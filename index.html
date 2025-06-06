@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Pedagógico TeleEducación - TulaSalud</title>
+    <!-- Incluye Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Inter', sans-serif; /* Fuente moderna y legible */
+            background-color: #1A1A1A; /* Negro profundo para el fondo */
+            color: #E0E0E0; /* Blanco suave para el texto */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alinea al inicio verticalmente */
+            min-height: 100vh;
+            box-sizing: border-box; /* Incluye padding en el tamaño total */
+        }
+
+        .container {
+            background-color: #282828; /* Un gris oscuro elegante */
+            border-radius: 12px; /* Esquinas más redondeadas */
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada */
+            padding: 30px;
+            width: 100%;
+            max-width: 900px; /* Ancho máximo para escritorio */
+            box-sizing: border-box;
+            text-align: center;
+            margin-bottom: 40px; /* Espacio para el contenido debajo */
+        }
+
+        /* Estilos para el logo en el encabezado */
+        .header-logo {
+            margin-bottom: 20px; /* Espacio debajo del logo */
+        }
+
+        .header-logo img {
+            max-width: 120px; /* Tamaño máximo para el logo en escritorio */
+            height: auto; /* Mantiene la proporción */
+            border-radius: 50%; /* Hace la imagen circular si es cuadrada */
+            border: 3px solid #00BFFF; /* Borde de color de acento */
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5); /* Sombra luminosa */
+            display: block; /* Para centrar con margin auto */
+            margin: 0 auto; /* Centra la imagen */
+        }
+
+        h1 {
+            color: #00BFFF; /* Azul claro para el título, un toque de color */
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #B0B0B0; /* Gris más claro para párrafos */
+        }
+
+        /* Área de subida de archivos */
+        .upload-area {
+            border: 3px dashed #444444; /* Borde punteado más oscuro */
+            border-radius: 10px;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .upload-area:hover {
+            background-color: #3A3A3A; /* Fondo ligeramente más claro al pasar el ratón */
+            border-color: #00BFFF; /* Resalta el borde al pasar el ratón */
+        }
+
+        .upload-area i {
+            font-size: 3.5em; /* Icono más grande */
+            color: #00BFFF;
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            margin: 0;
+            font-size: 1.2em;
+            color: #E0E0E0;
+        }
+
+        #fileInput {
+            display: none; /* Oculta el input de archivo por defecto */
+        }
+
+        /* Botón de carga */
+        .upload-button, .llm-feature-button {
+            background-color: #007BFF; /* Azul para el botón */
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 20px;
+            margin-right: 10px; /* Espacio entre botones */
+            margin-left: 10px; /* Espacio entre botones */
+        }
+
+        .upload-button:hover, .llm-feature-button:hover {
+            background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+            transform: translateY(-2px); /* Efecto de elevación */
+        }
+
+        .llm-feature-button {
+            background-color: #8A2BE2; /* Un púrpura vibrante para los botones de IA */
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        .llm-feature-button:hover {
+            background-color: #6A1AAB;
+        }
+
+        /* Indicador de carga */
+        .loading-indicator, .llm-loading-indicator {
+            display: none; /* Oculto por defecto */
+            margin-top: 30px;
+            font-size: 1.2em;
+            color: #00BFFF;
+        }
+
+        .loading-indicator .spinner, .llm-loading-indicator .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #00BFFF;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Área de resultados */
+        .results-area {
+            background-color: #333333; /* Un gris más oscuro para la caja de resultados */
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: left;
+            border: 1px solid #444444; /* Borde sutil */
+        }
+
+        .results-area h2 {
+            color: #00BFFF;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+            border-bottom: 1px solid #444444;
+            padding-bottom: 10px;
+        }
+
+        .results-area p {
+            margin-bottom: 10px;
+            color: #D0D0D0;
+        }
+
+        .results-area ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+            color: #D0D0D0;
+        }
+
+        .results-area ul li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .llm-output-section {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #555555;
+        }
+
+        .llm-output-section h3 {
+            color: #8A2BE2; /* Púrpura para los títulos de la IA */
+            margin-bottom: 10px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            font-size: 0.85em;
+            color: #888888; /* Gris más claro para el texto del footer */
+        }
+
+        /* Media Queries para responsividad */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            .header-logo img {
+                max-width: 100px; /* Ajuste para tablets */
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .upload-area {
+                padding: 30px 15px;
+                min-height: 150px;
+            }
+            .upload-area i {
+                font-size: 2.8em;
+            }
+            .upload-area p {
+                font-size: 1em;
+            }
+            .upload-button, .llm-feature-button {
+                padding: 10px 20px;
+                font-size: 1em;
+                margin: 10px 5px; /* Ajuste el margen en móvil */
+            }
+            .results-area {
+                padding: 20px;
+            }
+            .results-area h2 {
+                font-size: 1.4em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            .header-logo img {
+                max-width: 80px; /* Ajuste para móviles */
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .upload-area {
+                padding: 25px 10px;
+                min-height: 120px;
+            }
+            .upload-area i {
+                font-size: 2.2em;
+            }
+            .upload-area p {
+                font-size: 0.9em;
+            }
+            .upload-button, .llm-feature-button {
+                width: calc(100% - 20px); /* Botón de ancho completo en móvil */
+                padding: 12px;
+                margin: 5px 0; /* Sin margen lateral */
+            }
+            .results-area {
+                padding: 15px;
+            }
+            .results-area h2 {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Contenedor para el logo en el encabezado -->
+        <div class="header-logo">
+            <img src="https://pbs.twimg.com/profile_images/535655953480175616/D5VRHaDd_400x400.jpeg"
+                 alt="Logo de TulaSalud"
+                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/8A2BE2/FFFFFF?text=Logo';" />
+        </div>
+
+        <h1><i class="fas fa-brain"></i> Analizador Pedagógico TeleEducación - TulaSalud</h1>
+        <p>Sube tus archivos PDF, imágenes o presentaciones para un análisis impulsado por IA.</p>
+
+        <div class="upload-area" id="uploadArea">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Arrastra y suelta tu archivo aquí, o haz click para seleccionar</p>
+            <input type="file" id="fileInput" accept=".pdf, image/jpeg, image/png, .ppt, .pptx">
+        </div>
+
+        <button class="upload-button" id="analyzeButton" disabled>Analizar Archivo</button>
+
+        <div class="loading-indicator" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Analizando archivo con el Modelo de IA...</p>
+        </div>
+
+        <div class="results-area" id="resultsArea" style="display: none;">
+            <h2><i class="fas fa-chart-bar"></i> Resultados del Análisis</h2>
+            <div id="analysisContent"></div>
+            <!-- Nuevo indicador de carga para las funciones LLM -->
+            <div class="llm-loading-indicator" id="llmLoadingIndicator">
+                <div class="spinner"></div>
+                <p>Generando contenido con IA...</p>
+            </div>
+            <div id="llmOutput" class="llm-output-section">
+                <!-- Aquí se mostrarán los resultados del LLM -->
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Lic. Luis Ygnacio Ponce Sierra | Todos los derechos reservados</p>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsArea = document.getElementById('resultsArea');
+        const analysisContent = document.getElementById('analysisContent');
+        const llmLoadingIndicator = document.getElementById('llmLoadingIndicator');
+        const llmOutput = document.getElementById('llmOutput');
+
+        let selectedFile = null;
+
+        // Previene el comportamiento por defecto de arrastrar y soltar
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false); // También para el body
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Resalta el área al arrastrar el archivo
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = '#00BFFF', false);
+        });
+
+        // Vuelve al borde normal al salir del área
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = '#444444', false);
+        });
+
+        // Maneja la caída del archivo
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        // Abre el explorador de archivos al hacer click en el área de subida
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Maneja la selección de archivos desde el input
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                selectedFile = files[0];
+                // Muestra el nombre del archivo en el área de subida
+                uploadArea.querySelector('p').textContent = `Archivo seleccionado: ${selectedFile.name}`;
+                analyzeButton.disabled = false; // Habilita el botón de analizar
+                resultsArea.style.display = 'none'; // Oculta resultados anteriores
+                llmOutput.innerHTML = ''; // Limpia el contenido LLM anterior
+                llmLoadingIndicator.style.display = 'none'; // Oculta el indicador LLM
+            }
+        }
+
+        // Maneja el clic en el botón de analizar
+        analyzeButton.addEventListener('click', () => {
+            if (selectedFile) {
+                startAnalysis(selectedFile);
+            }
+        });
+
+        /**
+         * Simula el proceso de análisis inicial de un archivo por una IA.
+         * @param {File} file - El archivo a "analizar".
+         */
+        function startAnalysis(file) {
+            // Oculta el área de subida y muestra el indicador de carga
+            uploadArea.style.display = 'none';
+            analyzeButton.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+            resultsArea.style.display = 'none'; // Asegura que los resultados estén ocultos
+            llmOutput.innerHTML = ''; // Limpia el contenido LLM anterior
+
+            // Simula el proceso de análisis inicial
+            setTimeout(() => {
+                let initialAnalysis = '';
+                let llmButtons = '';
+
+                if (file.type.includes('pdf')) {
+                    initialAnalysis = `
+                        <p><strong>Tipo de Archivo:</strong> Documento PDF</p>
+                        <p><strong>Evaluación Pedagógica del Contenido (simulada):</strong></p>
+                        <ul>
+                            <li><strong>Claridad Conceptual:</strong> <span style="color:#28a745;">Alta.</span> Las definiciones y conceptos clave parecen estar bien explicados.</li>
+                            <li><strong>Estructura y Flujo:</strong> <span style="color:#ffc107;">Media.</span> La organización general es lógica, pero algunas transiciones entre secciones podrían ser más fluidas.</li>
+                            <li><strong>Complejidad del Lenguaje:</strong> <span style="color:#28a745;">Adecuada.</span> El léxico y la sintaxis son apropiados para un público de jóvenes y adultos, evitando jerga excesiva.</li>
+                            <li><strong>Uso de Ejemplos/Analogías:</strong> <span style="color:#ffc107;">Suficiente.</span> Se identifican algunos ejemplos, pero la incorporación de más casos prácticos podría mejorar la comprensión.</li>
+                            <li><strong>Relevancia de Elementos Visuales:</strong> <span style="color:#28a745;">Buena.</span> Las imágenes o gráficos detectados apoyan el texto de manera efectiva.</li>
+                        </ul>
+                        <p><strong>Observaciones de Mejora (simulada):</strong></p>
+                        <ul>
+                            <li><strong>1. Coherencia de Estructura:</strong> Considere añadir una tabla de contenido interactiva si el documento excede las 5 páginas, y un breve resumen de los puntos clave al inicio de cada capítulo o sección principal para facilitar la navegación y comprensión rápida.</li>
+                            <li><strong>2. Enganche del Lector:</strong> Integrar preguntas reflexivas al final de cada subsección o proponer micro-actividades (ej. "Piensa en un ejemplo...") que fomenten la aplicación del conocimiento y la interacción con el material.</li>
+                            <li><strong>3. Recursos Complementarios:</strong> Sugerir la inclusión de códigos QR o enlaces directos a videos explicativos, simulaciones interactivas o lecturas adicionales que enriquezcan la comprensión de temas complejos.</li>
+                            <li><strong>4. Glosario de Términos:</strong> Si el documento introduce terminología especializada, un glosario al final facilitaría el aprendizaje, especialmente para audiencias menos familiarizadas con el tema.</li>
+                            <li><strong>5. Resúmenes de Sección:</strong> Al final de cada sección importante, añadir un breve "Para recordar" o "Ideas Clave" que condense la información más relevante.</li>
+                            <li><strong>6. Consistencia de Formato:</strong> Asegurar que la tipografía, los tamaños de fuente y los espaciados sean consistentes en todo el documento para mejorar la legibilidad y la experiencia visual.</li>
+                            <li><strong>7. Uso de Infografías:</strong> Transformar datos o procesos complejos en infografías claras y concisas, que puedan reemplazar grandes bloques de texto y facilitar la asimilación visual de la información.</li>
+                            <li><strong>8. Accesibilidad del Contenido:</strong> Evaluar el contraste de color entre el texto y el fondo, y asegurar que las imágenes tengan descripciones alt text para usuarios con discapacidades visuales.</li>
+                            <li><strong>9. Evaluación Formativa:</strong> Integrar pequeños cuestionarios o ejercicios de autoevaluación (sin calificar) al final de unidades temáticas para que el lector pueda verificar su comprensión.</li>
+                            <li><strong>10. Narrativa o Casos de Estudio:</strong> Si aplica, introducir el contenido a través de una pequeña historia o un caso de estudio real que genere interés y muestre la aplicabilidad del tema desde el inicio.</li>
+                            <li><strong>11. Evitar Bloques de Texto Densos:</strong> Fragmentar párrafos largos en unidades más cortas y digeribles, utilizando listas con viñetas o numeradas cuando sea apropiado.</li>
+                            <li><strong>12. Interacción con Datos:</strong> Si se presentan datos estadísticos, considerar el uso de gráficos interactivos (si el formato lo permite) en lugar de solo imágenes estáticas.</li>
+                        </ul>
+                    `;
+                    llmButtons = '<button class="llm-feature-button" onclick="generateComprehensionQuestions()">Generar Preguntas de Comprensión ✨</button>';
+                } else if (file.type.includes('image')) {
+                    fileType = 'Archivo de Imagen';
+                    initialAnalysis = `
+                        <p><strong>Tipo de Archivo:</strong> ${fileType} (${file.type.split('/')[1].toUpperCase()})</p>
+                        <p><strong>Análisis Pedagógico Visual (simulada):</strong></p>
+                        <ul>
+                            <li><strong>Claridad y Propósito:</strong> <span style="color:#28a745;">Alta.</span> La imagen parece clara y su propósito comunicativo (ilustrar, explicar, decorar) es evidente.</li>
+                            <li><strong>Relevancia Contextual:</strong> <span style="color:#ffc107;">Media.</span> La imagen podría ser relevante para el contexto pedagógico, pero su conexión explícita con un tema específico podría fortalecerse con un pie de foto más descriptivo o un texto que la referencie directamente.</li>
+                            <li><strong>Calidad y Legibilidad:</strong> <span style="color:#28a745;">Buena.</span> La resolución y el contraste son adecuados. Si contiene texto, este es legible.</li>
+                            <li><strong>Impacto Didáctico:</strong> <span style="color:#ffc107;">Potencial.</span> La imagen tiene potencial para ser una herramienta didáctica, pero se beneficiaría de un pequeño análisis de los puntos clave o preguntas que dirijan la atención del estudiante.</li>
+                        </ul>
+                        <p><strong>Observaciones de Mejora (simulada):</strong></p>
+                        <ul>
+                            <li><strong>1. Pie de Foto Descriptivo:</strong> Añadir un pie de foto conciso que no solo describa la imagen, sino que también explique su relevancia directa para el contenido pedagógico.</li>
+                            <li><strong>2. Elementos Interactivos (Web):</strong> Si se usa en un contexto web, considerar el uso de "hotspots" o áreas clicables en la imagen que revelen información adicional o definiciones al pasar el ratón.</li>
+                            <li><strong>3. Descripción Alt Text:</strong> Asegurar que la imagen tenga una descripción de texto alternativa (alt text) robusta para mejorar la accesibilidad para usuarios con lectores de pantalla.</li>
+                            <li><strong>4. Ubicación Estratégica:</strong> Evaluar si la posición de la imagen dentro del documento es la más óptima para su propósito didáctico, preferiblemente cerca del texto que explica su contenido.</li>
+                            <li><strong>5. Claridad de Anotaciones:</strong> Si la imagen contiene anotaciones, etiquetas o flechas, asegurarse de que estas sean claras, grandes y de alto contraste.</li>
+                            <li><strong>6. Redundancia Controlada:</strong> Utilizar la imagen para complementar o ilustrar, no para duplicar textualmente la información ya presente en el cuerpo del texto.</li>
+                            <li><strong>7. Relevancia Cultural:</strong> Si la imagen incluye elementos culturales, verificar que sean apropiados y comprensibles para la audiencia objetivo global o específica.</li>
+                            <li><strong>8. Optimización de Carga:</strong> Asegurar que el tamaño del archivo de la imagen esté optimizado para una carga rápida en la página web, sin comprometer excesivamente la calidad visual.</li>
+                            <li><strong>9. Coherencia Estilística:</strong> Si hay varias imágenes en el documento, mantener un estilo visual coherente (ej. ilustraciones, fotografías, diagramas) para una apariencia unificada.</li>
+                            <li><strong>10. Preguntas Guiadas:</strong> Proponer 1 o 2 preguntas que el estudiante pueda responder observando la imagen, fomentando el pensamiento crítico y la observación activa.</li>
+                            <li><strong>11. Uso de Metáforas Visuales:</strong> Si aplica, explorar el uso de imágenes que funcionen como metáforas visuales para conceptos abstractos.</li>
+                            <li><strong>12. Evitar Distracciones:</strong> Asegurarse de que el fondo o los elementos periféricos de la imagen no distraigan del punto principal que se quiere comunicar.</li>
+                        </ul>
+                    `;
+                    llmButtons = '<button class="llm-feature-button" onclick="generateDetailedImageDescription()">Generar Descripción Detallada ✨</button>';
+                } else if (file.type.includes('presentation') || file.type.includes('powerpoint')) {
+                    fileType = 'Presentación (PPT/PPTX)';
+                    initialAnalysis = `
+                        <p><strong>Tipo de Archivo:</strong> ${fileType}</p>
+                        <p><strong>Análisis Pedagógico de Presentación (simulada):</strong></p>
+                        <ul>
+                            <li><strong>Estructura Lógica:</strong> <span style="color:#28a745;">Buena.</span> La secuencia de diapositivas parece seguir un orden coherente, con una clara introducción y desarrollo.</li>
+                            <li><strong>Densidad de Información por Diapositiva:</strong> <span style="color:#ffc107;">Media.</span> Algunas diapositivas podrían contener demasiada información textual, lo que podría dificultar la retención para la audiencia.</li>
+                            <li><strong>Coherencia Visual:</strong> <span style="color:#28a745;">Adecuada.</span> Se observa un estilo visual consistente (fuentes, colores, layouts).</li>
+                            <li><strong>Uso de Elementos Multimedia:</strong> <span style="color:#ffc107;">Suficiente.</span> Si hay videos o audios, están bien integrados, pero se podrían explorar más recursos interactivos.</li>
+                            <li><strong>Apoyo Visual al Discurso:</strong> <span style="color:#28a745;">Efectivo.</span> Las imágenes y gráficos complementan el mensaje principal de las diapositivas.</li>
+                        </ul>
+                        <p><strong>Observaciones de Mejora (simulada):</strong></p>
+                        <ul>
+                            <li><strong>1. Principio de Pareto (80/20):</strong> Reducir la cantidad de texto por diapositiva a puntos clave, utilizando más elementos visuales y dejando la explicación detallada para el orador. Máximo 6-8 líneas de texto por diapositiva.</li>
+                            <li><strong>2. Interacción con la Audiencia:</strong> Incluir diapositivas dedicadas a preguntas y respuestas, encuestas rápidas o ejercicios de "piensa y comparte" para mantener la participación activa.</li>
+                            <li><strong>3. Accesibilidad del Contenido:</strong> Asegurar un alto contraste entre el texto y el fondo, usar fuentes claras y un tamaño mínimo de 24pt para el texto principal. Considerar subtítulos para videos/audios.</li>
+                            <li><strong>4. Transiciones Lógicas:</strong> Fortalecer las frases de transición entre diapositivas o secciones para guiar al público a través del flujo de la presentación.</li>
+                            <li><strong>5. Uso de Íconos y Gráficos:</strong> Priorizar el uso de iconos y gráficos vectoriales sobre imágenes de mapa de bits cuando sea posible para claridad y escalabilidad, y para reducir la densidad de texto.</li>
+                            <li><strong>6. Navegación Visual:</strong> Si es una presentación larga, incluir un indicador de progreso o una agenda visual en cada diapositiva para que la audiencia sepa dónde se encuentra.</li>
+                            <li><strong>7. Llamadas a la Acción Claras:</strong> Si la presentación tiene un objetivo específico, asegurar que las llamadas a la acción o los puntos clave a recordar estén claramente definidos en las diapositivas finales.</li>
+                            <li><strong>8. Tiempo por Diapositiva:</strong> Estimar el tiempo promedio de visualización por diapositiva. Si es excesivo, considerar dividir la información en más diapositivas o simplificarla.</li>
+                            <li><strong>9. Narrativa Coherente:</strong> Asegurarse de que cada diapositiva contribuya a la narrativa general de la presentación, evitando información irrelevante o desviaciones temáticas.</li>
+                            <li><strong>10. Práctica de Presentación:</strong> Si el orador es un humano, sugerir ensayar la presentación con un enfoque en la claridad y el ritmo, complementando las diapositivas en lugar de solo leerlas.</li>
+                            <li><strong>11. Resumen al Final:</strong> Añadir una diapositiva final de "Conclusiones Clave" o "Puntos para Llevar a Casa" que sintetice los mensajes más importantes.</li>
+                            <li><strong>12. Evitar el Efecto "Ruido Visual":</strong> Limitar el número de elementos visuales en una sola diapositiva para evitar la sobrecarga cognitiva.</li>
+                        </ul>
+                    `;
+                    llmButtons = '<button class="llm-feature-button" onclick="suggestSpeakerPoints()">Sugerir Puntos Clave para el Orador ✨</button>';
+                } else {
+                    initialAnalysis = `<p><strong>Tipo de Archivo:</strong> Tipo de archivo desconocido</p><p>Lo siento, el Analizador Pedagógico TeleEducación no puede procesar este tipo de archivo en este momento. Por favor, sube un PDF, una imagen o una presentación (PPT/PPTX).</p>`;
+                }
+
+                // Oculta el indicador de carga y muestra los resultados
+                loadingIndicator.style.display = 'none';
+                uploadArea.style.display = 'flex'; // Muestra el área de subida de nuevo
+                analyzeButton.style.display = 'block'; // Muestra el botón de nuevo
+                analyzeButton.disabled = true; // Deshabilita el botón hasta una nueva carga
+                uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu archivo aquí, o haz click para seleccionar'; // Restablece el texto
+                fileInput.value = ''; // Limpia el input de archivo
+                selectedFile = null; // Reinicia el archivo seleccionado
+
+                analysisContent.innerHTML = initialAnalysis + '<div class="llm-feature-buttons">' + llmButtons + '</div>'; // Añade los botones de LLM
+                resultsArea.style.display = 'block'; // Muestra el área de resultados
+            }, 3000); // Simula un retraso de 3 segundos para el análisis inicial
+        }
+
+        /**
+         * Simula la generación de preguntas de comprensión con un LLM (para PDF).
+         */
+        function generateComprehensionQuestions() {
+            llmLoadingIndicator.style.display = 'block';
+            llmOutput.innerHTML = ''; // Limpiar salida anterior
+            // En un entorno real, aquí se haría una llamada a la API de Gemini
+            // Por ejemplo:
+            // const prompt = "Genera 5 preguntas de comprensión sobre el contenido de este documento PDF:";
+            // const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=YOUR_API_KEY', { /* ... */ });
+
+            setTimeout(() => {
+                const questions = [
+                    "¿Cuál es el objetivo principal del documento y a quién está dirigido?",
+                    "Explica con tus propias palabras al menos dos conceptos clave presentados en el texto.",
+                    "Identifica y describe un ejemplo o caso práctico que se utilice para ilustrar un concepto complejo.",
+                    "Según el documento, ¿qué elementos visuales (gráficos, imágenes) son más efectivos para la comprensión del tema?",
+                    "Si tuvieras que mejorar una sección del documento para una mayor claridad, ¿cuál sería y qué cambio harías?",
+                    "¿Qué preguntas adicionales te surgen después de leer este contenido que el documento no aborda completamente?",
+                    "¿Cómo crees que la estructura del documento (ej. uso de títulos, subtítulos, viñetas) ayuda o dificulta la comprensión?",
+                    "Si fueras a enseñar este tema a alguien, ¿qué parte del documento usarías como punto de partida y por qué?",
+                    "¿Qué tipo de recurso complementario (video, infografía, simulación) crees que sería más útil para este documento?",
+                    "Identifica una fortaleza clave en el diseño de la información que facilite el aprendizaje."
+                ];
+                let output = '<h3>Preguntas de Comprensión Sugeridas por IA ✨</h3><ul>';
+                questions.forEach(q => { output += `<li>${q}</li>`; });
+                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido.</em></p>';
+                llmOutput.innerHTML = output;
+                llmLoadingIndicator.style.display = 'none';
+            }, 2500); // Simula un retraso de 2.5 segundos para la generación de preguntas
+        }
+
+        /**
+         * Simula la generación de una descripción detallada de imagen con un LLM.
+         */
+        function generateDetailedImageDescription() {
+            llmLoadingIndicator.style.display = 'block';
+            llmOutput.innerHTML = ''; // Limpiar salida anterior
+
+            setTimeout(() => {
+                const description = `
+                    <h3>Descripción Detallada de Imagen Sugerida por IA ✨</h3>
+                    <p>La IA interpreta esta imagen como una representación altamente conceptual de un entorno de aprendizaje dinámico, probablemente en el ámbito de la teleeducación. Se observa una paleta de colores que evoca profesionalismo y claridad, con elementos que sugieren interconexión y flujo de información.</p>
+                    <p><strong>Análisis Pedagógico Visual:</strong></p>
+                    <ul>
+                        <li><strong>Propósito Didáctico:</strong> La imagen sirve como metáfora visual para el proceso de aprendizaje digital, enfatizando la interacción de ideas y la conectividad.</li>
+                        <li><strong>Composición:</strong> El uso de líneas limpias y formas geométricas sugiere orden y estructura, facilitando la interpretación visual de conceptos abstractos.</li>
+                        <li><strong>Impacto Emocional:</strong> Transmite una sensación de modernidad, eficiencia y colaboración, lo cual es positivo en un contexto educativo.</li>
+                        <li><strong>Puntos Focales:</strong> Los elementos centrales de la composición (posibles iconos o puntos de datos) atraen la mirada, sugiriendo información clave.</li>
+                        <li><strong>Aplicabilidad:</strong> Ideal para introducciones de módulos, diapositivas sobre metodologías de aprendizaje activo o como fondo para citas inspiradoras en teleeducación.</li>
+                    </ul>
+                    <p><strong>Sugerencias para el uso óptimo:</strong></p>
+                    <ul>
+                        <li>Integrar con un texto que la referencie explícitamente y explique la metáfora visual.</li>
+                        <li>Considerar animación sutil si se usa en un entorno web para reforzar la idea de dinamismo.</li>
+                        <li>Utilizarla como punto de partida para una discusión sobre la "arquitectura" del conocimiento en línea.</li>
+                    </ul>
+                `;
+                llmOutput.innerHTML = description;
+                llmLoadingIndicator.style.display = 'none';
+            }, 2500); // Simula un retraso
+        }
+
+        /**
+         * Simula la sugerencia de puntos clave para el orador con un LLM (para PPT).
+         */
+        function suggestSpeakerPoints() {
+            llmLoadingIndicator.style.display = 'block';
+            llmOutput.innerHTML = ''; // Limpiar salida anterior
+
+            setTimeout(() => {
+                const points = [
+                    "<strong>Diapositiva 1 (Título):</strong> 'Bienvenidos a X - El futuro de la TeleEducación'. Enfocarse en captar la atención, quizás con una estadística impactante o una pregunta retórica.",
+                    "<strong>Diapositiva 2 (Agenda):</strong> 'Qué cubriremos hoy'. Mencionar los puntos principales de manera atractiva, destacando cómo beneficiará a la audiencia.",
+                    "<strong>Diapositva 3 (Problema/Contexto):</strong> 'El desafío actual...'. Presentar el problema o la necesidad que la presentación abordará, usando una anécdota o datos.",
+                    "<strong>Diapositiva 4 (Nuestra Solución/Concepto):</strong> 'La respuesta de TulaSalud: [Concepto clave]'. Explicar la propuesta de valor de forma clara y concisa.",
+                    "<strong>Diapositiva 5 (Metodología/Proceso):</strong> 'Cómo lo hacemos: [Pasos principales]'. Describir el proceso en 3-5 pasos sencillos, usando analogías si es posible.",
+                    "<strong>Diapositiva 6 (Beneficios):</strong> 'Impacto y Resultados Clave'. Resaltar los beneficios tangibles para el usuario/estudiante, utilizando viñetas y un lenguaje persuasivo.",
+                    "<strong>Diapositiva 7 (Caso de Éxito):</strong> 'Historias Reales'. Presentar un breve estudio de caso o testimonio para dar credibilidad y conectar emocionalmente.",
+                    "<strong>Diapositiva 8 (Innovación Futura):</strong> 'Mirando hacia adelante: [Nuevas características/proyectos]'. Compartir la visión a futuro y cómo la plataforma seguirá evolucionando.",
+                    "<strong>Diapositiva 9 (Preguntas Frecuentes/Q&A):</strong> 'Resolviendo tus dudas'. Anticipar preguntas comunes y preparar respuestas concisas, o invitar a la audiencia a preguntar.",
+                    "<strong>Diapositiva 10 (Llamada a la Acción):</strong> 'Únete a la TeleEducación del futuro'. Dejar claro el siguiente paso para la audiencia (ej. registrarse, contactar, explorar la plataforma).",
+                    "<strong>Diapositiva 11 (Agradecimientos):</strong> '¡Gracias por su tiempo e interés!'. Incluir información de contacto visible.",
+                    "<strong>Diapositiva 12 (Recursos Adicionales):</strong> 'Para saber más...'. Opcional: Proporcionar enlaces, códigos QR o materiales complementarios."
+                ];
+                let output = '<h3>Puntos Clave para el Orador Sugeridos por IA ✨</h3><ul>';
+                points.forEach(p => { output += `<li>${p}</li>`; });
+                output += '</ul><p><em>Estos puntos son sugerencias detalladas para enriquecer tu presentación, centrándote en la claridad y el impacto pedagógico.</em></p>';
+                llmOutput.innerHTML = output;
+                llmLoadingIndicator.style.display = 'none';
+            }, 2500); // Simula un retraso
+        }
+    </script>
+</body>
+</html>
