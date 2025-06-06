@@ -268,7 +268,7 @@
             font-size: 1.4em;
             border-bottom: 1px solid #555555;
             padding-bottom: 8px;
-            text-align: center; /* ¡NUEVO! Centra los títulos de las tarjetas */
+            text-align: center; /* Centra los títulos de las tarjetas */
         }
 
         .llm-output-section {
@@ -799,11 +799,11 @@
         resetButton.addEventListener('click', resetUIState); // Botón para cargar otro archivo (reinicia la UI)
 
         closePageButton.addEventListener('click', () => {
-            // Intenta cerrar la ventana/pestaña del navegador.
-            // Nota: La mayoría de los navegadores modernos restringen esta función
-            // por seguridad, a menos que la ventana haya sido abierta por script.
-            // Por lo tanto, es posible que este botón no funcione en todos los casos.
-            window.close();
+            // Se intenta cerrar la ventana o redirigir a una página en blanco.
+            // La mayoría de los navegadores modernos impiden que un script cierre una ventana
+            // a menos que esa ventana haya sido abierta por el mismo script.
+            // Redirigir a "about:blank" es una alternativa para "cerrar" la vista actual.
+            window.location.href = 'about:blank';
         });
 
         // Función para mostrar mensajes personalizados (en lugar de alert)
