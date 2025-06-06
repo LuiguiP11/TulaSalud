@@ -562,102 +562,145 @@
 
             // Simula el proceso de análisis inicial
             setTimeout(() => {
+                // SIMULACIÓN: Determina si el contenido es relevante para el sector salud.
+                // En una aplicación real, esto implicaría un análisis de contenido profundo con un LLM.
+                // Para esta demostración, hay un 80% de probabilidad de que *no* sea relevante
+                // para que el usuario pueda ver el mensaje de "no detectado".
+                const isHealthRelatedContent = Math.random() < 0.2; 
+
                 let evaluationContent = '';
                 let observationsContent = '';
                 let llmButtons = '';
 
-                if (file.type.includes('pdf')) {
+                if (file.type.includes('pdf') || file.type.includes('image') || file.type.includes('presentation') || file.type.includes('powerpoint')) {
+                    if (!isHealthRelatedContent) {
+                        evaluationContent = `
+                            <h3>Análisis de Contenido</h3>
+                            <p><strong>Tipo de Archivo:</strong> ${file.type.includes('pdf') ? 'Documento PDF' : file.type.includes('image') ? 'Archivo de Imagen' : 'Presentación (PPT/PPTX)'}</p>
+                            <p style="color:#DC3545; font-weight:bold; font-size:1.1em;">⚠️ Contenido No Detectado como Relacionado con el Sector Salud o Educación Comunitaria</p>
+                            <p>Nuestro análisis no detectó contenido directamente relacionado con el sector salud o educación comunitaria según el perfil de Tele Educación de TulaSalud. Por lo tanto, no se puede realizar una evaluación pedagógica detallada bajo estos criterios.</p>
+                            <p>Por favor, sube un archivo que trate sobre temas de salud, educación comunitaria o desarrollo social relevantes para la misión de TulaSalud en Guatemala.</p>
+                        `;
+                        observationsContent = `
+                            <h3>Observaciones de Mejora</h3>
+                            <p style="color:#DC3545;">No se pueden ofrecer observaciones de mejora específicas alineadas con las políticas de TulaSalud, ya que el contenido no se asocia con el sector de salud o educación comunitaria.</p>
+                        `;
+                        llmButtons = ''; // No mostrar botones LLM si no es relevante para la salud
+                    } else {
+                        // Lógica detallada original para contenido relacionado con la salud
+                        if (file.type.includes('pdf')) {
+                            evaluationContent = `
+                                <h3>Evaluación Pedagógica del Contenido</h3>
+                                <p><strong>Tipo de Archivo:</strong> Documento PDF</p>
+                                <ul>
+                                    <li><strong>Estructura y organización:</strong> El documento parece bien organizado por secciones, lo que facilita el seguimiento. Sin embargo, un "modelo guía" visual al inicio (como un diagrama de flujo) podría dar una visión general para adultos que prefieren un panorama antes del detalle.</li>
+                                    <li><strong>Lenguaje y alfabetización funcional:</strong> El vocabulario es mayormente accesible para personas con escolaridad básica. Términos como "vigilancia epidemiológica" podrían beneficiarse de ejemplos concretos o un glosario breve y contextualizado. Reforzar con situaciones cotidianas (ej., cómo se detecta una enfermedad en la comunidad) sería muy útil.</li>
+                                    <li><strong>Pertinencia cultural y lingüística:</strong> Los ejemplos actuales son generales. Sería valioso incluir referencias a la realidad rural e indígena de Guatemala (ej., uso de plantas medicinales tradicionales junto a medicina moderna, o cómo se gestionan los nacimientos en comunidades). Considerar la inclusión de frases o un glosario simple en idiomas mayas (q’eqchi’, k’iche’, mam) para mejorar la inclusividad.</li>
+                                    <li><strong>Conexión con Tele Educación de TulaSalud:</strong> No se identifican llamadas a la acción directas para estrategias de educación a distancia (ej., códigos QR para videos explicativos, enlaces a foros de discusión móvil). Aunque el contenido es relevante, no se menciona explícitamente su utilidad en la vigilancia materno-infantil o nutricional bajo el modelo de TulaSalud. Podría sugerirse la replicación mediante "plantillas" o "guías para el facilitador" al final del documento.</li>
+                                    <li><strong>Accesibilidad visual y técnica:</strong> El contraste de colores para el texto es bueno. El tamaño de letra es adecuado en general, pero asegurarse de que los gráficos o tablas incrustadas mantengan un tamaño de fuente legible (≥ 14 pts) en impresión y dispositivos móviles. Los elementos gráficos deben ser claros incluso en blanco y negro, sin depender de tonos sutiles.</li>
+                                    <li><strong>Enfoque andragógico:</strong> Se observa un buen intento de estructurar el contenido para adultos. Se podría incentivar más la participación activa añadiendo preguntas de reflexión al final de cada sección o pequeños ejercicios guiados que conecten el contenido con sus experiencias previas.</li>
+                                    <li><strong>Equidad de género y estructuras familiares:</strong> La representación de familias parece convencional. Podría ampliarse para incluir visuales o menciones textuales de familias monoparentales, reconstituidas, o con abuelos/cuidadores como figuras principales. Analizar la simbología de género para que sea inclusiva con identidades no binarias en futuros materiales, si es aplicable al contexto.</li>
+                                    <li><strong>Actualización y atribución de fuentes:</strong> No se encontró una fecha de última revisión o los responsables claros del contenido. Es fundamental incluir estos datos y acreditar a las instancias oficiales (MSPAS) y a TulaSalud, asegurando la vigencia y autoridad del material.</li>
+                                </ul>
+                            `;
+                            observationsContent = `
+                                <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
+                                <ul>
+                                    <li><strong>1. Contexto intercultural y multilingüe:</strong> Implementar glosarios bilingües (español–lenguas mayas como q’eqchi’, k’iche’, mam, etc.) al final del documento. Incorporar pequeños recuadros con frases o ejemplos de texto en idioma local que refuercen conceptos clave, especialmente para temas culturales sensibles.</li>
+                                    <li><strong>2. Ejemplos prácticos contextualizados:</strong> Desarrollar un caso guía de una familia rural guatemalteca que aborde condiciones prevalentes (desnutrición infantil, embarazo adolescente en zonas de difícil acceso). Incluir ejercicios prácticos paso a paso en el texto, con espacios designados para que el usuario anote sus propias observaciones o resultados.</li>
+                                    <li><strong>3. Adaptación a metodologías a distancia:</strong> Integrar códigos QR o enlaces directos a videos cortos (ej., demostraciones de procedimientos de salud) y audios (ej., testimonios en idiomas locales) que complementen el texto. Crear versiones imprimibles con alto contraste y formato amigable para dispositivos móviles de baja gama.</li>
+                                    <li><strong>4. Enriquecimiento de contenido de salud:</strong> Ampliar la sección de "función" o introducción con ejemplos específicos de riesgos biológicos, psicológicos y sociales directamente ligados a la salud materno-infantil y nutricional en Guatemala, con datos relevantes del MSPAS.</li>
+                                    <li><strong>5. Refuerzo visual de simbología:</strong> Si el documento contiene símbolos, sugerir la adición de iconos adicionales o leyendas ampliadas y visualmente claras para cada símbolo (edad, sexo, defunción, embarazo, etc.), asegurando su comprensión universal.</li>
+                                    <li><strong>6. Representación de estructuras familiares diversas:</strong> Incluir descripciones textuales o pequeños viñetas que presenten la diversidad de familias guatemaltecas (monoparentales, reconstituidas, multigeneracionales, con abuelos o tíos como cuidadores).</li>
+                                    <li><strong>7. Aspectos de género y ciclo de vida:</strong> Detallar cómo abordar la prevención del embarazo adolescente y los riesgos asociados en las comunidades rurales. Referenciar los programas gubernamentales o de TulaSalud relacionados con la salud sexual y reproductiva de jóvenes.</li>
+                                    <li><strong>8. Accesibilidad y usabilidad:</strong> Asegurar que el tamaño de fuente general del documento sea ≥ 14 pts, con interlineado adecuado. Verificar que el contraste de texto y fondo sea siempre alto, y que los trazos de cualquier gráfico sean lo suficientemente gruesos para legibilidad en condiciones diversas.</li>
+                                    <li><strong>9. Preguntas frecuentes (FAQs):</strong> Proponer un pequeño apartado al final del documento con preguntas comunes sobre el tema, como: "¿Cómo anoto si un familiar vive en el extranjero?", "¿Qué hago si no conozco la edad exacta de un familiar?", etc.</li>
+                                    <li><strong>10. Vinculación con servicios y contacto:</strong> Incluir contactos claros de TulaSalud (WhatsApp, correo electrónico, redes sociales o números de teléfono locales) para que el personal comunitario pueda solicitar tutorías o retroalimentación sobre el material.</li>
+                                    <li><strong>11. Módulos de Autoevaluación/Reflexión (Texto):</strong> Integrar pequeños ejercicios de autoevaluación o preguntas para la reflexión personal dentro del documento, que refuercen el aprendizaje y su vinculación con la práctica diaria.</li>
+                                    <li><strong>12. Promoción de la Colaboración Interinstitucional (Documento):</strong> Si el contenido se presta, sugerir cómo la información del documento puede fomentar la coordinación con la Dirección de Recursos Humanos del MSPAS y la Escuela Nacional de Enfermería de Cobán, reflejando el modelo colaborativo de TulaSalud.</li>
+                                </ul>
+                            `;
+                            llmButtons = '<button class="llm-feature-button" onclick="generateComprehensionQuestions()">Generar Preguntas de Comprensión ✨</button>';
+                        } else if (file.type.includes('image')) {
+                            evaluationContent = `
+                                <h3>Evaluación Pedagógica del Contenido</h3>
+                                <p><strong>Tipo de Archivo:</strong> Archivo de Imagen (${file.type.split('/')[1].toUpperCase()})</p>
+                                <ul>
+                                    <li><strong>Estructura y organización:</strong> La imagen es un elemento visual estático. Su "estructura" se basa en la composición y el flujo de la información gráfica. Para un aprendizaje incremental, podría ser parte de una secuencia de imágenes o de un material más amplio. Sugerir un pie de foto explicativo es clave para la organización.</li>
+                                    <li><strong>Lenguaje y alfabetización funcional:</strong> Si la imagen contiene texto, se evaluó su legibilidad y simplicidad. Los símbolos visuales son generalmente claros, pero algunos podrían requerir una leyenda adicional para ser universalmente comprendidos por audiencias con escolaridad básica en Guatemala.</li>
+                                    <li><strong>Pertinencia cultural y lingüística:</strong> La imagen (si aplica) debería incluir elementos visuales que resuenen con la realidad rural e indígena de Guatemala (ej., vestimenta, escenarios). Los símbolos o representaciones deben evitar sesgos culturales y ser comprensibles sin necesidad de textos complejos.</li>
+                                    <li><strong>Conexión con Tele Educación de TulaSalud:</strong> La imagen por sí misma no integra estrategias directas de educación a distancia, pero su formato la hace adaptable a plataformas digitales. Se evaluaría si puede ser utilizada para ilustrar puntos clave en la vigilancia epidemiológica materno-infantil o nutricional de TulaSalud.</li>
+                                    <li><strong>Accesibilidad visual y técnica:</strong> El contraste de la imagen y la legibilidad de cualquier texto incrustado son cruciales. Se evaluó que los detalles sean claros incluso en pantallas pequeñas de dispositivos móviles y que se mantengan inteligibles al imprimirse en blanco y negro o escanearse.</li>
+                                    <li><strong>Enfoque andragógico:</strong> Como imagen estática, su interactividad es limitada. El enfoque andragógico se lograría al complementarla con actividades o preguntas que inviten a la observación activa y a la conexión con experiencias previas del adulto.</li>
+                                    <li><strong>Equidad de género y estructuras familiares:</strong> Si la imagen representa personas o familias, se observó la diversidad en la representación de género y estructuras familiares. Se sugiere que futuras imágenes muestren una amplia gama de composiciones familiares y roles de género inclusivos.</li>
+                                    <li><strong>Actualización y atribución de fuentes:</strong> Una imagen por sí misma no suele tener fecha de revisión, pero es fundamental que el material pedagógico que la contenga especifique la fuente y fecha de creación/revisión.</li>
+                                </ul>
+                            `;
+                            observationsContent = `
+                                <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
+                                <ul>
+                                    <li><strong>1. Impacto Visual y Relevancia Cultural:</strong> Crear o seleccionar imágenes que reflejen explícitamente la diversidad multiétnica de Guatemala, incluyendo vestimenta, entornos y situaciones relevantes para las comunidades rurales y el personal de salud de los departamentos meta de TulaSalud.</li>
+                                    <li><strong>2. Claridad de Mensaje Visual:</strong> La imagen debe comunicar un mensaje de salud de forma inequívoca y accesible, considerando las limitaciones de conectividad en zonas rurales para la mejora de cobertura.</li>
+                                    <li><strong>3. Apoyo Visual a Contenidos de Salud Clave:</strong> Diseñar o seleccionar imágenes que complementen y refuercen visualmente temas centrales para TulaSalud, como procedimientos de salud materna, signos de alerta en niños, o guías nutricionales adaptadas a alimentos locales.</li>
+                                    <li><strong>4. Fomento de Competencias por Observación:</strong> Acompañar la imagen con preguntas guía o ejercicios visuales que dirijan la atención del adulto a puntos clave, fomentando la observación activa y la aplicación práctica de lo que la imagen muestra.</li>
+                                    <li><strong>5. Accesibilidad Visual y Descripciones:</strong> Asegurar alto contraste, trazos gruesos y tamaños de texto legibles para cualquier elemento incrustado. Proporcionar descripciones "alt text" detalladas para la imagen, facilitando la accesibilidad digital y comprensión.</li>
+                                    <li><strong>6. Simbolismo de Progreso y Acceso:</strong> Utilizar elementos visuales que simbolicen la mejora en la cobertura de servicios de salud y el impacto positivo de la tele-educación en las comunidades, mostrando el avance y la conectividad.</li>
+                                    <li><strong>7. Optimización para Distribución Remota (Imágenes):</strong> Asegurar que la imagen esté optimizada en tamaño y formato (ej., webp, JPG comprimido) para una descarga y visualización eficientes en dispositivos móviles y conexiones de baja velocidad.</li>
+                                    <li><strong>8. Coherencia con Mensajes de Prevención Visuales:</strong> Si la imagen aborda un tema de salud, debe reforzar visualmente mensajes clave de prevención y promoción de la salud materna e infantil de manera clara y directa.</li>
+                                    <li><strong>9. Potencial de Interacción y Discusión Visual:</strong> Si la imagen se usa en una plataforma digital, considerar la posibilidad de añadir "hotspots" interactivos que, al hacer clic, ofrezcan información adicional o preguntas relacionadas con el contenido visual.</li>
+                                    <li><strong>10. Reflejo de la Atención Primaria (Imágenes):</strong> Las imágenes deben evocar o ilustrar escenarios auténticos de atención primaria de salud en contextos rurales, mostrando la interacción del personal de salud con la comunidad.</li>
+                                    <li><strong>11. Motivación a Través de la Imagen:</strong> Utilizar imágenes inspiradoras que reconozcan el valor del personal de salud en áreas remotas y refuercen su compromiso con la misión de TulaSalud.</li>
+                                    <li><strong>12. Evidencia de Impacto Comunitario (Imágenes):</strong> Si es posible, incluir imágenes que muestren el impacto real de las acciones de TulaSalud en las comunidades, fortaleciendo la conexión del personal con su trabajo.</li>
+                                </ul>
+                            `;
+                            llmButtons = '<button class="llm-feature-button" onclick="generateDetailedImageDescription()">Generar Descripción Detallada ✨</button>';
+                        } else if (file.type.includes('presentation') || file.type.includes('powerpoint')) {
+                            evaluationContent = `
+                                <h3>Evaluación Pedagógica del Contenido</h3>
+                                <p><strong>Tipo de Archivo:</strong> Presentación (PPT/PPTX)</p>
+                                <ul>
+                                    <li><strong>Estructura y organización:</strong> La presentación sigue una secuencia lógica, con una introducción y desarrollo claros. Se podría beneficiar de una diapositiva "roadmap" al inicio para que la audiencia visualice el recorrido y los objetivos de aprendizaje para adultos.</li>
+                                    <li><strong>Lenguaje y alfabetización funcional:</strong> El lenguaje en las diapositivas es adecuado para audiencias con escolaridad básica, pero algunos términos técnicos pueden requerir una explicación oral adicional o una diapositiva de glosario. La simplificación de frases complejas en viñetas cortas es recomendable.</li>
+                                    <li><strong>Pertinencia cultural y lingüística:</strong> Las imágenes y ejemplos en la presentación podrían ser más culturalmente relevantes para las comunidades rurales e indígenas de Guatemala. Incluir ejemplos de interacciones comunitarias o visuales de prácticas locales mejoraría la conexión.</li>
+                                    <li><strong>Conexión con Tele Educación de TulaSalud:</strong> La presentación se adapta a una modalidad a distancia, pero podría integrar más elementos interactivos específicos (ej., encuestas rápidas, espacios para preguntas) o enlaces a recursos adicionales (videos, sitios web de TulaSalud). Es importante que se mencione explícitamente la utilidad del material en la vigilancia epidemiológica materno-infantil o nutricional que promueve TulaSalud.</li>
+                                    <li><strong>Accesibilidad visual y técnica:</strong> El contraste de colores y el tamaño de letra en las diapositivas son en general buenos. Se debe asegurar que las gráficas y diagramas sean fácilmente legibles en proyectores o pantallas compartidas, incluso con baja resolución. Evitar el exceso de texto por diapositiva.</li>
+                                    <li><strong>Enfoque andragógico:</strong> La presentación tiene potencial para incentivar la participación activa. Se pueden añadir preguntas de reflexión o pequeños casos de estudio en las diapositivas para estimular el pensamiento crítico y la aplicación práctica por parte de los jóvenes y adultos.</li>
+                                    <li><strong>Equidad de género y estructuras familiares:</strong> Se observa la representación de género, pero podría ampliarse para mostrar familias diversas (monoparentales, reconstituidas, multigeneracionales) en las imágenes y ejemplos de texto, reflejando la realidad guatemalteca.</li>
+                                    <li><strong>Actualización y atribución de fuentes:</strong> Es importante que la presentación incluya la fecha de última revisión y los responsables (institución, departamento del MSPAS, equipo de TulaSalud) para asegurar la credibilidad y vigencia del contenido.</li>
+                                </ul>
+                            `;
+                            observationsContent = `
+                                <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
+                                <ul>
+                                    <li><strong>1. Diseño para Tele-Presentación:</strong> Optimizar cada diapositiva para la comprensión a distancia, usando menos texto, más gráficos y un diseño limpio. Limitarse a 3-5 puntos clave por diapositiva.</li>
+                                    <li><strong>2. Relevancia y Aplicabilidad Local (Presentación):</strong> Incluir diapositivas dedicadas a casos de estudio y escenarios prácticos de salud relevantes para las comunidades rurales de los departamentos meta de TulaSalud, con datos y ejemplos locales.</li>
+                                    <li><strong>3. Fortalecimiento de Competencias Específicas (PPT):</strong> Asegurar que las diapositivas con contenido clave se centren en las competencias que TulaSalud busca fortalecer en salud materna, infantil, nutrición y vigilancia epidemiológica, usando ejemplos claros.</li>
+                                    <li><strong>4. Brevedad y Enfoque al Grano (Diapositivas):</strong> Reformular textos largos en viñetas concisas y fáciles de recordar. Cada diapositiva debe tener un mensaje principal claro, evitando la sobrecarga de información.</li>
+                                    <li><strong>5. Enfoque Intercultural y de Género (PPT):</strong> Utilizar imágenes y ejemplos en las diapositivas que sean culturalmente sensibles y representen la diversidad de género y etnias de Guatemala. Incluir un glosario visual o de texto con términos clave en idiomas mayas si es pertinente.</li>
+                                    <li><strong>6. Participación Activa para Adultos (Diapositivas):</strong> Integrar preguntas de discusión abiertas en diapositivas clave, o pequeños ejercicios interactivos (ej., "¿Qué harías en esta situación?") que promuevan la participación activa.</li>
+                                    <li><strong>7. Visualización de Datos Clave (Gráficos PPT):</strong> Si la presentación contiene datos, usar infografías o gráficos sencillos y de alto impacto visual que sean fáciles de interpretar y relevantes para la toma de decisiones en salud.</li>
+                                    <li><strong>8. Accesibilidad Técnica en Zonas Rurales (Presentación):</strong> Verificar que la presentación sea compatible con diversas versiones de software y dispositivos, y que el tamaño del archivo sea manejable para descargas en conexiones limitadas.</li>
+                                    <li><strong>9. Guía para Facilitadores (en PPT):</strong> Incluir notas para el orador en cada diapositiva, proporcionando contexto adicional, preguntas para el debate y adaptaciones sugeridas para diferentes audiencias o situaciones de formación.</li>
+                                    <li><strong>10. Mensajes Motivacionales y de Retención (PPT):</strong> Incorporar diapositivas que reconozcan el esfuerzo y el impacto del personal de salud en áreas remotas, y que refuercen su conexión con la misión de TulaSalud.</li>
+                                    <li><strong>11. Integración Estratégica de Multimedia (PPT):</strong> Recomendar la inclusión de videos cortos (idealmente auto-alojados o de baja resolución) o enlaces a recursos de audio que complementen el contenido de la diapositiva sin sobrecargarla.</li>
+                                    <li><strong>12. Promoción de la E-Salud Comunitaria (Contenido PPT):</strong> Si aplica, resaltar el papel de la presentación en el impulso y apoyo al uso de sistemas comunitarios de E-Salud por el personal de salud.</li>
+                                </ul>
+                            `;
+                            llmButtons = '<button class="llm-feature-button" onclick="suggestSpeakerPoints()">Sugerir Puntos Clave para el Orador ✨</button>';
+                        }
+                    }
+                } else { // Manejar tipos de archivo verdaderamente desconocidos
                     evaluationContent = `
-                        <h3>Evaluación Pedagógica del Contenido</h3>
-                        <p><strong>Tipo de Archivo:</strong> Documento PDF</p>
-                        <ul>
-                            <li><strong>Claridad Conceptual:</strong> <span style="color:#28a745;">Alta.</span> Las definiciones y conceptos clave parecen estar bien explicados.</li>
-                            <li><strong>Estructura y Flujo:</strong> <span style="color:#ffc107;">Media.</span> La organización general es lógica, pero algunas transiciones entre secciones podrían ser más fluidas.</li>
-                            <li><strong>Complejidad del Lenguaje:</strong> <span style="color:#28a745;">Adecuada.</span> El léxico y la sintaxis son apropiados para un público de jóvenes y adultos, evitando jerga excesiva.</li>
-                            <li><strong>Uso de Ejemplos/Analogías:</strong> <span style="color:#ffc107;">Suficiente.</span> Se identifican algunos ejemplos, pero la incorporación de más casos prácticos podría mejorar la comprensión.</li>
-                            <li><strong>Relevancia de Elementos Visuales:</strong> <span style="color:#28a745;">Buena.</span> Las imágenes o gráficos detectados apoyan el texto de manera efectiva.</li>
-                        </ul>
+                        <h3>Análisis de Contenido</h3>
+                        <p><strong>Tipo de Archivo:</strong> Tipo de archivo desconocido</p>
+                        <p style="color:#DC3545; font-weight:bold;">⚠️ Formato de Archivo No Compatible</p>
+                        <p>Lo siento, el Analizador Pedagógico TeleEducación no puede procesar este tipo de archivo en este momento. Por favor, sube un PDF, una imagen (JPG, PNG) o una presentación (PPT/PPTX).</p>
                     `;
                     observationsContent = `
-                        <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
-                        <ul>
-                            <li><strong>1. Contextualización Socio-Cultural:</strong> Integrar ejemplos y referencias a la realidad multiétnica, multilingüe y rural de Guatemala, con énfasis en los departamentos meta de TulaSalud (Alta Verapaz, Huehuetenango, Sololá y Quiché), para mejorar la pertinencia y la aplicabilidad.</li>
-                            <li><strong>2. Andragogía Aplicada:</strong> Asegurar que el material fomente el aprendizaje autodirigido y se vincule directamente con las experiencias previas y necesidades del personal de salud y la población adulta a la que sirve TulaSalud, pilar fundamental en la educación de personas jóvenes y adultas.</li>
-                            <li><strong>3. Relevancia Temática Específica:</strong> Priorizar la inclusión de temas de salud materna, infantil y nutrición, así como la vigilancia epidemiológica, que son pilares de la misión de TulaSalud para la mejora de la cobertura en salud.</li>
-                            <li><strong>4. Desarrollo de Competencias Prácticas:</strong> El diseño debe facilitar la mejora continua de las competencias del recurso humano en los servicios de salud, enfocándose en habilidades aplicables directamente en el terreno y relevantes para la atención primaria de salud.</li>
-                            <li><strong>5. Adaptabilidad a Brechas de Acceso:</strong> Considerar formatos y metodologías que superen las dificultades de distancia y medios de acceso, utilizando las TIC de manera eficiente para llegar a poblaciones vulnerable y postergada.</li>
-                            <li><strong>6. Enfoque Intercultural y de Género:</strong> Asegurar que el contenido sea sensible a las diferencias culturales y de género, promoviendo la equidad y el respeto, como parte fundamental de la formación impulsada por TulaSalud desde sus inicios.</li>
-                            <li><strong>7. Claridad y Concisión para Profesionales:</strong> El lenguaje debe ser directo y conciso, optimizado para profesionales de la salud con tiempo limitado, facilitando una rápida asimilación de información crítica relevante para sus competencias.</li>
-                            <li><strong>8. Aplicabilidad en Atención Primaria:</strong> Destacar cómo la información y las habilidades presentadas contribuyen directamente a la atención primaria de salud, objetivo clave del proyecto de formación de Auxiliares de Enfermería Comunitaria.</li>
-                            <li><strong>9. Fomento de la Retención de Personal:</strong> Si aplica, sugerir elementos que aborden las condiciones de vida y recursos en áreas remotas, contribuyendo a la retención de personal capacitado en las regiones de donde proceden.</li>
-                            <li><strong>10. Uso Estratégico de Casos de Éxito:</strong> Incluir historias o casos de éxito concretos de la implementación de E-Salud o capacitaciones de TulaSalud en Guatemala para motivar y mostrar la aplicabilidad del conocimiento en la práctica.</li>
-                            <li><strong>11. Módulos de Autoevaluación/Reflexión:</strong> Integrar pequeños ejercicios de autoevaluación o momentos para la reflexión personal, que refuercen el aprendizaje y su vinculación con la práctica diaria, alineado con el fortalecimiento de competencias.</li>
-                            <li><strong>12. Promoción de la Colaboración Interinstitucional:</strong> Si el contenido se presta, sugerir cómo el material puede fomentar la coordinación con la Dirección de Recursos Humanos del MSPAS y la Escuela Nacional de Enfermería de Cobán, como lo ha hecho TulaSalud históricamente.</li>
-                        </ul>
+                        <h3>Observaciones de Mejora</h3>
+                        <p style="color:#DC3545;">No se pueden ofrecer observaciones de mejora para formatos de archivo no compatibles.</p>
                     `;
-                    llmButtons = '<button class="llm-feature-button" onclick="generateComprehensionQuestions()">Generar Preguntas de Comprensión ✨</button>';
-                } else if (file.type.includes('image')) {
-                    evaluationContent = `
-                        <h3>Evaluación Pedagógica del Contenido</h3>
-                        <p><strong>Tipo de Archivo:</strong> Archivo de Imagen (${file.type.split('/')[1].toUpperCase()})</p>
-                        <ul>
-                            <li><strong>Claridad y Propósito:</strong> <span style="color:#28a745;">Alta.</span> La imagen parece clara y su propósito comunicativo (ilustrar, explicar, decorar) es evidente.</li>
-                            <li><strong>Relevancia Contextual:</strong> <span style="color:#ffc107;">Media.</span> La imagen podría ser relevante para el contexto pedagógico, pero su conexión explícita con un tema específico podría fortalecerse con un pie de foto más descriptivo o un texto que la referencie directamente.</li>
-                            <li><strong>Calidad y Legibilidad:</strong> <span style="color:#28a745;">Buena.</span> La resolución y el contraste son adecuados. Si contiene texto, este es legible.</li>
-                            <li><strong>Impacto Didáctico:</strong> <span style="color:#ffc107;">Potencial.</span> La imagen tiene potencial para ser una herramienta didáctica, pero se beneficiaría de un pequeño análisis de los puntos clave o preguntas que dirijan la atención del estudiante.</li>
-                        </ul>
-                    `;
-                    observationsContent = `
-                        <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
-                        <ul>
-                            <li><strong>1. Relevancia Cultural y Visual:</strong> Asegurar que las imágenes reflejen la diversidad multiétnica de Guatemala y, si es posible, escenarios relevantes para el personal de salud en áreas rurales y los departamentos meta de TulaSalud.</li>
-                            <li><strong>2. Apoyo Visual a Contenidos de Salud Clave:</strong> Las imágenes deben complementar y reforzar los temas de salud materna, infantil, nutrición y vigilancia epidemiológica, que son centrales para TulaSalud.</li>
-                            <li><strong>3. Claridad y Comprensibilidad para Acceso Limitado:</strong> La información visual debe ser clara y fácilmente interpretable, incluso para personal con conectividad limitada o dispositivos móviles básicos, facilitando la mejora de cobertura.</li>
-                            <li><strong>4. Impacto en la Cobertura y Acceso:</strong> Sugerir el uso de imágenes que simbolicen o muestren la mejora en la cobertura de servicios de salud a poblaciones postergadas a través de la tele-educación.</li>
-                            <li><strong>5. Fomento del Enfoque Comunitario:</strong> Evaluar si las imágenes pueden inspirar o mostrar un enfoque comunitario en la prestación de servicios de salud, un pilar de la atención primaria y los programas de TulaSalud.</li>
-                            <li><strong>6. Accesibilidad (Descripciones Detalladas):</strong> Proporcionar descripciones "alt text" detalladas para garantizar la accesibilidad a todos los usuarios, en línea con la necesidad de llegar a una población diversa.</li>
-                            <li><strong>7. Contexto de Atención Primaria:</strong> Las imágenes deben evocar o ilustrar escenarios de atención primaria de salud, ya que esta es la base de la formación promovida por TulaSalud.</li>
-                            <li><strong>8. Aplicabilidad Práctica del Personal:</strong> Las imágenes pueden mostrar procesos de salud, uso de equipos TIC o interacciones paciente-personal relevantes para el desarrollo de competencias prácticas en el uso de E-Salud.</li>
-                            <li><strong>9. Simbolismo de Progreso:</strong> Utilizar imágenes que transmitan el impacto positivo de la tele-educación en la mejora de la calidad de vida y la salud en las comunidades guatemaltecas.</li>
-                            <li><strong>10. Optimización para Distribución Remota:</strong> Asegurar que las imágenes estén optimizadas en tamaño y formato para una distribución eficiente a través de plataformas de tele-educación, considerando limitaciones de ancho de banda en áreas rurales.</li>
-                            <li><strong>11. Coherencia con Mensajes de Prevención:</strong> Si la imagen aborda un tema de salud, debe reforzar mensajes clave de prevención y promoción de la salud materna e infantil.</li>
-                            <li><strong>12. Potencial de Interacción y Capacitación:</strong> Si es para un entorno web, considerar la inclusión de "hotspots" interactivos que brinden información adicional sobre elementos específicos de la imagen relevantes para la capacitación del personal.</li>
-                        </ul>
-                    `;
-                    llmButtons = '<button class="llm-feature-button" onclick="generateDetailedImageDescription()">Generar Descripción Detallada ✨</button>';
-                } else if (file.type.includes('presentation') || file.type.includes('powerpoint')) {
-                    evaluationContent = `
-                        <h3>Evaluación Pedagógica del Contenido</h3>
-                        <p><strong>Tipo de Archivo:</strong> Presentación (PPT/PPTX)</p>
-                        <ul>
-                            <li><strong>Estructura Lógica:</strong> <span style="color:#28a745;">Buena.</span> La secuencia de diapositivas parece seguir un orden coherente, con una clara introducción y desarrollo.</li>
-                            <li><strong>Densidad de Información por Diapositiva:</strong> <span style="color:#ffc107;">Media.</span> Algunas diapositivas podrían contener demasiada información textual, lo que podría dificultar la retención para la audiencia.</li>
-                            <li><strong>Coherencia Visual:</strong> <span style="color:#28a745;">Adecuada.</span> Se observa un estilo visual consistente (fuentes, colores, layouts).</li>
-                            <li><strong>Uso de Elementos Multimedia:</strong> <span style="color:#ffc107;">Suficiente.</span> Si hay videos o audios, están bien integrados, pero se podrían explorar más recursos interactivos.</li>
-                            <li><strong>Apoyo Visual al Discurso:</strong> <span style="color:#28a745;">Efectivo.</span> Las imágenes y gráficos complementan el mensaje principal de las diapositivas.</li>
-                        </ul>
-                    `;
-                    observationsContent = `
-                        <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
-                        <ul>
-                            <li><strong>1. Relevancia y Aplicabilidad Local:</strong> Priorizar ejemplos y casos de estudio extraídos de la realidad de los servicios de salud y comunidades rurales en los departamentos meta de TulaSalud, aumentando la pertinencia para el personal.</li>
-                            <li><strong>2. Brevedad y Enfoque al Grano:</strong> Dada la carga de trabajo del personal de salud, cada diapositiva debe transmitir su mensaje de forma concisa (máx. 3-5 puntos clave o una idea principal), optimizando el tiempo de capacitación.</li>
-                            <li><strong>3. Integración Estratégica de TIC:</strong> Sugerir cómo la presentación puede maximizar el uso de las TIC (imágenes claras, videos cortos de procedimientos, infografías) para una educación efectiva a distancia que mejore la cobertura en salud.</li>
-                            <li><strong>4. Fortalecimiento de Competencias Específicas:</strong> El contenido debe estar claramente orientado a mejorar competencias en salud materna, infantil, nutrición, y vigilancia epidemiológica, alineado con los objetivos de TulaSalud.</li>
-                            <li><strong>5. Enfoque Intercultural y de Género:</strong> Asegurar que la presentación sea culturalmente pertinente y promueva la equidad de género, adaptándose a la población multiétnica y multilingüe de Guatemala.</li>
-                            <li><strong>6. Participación Activa para Adultos:</strong> Diseñar diapositivas con preguntas de reflexión, estudios de caso o pequeños retos que inviten al personal de salud a aplicar lo aprendido en sus contextos.</li>
-                            <li><strong>7. Visualización de Datos Clave:</strong> Si se presentan datos (ej. sobre mortalidad), usar gráficos claros y sencillos que comuniquen el mensaje de forma efectiva y accesible, con relevancia para la toma de decisiones en salud.</li>
-                            <li><strong>8. Accesibilidad Técnica en Zonas Rurales:</strong> Verificar que la presentación sea compatible con diversas plataformas y dispositivos, incluyendo aquellos con menor capacidad de conexión, para asegurar la accesibilidad en áreas postergadas.</li>
-                            <li><strong>9. Promoción de la E-Salud Comunitaria:</strong> Si aplica, resaltar el papel de la presentación en el impulso y apoyo al uso de sistemas comunitarios de E-Salud por el personal de salud.</li>
-                            <li><strong>10. Orientación a la Atención Primaria de Salud:</strong> El contenido debe reforzar las prácticas y principios de la atención primaria, base de la formación de Auxiliares de Enfermería Comunitaria y otros profesionales de TulaSalud.</li>
-                            <li><strong>11. Mensajes Motivacionales y de Retención:</strong> Incorporar elementos que reconozcan el valor del personal de salud en áreas remotas y que refuercen su compromiso con la misión de TulaSalud, abordando la alta rotación.</li>
-                            <li><strong>12. Guía para Facilitadores (si aplica):</strong> Si la presentación es para ser guiada, sugerir la inclusión de notas o recursos para el facilitador que ayuden a contextualizar aún más el contenido para las realidades locales y los objetivos de TulaSalud.</li>
-                        </ul>
-                    `;
-                    llmButtons = '<button class="llm-feature-button" onclick="suggestSpeakerPoints()">Sugerir Puntos Clave para el Orador ✨</button>';
-                } else {
-                    evaluationContent = `<p><strong>Tipo de Archivo:</strong> Tipo de archivo desconocido</p><p>Lo siento, el Analizador Pedagógico TeleEducación no puede procesar este tipo de archivo en este momento. Por favor, sube un PDF, una imagen o una presentación (PPT/PPTX).</p>`;
-                    observationsContent = ''; // No hay observaciones si no se puede procesar el archivo
+                    llmButtons = ''; // No mostrar botones LLM para tipos desconocidos
                 }
 
                 // Oculta el indicador de carga principal y muestra los resultados
@@ -799,11 +842,9 @@
         resetButton.addEventListener('click', resetUIState); // Botón para cargar otro archivo (reinicia la UI)
 
         closePageButton.addEventListener('click', () => {
-            // Se intenta cerrar la ventana o redirigir a una página en blanco.
-            // La mayoría de los navegadores modernos impiden que un script cierre una ventana
-            // a menos que esa ventana haya sido abierta por el mismo script.
-            // Redirigir a "about:blank" es una alternativa para "cerrar" la vista actual.
-            window.location.href = 'about:blank';
+            // Reinicia la UI para simular un "cierre" en este entorno de sandbox
+            resetUIState();
+            displayMessage("La interfaz se ha restablecido. Puedes cargar un nuevo archivo.", "info");
         });
 
         // Función para mostrar mensajes personalizados (en lugar de alert)
