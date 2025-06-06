@@ -6,6 +6,7 @@
     <title>Analizador Pedagógico TeleEducación - TulaSalud</title>
     <!-- Incluye Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- html2pdf.js ya no es necesario -->
     <style>
         /* Estilos generales */
         body {
@@ -98,10 +99,18 @@
             display: none; /* Oculta el input de archivo por defecto */
         }
 
-        /* Botón de carga */
-        .upload-button, .llm-feature-button {
-            background-color: #007BFF; /* Azul para el botón */
-            color: white;
+        /* Grupo de botones principales (Analizar, LLM features) */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Permite que los botones se envuelvan */
+            gap: 15px; /* Espacio entre los botones */
+            margin-top: 20px;
+            margin-bottom: 20px; /* Para separar de los resultados */
+        }
+
+        /* Estilos base para todos los botones */
+        .upload-button, .llm-feature-button, .action-button {
             padding: 12px 25px;
             border: none;
             border-radius: 8px;
@@ -109,28 +118,54 @@
             font-size: 1.1em;
             font-weight: 600;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 20px;
-            margin-right: 10px; /* Espacio entre botones */
-            margin-left: 10px; /* Espacio entre botones */
+            color: white; /* Color de texto por defecto para la mayoría de botones */
         }
 
-        .upload-button:hover, .llm-feature-button:hover {
-            background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
-            transform: translateY(-2px); /* Efecto de elevación */
+        /* Estilo para el botón de 'Analizar Archivo' */
+        .upload-button {
+            background-color: #007BFF; /* Azul principal */
+        }
+        .upload-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
         }
 
+        /* Estilo para los botones de funciones LLM */
         .llm-feature-button {
-            background-color: #8A2BE2; /* Un púrpura vibrante para los botones de IA */
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 1em;
+            background-color: #8A2BE2; /* Púrpura para funciones de IA */
+            margin-top: 0; /* Asegura que el margen se gestione por el gap del button-group */
         }
-
         .llm-feature-button:hover {
             background-color: #6A1AAB;
         }
 
-        /* Indicador de carga */
+        /* Estilos para los botones de acción al final */
+        .action-button {
+            /* Colores definidos más abajo para cada tipo de botón */
+            margin: 10px; /* Margen para asegurar separación en flex-wrap */
+        }
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Colores específicos para los botones de acción */
+        .action-button.reset-button {
+            background-color: #0060B0; /* Azul oscuro para 'Cargar otro archivo' */
+            color: #E0E0E0;
+        }
+        .action-button.reset-button:hover {
+            background-color: #004F90;
+        }
+
+        .action-button.close-button {
+            background-color: #A03030; /* Rojo apagado para 'Cerrar' */
+            color: #E0E0E0;
+        }
+        .action-button.close-button:hover {
+            background-color: #8C2A2A;
+        }
+
+        /* Indicador de carga general */
         .loading-indicator, .llm-loading-indicator {
             display: none; /* Oculto por defecto */
             margin-top: 30px;
@@ -200,6 +235,18 @@
             margin-bottom: 10px;
         }
 
+        /* Contenedor para los botones de acción post-análisis */
+        .action-buttons-after-analysis {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas pequeñas */
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #444444;
+            display: none; /* Oculto por defecto, se muestra con JS */
+        }
+
+
         /* Footer */
         .footer {
             margin-top: 30px;
@@ -229,10 +276,21 @@
             .upload-area p {
                 font-size: 1em;
             }
-            .upload-button, .llm-feature-button {
-                padding: 10px 20px;
-                font-size: 1em;
-                margin: 10px 5px; /* Ajuste el margen en móvil */
+            .button-group .upload-button,
+            .button-group .llm-feature-button {
+                width: calc(50% - 15px); /* Dos botones por fila */
+                margin: 0; /* Reset margin from general rules */
+            }
+            .button-group {
+                gap: 15px; /* Ensure gap is applied */
+            }
+            .action-buttons-after-analysis {
+                flex-direction: column; /* Apila los botones en columnas */
+                gap: 10px; /* Espacio entre botones apilados */
+            }
+            .action-buttons-after-analysis .action-button {
+                width: calc(100% - 20px); /* Ocupa casi todo el ancho en columnas */
+                margin: 0; /* Reset margin from general rules, use gap from parent */
             }
             .results-area {
                 padding: 20px;
@@ -265,10 +323,16 @@
             .upload-area p {
                 font-size: 0.9em;
             }
-            .upload-button, .llm-feature-button {
+            .button-group {
+                flex-direction: column; /* Apila todos los botones en columnas */
+                gap: 10px;
+            }
+            .button-group .upload-button,
+            .button-group .llm-feature-button,
+            .action-buttons-after-analysis .action-button {
                 width: calc(100% - 20px); /* Botón de ancho completo en móvil */
                 padding: 12px;
-                margin: 5px 0; /* Sin margen lateral */
+                margin: 0; /* Sin margen lateral */
             }
             .results-area {
                 padding: 15px;
@@ -297,7 +361,9 @@
             <input type="file" id="fileInput" accept=".pdf, image/jpeg, image/png, .ppt, .pptx">
         </div>
 
-        <button class="upload-button" id="analyzeButton" disabled>Analizar Archivo</button>
+        <div class="button-group">
+            <button class="upload-button" id="analyzeButton" disabled>Analizar Archivo</button>
+        </div>
 
         <div class="loading-indicator" id="loadingIndicator">
             <div class="spinner"></div>
@@ -317,6 +383,12 @@
             </div>
         </div>
 
+        <!-- Nuevos botones de acción que se muestran después del análisis -->
+        <div class="action-buttons-after-analysis" id="actionButtons">
+            <button class="action-button reset-button" id="resetButton"><i class="fas fa-redo"></i> Cargar otro archivo</button>
+            <button class="action-button close-button" id="closePageButton"><i class="fas fa-times-circle"></i> Cerrar Página</button>
+        </div>
+
         <div class="footer">
             <p>© 2025 Lic. Luis Ygnacio Ponce Sierra | Todos los derechos reservados</p>
         </div>
@@ -331,6 +403,9 @@
         const analysisContent = document.getElementById('analysisContent');
         const llmLoadingIndicator = document.getElementById('llmLoadingIndicator');
         const llmOutput = document.getElementById('llmOutput');
+        const actionButtons = document.getElementById('actionButtons');
+        const resetButton = document.getElementById('resetButton');
+        const closePageButton = document.getElementById('closePageButton');
 
         let selectedFile = null;
 
@@ -361,7 +436,10 @@
         function handleDrop(e) {
             const dt = e.dataTransfer;
             const files = dt.files;
-            handleFiles(files);
+            // Asegura que solo se procese un archivo
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
         }
 
         // Abre el explorador de archivos al hacer click en el área de subida
@@ -369,25 +447,41 @@
 
         // Maneja la selección de archivos desde el input
         fileInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
+            // Asegura que solo se procese un archivo
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
         });
 
-        function handleFiles(files) {
-            if (files.length > 0) {
-                selectedFile = files[0];
-                // Muestra el nombre del archivo en el área de subida
-                uploadArea.querySelector('p').textContent = `Archivo seleccionado: ${selectedFile.name}`;
-                analyzeButton.disabled = false; // Habilita el botón de analizar
-                resultsArea.style.display = 'none'; // Oculta resultados anteriores
-                llmOutput.innerHTML = ''; // Limpia el contenido LLM anterior
-                llmLoadingIndicator.style.display = 'none'; // Oculta el indicador LLM
-            }
+        /**
+         * Maneja el archivo seleccionado, actualiza el UI y habilita el botón de análisis.
+         * Esta función se llama cuando se selecciona un nuevo archivo.
+         * @param {File} file - El archivo seleccionado.
+         */
+        function handleFileSelection(file) {
+            selectedFile = file;
+            // Muestra el nombre del archivo en el área de subida
+            uploadArea.querySelector('p').textContent = `Archivo seleccionado: ${selectedFile.name}`;
+            analyzeButton.disabled = false; // Habilita el botón de analizar
+
+            // Resetea el estado de la UI para un nuevo archivo, pero manteniendo el archivo seleccionado
+            resultsArea.style.display = 'none';
+            llmOutput.innerHTML = '';
+            loadingIndicator.style.display = 'none';
+            llmLoadingIndicator.style.display = 'none';
+            actionButtons.style.display = 'none';
+            // Asegura que el área de subida y el botón de análisis estén visibles
+            uploadArea.style.display = 'flex';
+            analyzeButton.style.display = 'block';
         }
 
         // Maneja el clic en el botón de analizar
         analyzeButton.addEventListener('click', () => {
             if (selectedFile) {
                 startAnalysis(selectedFile);
+            } else {
+                // Usamos un modal o un mensaje dentro de la página en lugar de alert()
+                displayMessage("Por favor, selecciona un archivo para analizar.", "error");
             }
         });
 
@@ -402,12 +496,14 @@
             loadingIndicator.style.display = 'block';
             resultsArea.style.display = 'none'; // Asegura que los resultados estén ocultos
             llmOutput.innerHTML = ''; // Limpia el contenido LLM anterior
+            actionButtons.style.display = 'none'; // Oculta los botones de acción mientras se analiza
 
             // Simula el proceso de análisis inicial
             setTimeout(() => {
                 let initialAnalysis = '';
                 let llmButtons = '';
 
+                // El contenido del análisis inicial se mantiene igual
                 if (file.type.includes('pdf')) {
                     initialAnalysis = `
                         <p><strong>Tipo de Archivo:</strong> Documento PDF</p>
@@ -419,7 +515,7 @@
                             <li><strong>Uso de Ejemplos/Analogías:</strong> <span style="color:#ffc107;">Suficiente.</span> Se identifican algunos ejemplos, pero la incorporación de más casos prácticos podría mejorar la comprensión.</li>
                             <li><strong>Relevancia de Elementos Visuales:</strong> <span style="color:#28a745;">Buena.</span> Las imágenes o gráficos detectados apoyan el texto de manera efectiva.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada):</strong></p>
+                        <p><strong>Observaciones de Mejora (simulada):</p>
                         <ul>
                             <li><strong>1. Coherencia de Estructura:</strong> Considere añadir una tabla de contenido interactiva si el documento excede las 5 páginas, y un breve resumen de los puntos clave al inicio de cada capítulo o sección principal para facilitar la navegación y comprensión rápida.</li>
                             <li><strong>2. Enganche del Lector:</strong> Integrar preguntas reflexivas al final de cada subsección o proponer micro-actividades (ej. "Piensa en un ejemplo...") que fomenten la aplicación del conocimiento y la interacción con el material.</li>
@@ -437,9 +533,8 @@
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="generateComprehensionQuestions()">Generar Preguntas de Comprensión ✨</button>';
                 } else if (file.type.includes('image')) {
-                    fileType = 'Archivo de Imagen';
                     initialAnalysis = `
-                        <p><strong>Tipo de Archivo:</strong> ${fileType} (${file.type.split('/')[1].toUpperCase()})</p>
+                        <p><strong>Tipo de Archivo:</strong> Archivo de Imagen (${file.type.split('/')[1].toUpperCase()})</p>
                         <p><strong>Análisis Pedagógico Visual (simulada):</strong></p>
                         <ul>
                             <li><strong>Claridad y Propósito:</strong> <span style="color:#28a745;">Alta.</span> La imagen parece clara y su propósito comunicativo (ilustrar, explicar, decorar) es evidente.</li>
@@ -447,7 +542,7 @@
                             <li><strong>Calidad y Legibilidad:</strong> <span style="color:#28a745;">Buena.</span> La resolución y el contraste son adecuados. Si contiene texto, este es legible.</li>
                             <li><strong>Impacto Didáctico:</strong> <span style="color:#ffc107;">Potencial.</span> La imagen tiene potencial para ser una herramienta didáctica, pero se beneficiaría de un pequeño análisis de los puntos clave o preguntas que dirijan la atención del estudiante.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada):</strong></p>
+                        <p><strong>Observaciones de Mejora (simulada):</p>
                         <ul>
                             <li><strong>1. Pie de Foto Descriptivo:</strong> Añadir un pie de foto conciso que no solo describa la imagen, sino que también explique su relevancia directa para el contenido pedagógico.</li>
                             <li><strong>2. Elementos Interactivos (Web):</strong> Si se usa en un contexto web, considerar el uso de "hotspots" o áreas clicables en la imagen que revelen información adicional o definiciones al pasar el ratón.</li>
@@ -465,9 +560,8 @@
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="generateDetailedImageDescription()">Generar Descripción Detallada ✨</button>';
                 } else if (file.type.includes('presentation') || file.type.includes('powerpoint')) {
-                    fileType = 'Presentación (PPT/PPTX)';
                     initialAnalysis = `
-                        <p><strong>Tipo de Archivo:</strong> ${fileType}</p>
+                        <p><strong>Tipo de Archivo:</strong> Presentación (PPT/PPTX)</p>
                         <p><strong>Análisis Pedagógico de Presentación (simulada):</strong></p>
                         <ul>
                             <li><strong>Estructura Lógica:</strong> <span style="color:#28a745;">Buena.</span> La secuencia de diapositivas parece seguir un orden coherente, con una clara introducción y desarrollo.</li>
@@ -476,7 +570,7 @@
                             <li><strong>Uso de Elementos Multimedia:</strong> <span style="color:#ffc107;">Suficiente.</span> Si hay videos o audios, están bien integrados, pero se podrían explorar más recursos interactivos.</li>
                             <li><strong>Apoyo Visual al Discurso:</strong> <span style="color:#28a745;">Efectivo.</span> Las imágenes y gráficos complementan el mensaje principal de las diapositivas.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada):</strong></p>
+                        <p><strong>Observaciones de Mejora (simulada):</p>
                         <ul>
                             <li><strong>1. Principio de Pareto (80/20):</strong> Reducir la cantidad de texto por diapositiva a puntos clave, utilizando más elementos visuales y dejando la explicación detallada para el orador. Máximo 6-8 líneas de texto por diapositiva.</li>
                             <li><strong>2. Interacción con la Audiencia:</strong> Incluir diapositivas dedicadas a preguntas y respuestas, encuestas rápidas o ejercicios de "piensa y comparte" para mantener la participación activa.</li>
@@ -497,17 +591,20 @@
                     initialAnalysis = `<p><strong>Tipo de Archivo:</strong> Tipo de archivo desconocido</p><p>Lo siento, el Analizador Pedagógico TeleEducación no puede procesar este tipo de archivo en este momento. Por favor, sube un PDF, una imagen o una presentación (PPT/PPTX).</p>`;
                 }
 
-                // Oculta el indicador de carga y muestra los resultados
+                // Oculta el indicador de carga principal y muestra los resultados
                 loadingIndicator.style.display = 'none';
-                uploadArea.style.display = 'flex'; // Muestra el área de subida de nuevo
-                analyzeButton.style.display = 'block'; // Muestra el botón de nuevo
-                analyzeButton.disabled = true; // Deshabilita el botón hasta una nueva carga
-                uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu archivo aquí, o haz click para seleccionar'; // Restablece el texto
-                fileInput.value = ''; // Limpia el input de archivo
-                selectedFile = null; // Reinicia el archivo seleccionado
+                
+                // Estos elementos solo se muestran DESPUÉS de que el análisis inicial haya terminado
+                uploadArea.style.display = 'flex'; // Puede ser necesario para un nuevo ciclo
+                analyzeButton.style.display = 'block'; // Puede ser necesario para un nuevo ciclo
+                analyzeButton.disabled = true; // Deshabilita hasta nueva selección
+                uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu archivo aquí, o haz click para seleccionar'; 
+                fileInput.value = ''; 
+                selectedFile = null; // Reinicia el archivo seleccionado para evitar re-análisis sin nueva selección
 
-                analysisContent.innerHTML = initialAnalysis + '<div class="llm-feature-buttons">' + llmButtons + '</div>'; // Añade los botones de LLM
-                resultsArea.style.display = 'block'; // Muestra el área de resultados
+                analysisContent.innerHTML = initialAnalysis + '<div class="llm-feature-buttons button-group">' + llmButtons + '</div>'; 
+                resultsArea.style.display = 'block'; 
+                actionButtons.style.display = 'flex'; 
             }, 3000); // Simula un retraso de 3 segundos para el análisis inicial
         }
 
@@ -517,10 +614,6 @@
         function generateComprehensionQuestions() {
             llmLoadingIndicator.style.display = 'block';
             llmOutput.innerHTML = ''; // Limpiar salida anterior
-            // En un entorno real, aquí se haría una llamada a la API de Gemini
-            // Por ejemplo:
-            // const prompt = "Genera 5 preguntas de comprensión sobre el contenido de este documento PDF:";
-            // const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=YOUR_API_KEY', { /* ... */ });
 
             setTimeout(() => {
                 const questions = [
@@ -602,6 +695,60 @@
                 llmOutput.innerHTML = output;
                 llmLoadingIndicator.style.display = 'none';
             }, 2500); // Simula un retraso
+        }
+
+        /**
+         * Reinicia el estado de la UI a su condición inicial para permitir la carga de un nuevo archivo.
+         */
+        function resetUIState() {
+            selectedFile = null; // Resetea el archivo seleccionado
+            fileInput.value = ''; // Limpia el valor del input de archivo
+            uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu archivo aquí, o haz click para seleccionar'; // Restablece el texto del área de subida
+            analyzeButton.disabled = true; // Deshabilita el botón de analizar
+            resultsArea.style.display = 'none'; // Oculta la sección de resultados
+            llmOutput.innerHTML = ''; // Limpia el contenido generado por LLM
+            loadingIndicator.style.display = 'none'; // Oculta el indicador de carga principal
+            llmLoadingIndicator.style.display = 'none'; // Oculta el indicador de carga del LLM
+            uploadArea.style.display = 'flex'; // Asegura que el área de subida sea visible
+            analyzeButton.style.display = 'block'; // Asegura que el botón de análisis sea visible
+            actionButtons.style.display = 'none'; // Oculta los botones de acción post-análisis
+        }
+
+        // Event listeners para los nuevos botones de acción
+        resetButton.addEventListener('click', resetUIState); // Botón para cargar otro archivo (reinicia la UI)
+
+        closePageButton.addEventListener('click', () => {
+            // Intenta cerrar la ventana/pestaña del navegador.
+            // Nota: La mayoría de los navegadores modernos restringen esta función
+            // por seguridad, a menos que la ventana haya sido abierta por script.
+            window.close();
+        });
+
+        // Función para mostrar mensajes personalizados (en lugar de alert)
+        function displayMessage(message, type = "info") {
+            // Crear un div para el mensaje
+            const messageBox = document.createElement('div');
+            messageBox.textContent = message;
+            messageBox.style.padding = '15px';
+            messageBox.style.borderRadius = '8px';
+            messageBox.style.marginTop = '20px';
+            messageBox.style.color = '#fff';
+            messageBox.style.fontWeight = 'bold';
+            messageBox.style.textAlign = 'center';
+
+            if (type === "error") {
+                messageBox.style.backgroundColor = '#DC3545'; // Rojo para errores
+            } else {
+                messageBox.style.backgroundColor = '#007BFF'; // Azul para información
+            }
+
+            // Añadir al contenedor principal
+            container.insertBefore(messageBox, uploadArea.nextSibling); // Insertar después del área de carga
+
+            // Eliminar el mensaje después de unos segundos
+            setTimeout(() => {
+                messageBox.remove();
+            }, 5000);
         }
     </script>
 </body>
