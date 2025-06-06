@@ -6,7 +6,6 @@
     <title>Analizador Pedagógico TeleEducación - TulaSalud</title>
     <!-- Incluye Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- html2pdf.js ya no es necesario -->
     <style>
         /* Estilos generales */
         body {
@@ -20,6 +19,12 @@
             align-items: flex-start; /* Alinea al inicio verticalmente */
             min-height: 100vh;
             box-sizing: border-box; /* Incluye padding en el tamaño total */
+            /* Cambia el cursor del ratón por la imagen de dedo.png */
+            cursor: url('https://raw.githubusercontent.com/google/gemini-micro-web/main/assets/img/dedo.png'), auto;
+            /* Se usa raw.githubusercontent.com para acceder directamente a la imagen.
+               'auto' es el cursor de respaldo si la imagen no se carga o no es válida.
+               Idealmente, la imagen del cursor debe ser pequeña (por ejemplo, 32x32px o 48x48px)
+               y en formato .cur o .png con transparencia para un mejor rendimiento. */
         }
 
         .container {
@@ -69,7 +74,7 @@
             border-radius: 10px;
             padding: 40px 20px;
             margin-bottom: 30px;
-            cursor: pointer;
+            cursor: pointer; /* Cursor de puntero para indicar interactividad */
             transition: background-color 0.3s ease, border-color 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -114,7 +119,7 @@
             padding: 12px 25px;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
+            cursor: pointer; /* Cursor de puntero para acciones clicables */
             font-size: 1.1em;
             font-weight: 600;
             transition: background-color 0.3s ease, transform 0.2s ease;
@@ -198,6 +203,14 @@
             border: 1px solid #444444; /* Borde sutil */
         }
 
+        /* Justifica el texto dentro de la sección de resultados (párrafos y listas) */
+        .results-area p, .results-area ul, .results-area ol {
+            text-align: justify; /* Justifica el texto */
+        }
+        .results-area ul li, .results-area ol li {
+            text-align: justify; /* Asegura la justificación también en elementos de lista */
+        }
+
         .results-area h2 {
             color: #00BFFF;
             margin-top: 0;
@@ -222,6 +235,40 @@
         .results-area ul li {
             margin-bottom: 8px;
             line-height: 1.5;
+        }
+
+        /* NUEVOS ESTILOS PARA LAS TARJETAS DE EVALUACIÓN Y OBSERVACIONES */
+        .evaluation-card, .observations-card {
+            background-color: #3A3A3A; /* Un gris más claro para contraste */
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px; /* Espacio entre las tarjetas */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra suave para efecto de elevación */
+            border: 1px solid #444444; /* Borde sutil */
+        }
+
+        /* Justifica el texto dentro de las tarjetas */
+        .evaluation-card p, .evaluation-card ul, .evaluation-card ol {
+            text-align: justify;
+        }
+        .evaluation-card ul li, .evaluation-card ol li {
+            text-align: justify;
+        }
+        .observations-card p, .observations-card ul, .observations-card ol {
+            text-align: justify;
+        }
+        .observations-card ul li, .observations-card ol li {
+            text-align: justify;
+        }
+
+        .evaluation-card h3, .observations-card h3 {
+            color: #00BFFF; /* Título de la evaluación y observaciones (ahora el mismo color) */
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            border-bottom: 1px solid #555555;
+            padding-bottom: 8px;
+            text-align: center; /* ¡NUEVO! Centra los títulos de las tarjetas */
         }
 
         .llm-output-section {
@@ -298,6 +345,12 @@
             .results-area h2 {
                 font-size: 1.4em;
             }
+            .evaluation-card, .observations-card {
+                padding: 15px;
+            }
+            .evaluation-card h3, .observations-card h3 {
+                font-size: 1.2em;
+            }
         }
 
         @media (max-width: 480px) {
@@ -340,6 +393,12 @@
             .results-area h2 {
                 font-size: 1.2em;
             }
+            .evaluation-card, .observations-card {
+                padding: 10px;
+            }
+            .evaluation-card h3, .observations-card h3 {
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
@@ -372,7 +431,9 @@
 
         <div class="results-area" id="resultsArea" style="display: none;">
             <h2><i class="fas fa-chart-bar"></i> Resultados del Análisis</h2>
-            <div id="analysisContent"></div>
+            <div id="analysisContent">
+                <!-- Las tarjetas se insertarán aquí dinámicamente -->
+            </div>
             <!-- Nuevo indicador de carga para las funciones LLM -->
             <div class="llm-loading-indicator" id="llmLoadingIndicator">
                 <div class="spinner"></div>
@@ -501,14 +562,14 @@
 
             // Simula el proceso de análisis inicial
             setTimeout(() => {
-                let initialAnalysis = '';
+                let evaluationContent = '';
+                let observationsContent = '';
                 let llmButtons = '';
 
-                // El contenido del análisis inicial se mantiene igual
                 if (file.type.includes('pdf')) {
-                    initialAnalysis = `
+                    evaluationContent = `
+                        <h3>Evaluación Pedagógica del Contenido</h3>
                         <p><strong>Tipo de Archivo:</strong> Documento PDF</p>
-                        <p><strong>Evaluación Pedagógica del Contenido:</strong></p>
                         <ul>
                             <li><strong>Claridad Conceptual:</strong> <span style="color:#28a745;">Alta.</span> Las definiciones y conceptos clave parecen estar bien explicados.</li>
                             <li><strong>Estructura y Flujo:</strong> <span style="color:#ffc107;">Media.</span> La organización general es lógica, pero algunas transiciones entre secciones podrían ser más fluidas.</li>
@@ -516,55 +577,58 @@
                             <li><strong>Uso de Ejemplos/Analogías:</strong> <span style="color:#ffc107;">Suficiente.</span> Se identifican algunos ejemplos, pero la incorporación de más casos prácticos podría mejorar la comprensión.</li>
                             <li><strong>Relevancia de Elementos Visuales:</strong> <span style="color:#28a745;">Buena.</span> Las imágenes o gráficos detectados apoyan el texto de manera efectiva.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos):</p>
+                    `;
+                    observationsContent = `
+                        <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
                         <ul>
-                            <li><strong>1. Contextualización Local:</strong> Integrar ejemplos y referencias socioculturales guatemaltecas (ej. casos de estudio de comunidades, desafíos locales) para aumentar la relevancia del contenido según los principios del Currículo Nacional Base (CNB) para jóvenes y adultos.</li>
-                            <li><strong>2. Andragogía Aplicada:</strong> Asegurar que el material fomente el aprendizaje autodirigido y se conecte con las experiencias previas de los adultos, un pilar fundamental en la educación de personas jóvenes y adultas.</li>
-                            <li><strong>3. Interacción y Participación Activa:</strong> Incorporar más actividades interactivas, preguntas de debate o escenarios de resolución de problemas que promuevan la participación activa, en consonancia con las metodologías participativas sugeridas en las políticas educativas.</li>
-                            <li><strong>4. Claridad en Objetivos de Aprendizaje:</strong> Establecer objetivos de aprendizaje claros y alcanzables al inicio de cada sección, que resuenen con las necesidades y metas de los estudiantes adultos.</li>
-                            <li><strong>5. Resúmenes Prácticos:</strong> Incluir resúmenes concisos al final de cada unidad, enfocados en la aplicación práctica del conocimiento en la vida diaria o laboral, un aspecto valorado en la educación para adultos.</li>
-                            <li><strong>6. Lenguaje Inclusivo y Accesible:</strong> Revisar el lenguaje para garantizar que sea inclusivo, respetuoso de la diversidad cultural y lingüística de Guatemala, y accesible para diferentes niveles de alfabetización.</li>
-                            <li><strong>7. Elementos Visuales con Propósito Pedagógico:</strong> Optimizar los elementos visuales (gráficos, imágenes) para que no solo decoren, sino que expliquen conceptos complejos o ilustren situaciones relevantes para la audiencia.</li>
-                            <li><strong>8. Fomento del Pensamiento Crítico:</strong> Diseñar actividades o preguntas que inviten al análisis crítico de la información y a la formación de una opinión propia, en línea con el desarrollo de competencias del CNB.</li>
-                            <li><strong>9. Orientación a la Resolución de Problemas:</strong> Estructurar el contenido de manera que los temas se presenten como problemas a resolver, permitiendo a los estudiantes aplicar sus conocimientos para encontrar soluciones.</li>
-                            <li><strong>10. Retroalimentación Formativa:</strong> Sugerir la implementación de mecanismos de autoevaluación o mini-ejercicios con retroalimentación inmediata, para que los estudiantes puedan monitorear su propio progreso y ajustar su aprendizaje.</li>
-                            <li><strong>11. Pertinencia Sociocultural:</strong> Asegurar que el contenido refleje la realidad sociocultural de Guatemala, incluyendo referencias a su historia, geografía, tradiciones y desafíos actuales.</li>
-                            <li><strong>12. Adaptabilidad de Formato:</strong> Considerar formatos alternativos (ej. audio, video, infografías interactivas) para segmentos del contenido que puedan beneficiarse de una presentación multimodal, mejorando la accesibilidad y el engagement.</li>
+                            <li><strong>1. Contextualización Socio-Cultural:</strong> Integrar ejemplos y referencias a la realidad multiétnica, multilingüe y rural de Guatemala, con énfasis en los departamentos meta de TulaSalud (Alta Verapaz, Huehuetenango, Sololá y Quiché), para mejorar la pertinencia y la aplicabilidad.</li>
+                            <li><strong>2. Andragogía Aplicada:</strong> Asegurar que el material fomente el aprendizaje autodirigido y se vincule directamente con las experiencias previas y necesidades del personal de salud y la población adulta a la que sirve TulaSalud, pilar fundamental en la educación de personas jóvenes y adultas.</li>
+                            <li><strong>3. Relevancia Temática Específica:</strong> Priorizar la inclusión de temas de salud materna, infantil y nutrición, así como la vigilancia epidemiológica, que son pilares de la misión de TulaSalud para la mejora de la cobertura en salud.</li>
+                            <li><strong>4. Desarrollo de Competencias Prácticas:</strong> El diseño debe facilitar la mejora continua de las competencias del recurso humano en los servicios de salud, enfocándose en habilidades aplicables directamente en el terreno y relevantes para la atención primaria de salud.</li>
+                            <li><strong>5. Adaptabilidad a Brechas de Acceso:</strong> Considerar formatos y metodologías que superen las dificultades de distancia y medios de acceso, utilizando las TIC de manera eficiente para llegar a poblaciones vulnerable y postergada.</li>
+                            <li><strong>6. Enfoque Intercultural y de Género:</strong> Asegurar que el contenido sea sensible a las diferencias culturales y de género, promoviendo la equidad y el respeto, como parte fundamental de la formación impulsada por TulaSalud desde sus inicios.</li>
+                            <li><strong>7. Claridad y Concisión para Profesionales:</strong> El lenguaje debe ser directo y conciso, optimizado para profesionales de la salud con tiempo limitado, facilitando una rápida asimilación de información crítica relevante para sus competencias.</li>
+                            <li><strong>8. Aplicabilidad en Atención Primaria:</strong> Destacar cómo la información y las habilidades presentadas contribuyen directamente a la atención primaria de salud, objetivo clave del proyecto de formación de Auxiliares de Enfermería Comunitaria.</li>
+                            <li><strong>9. Fomento de la Retención de Personal:</strong> Si aplica, sugerir elementos que aborden las condiciones de vida y recursos en áreas remotas, contribuyendo a la retención de personal capacitado en las regiones de donde proceden.</li>
+                            <li><strong>10. Uso Estratégico de Casos de Éxito:</strong> Incluir historias o casos de éxito concretos de la implementación de E-Salud o capacitaciones de TulaSalud en Guatemala para motivar y mostrar la aplicabilidad del conocimiento en la práctica.</li>
+                            <li><strong>11. Módulos de Autoevaluación/Reflexión:</strong> Integrar pequeños ejercicios de autoevaluación o momentos para la reflexión personal, que refuercen el aprendizaje y su vinculación con la práctica diaria, alineado con el fortalecimiento de competencias.</li>
+                            <li><strong>12. Promoción de la Colaboración Interinstitucional:</strong> Si el contenido se presta, sugerir cómo el material puede fomentar la coordinación con la Dirección de Recursos Humanos del MSPAS y la Escuela Nacional de Enfermería de Cobán, como lo ha hecho TulaSalud históricamente.</li>
                         </ul>
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="generateComprehensionQuestions()">Generar Preguntas de Comprensión ✨</button>';
                 } else if (file.type.includes('image')) {
-                    initialAnalysis = `
+                    evaluationContent = `
+                        <h3>Evaluación Pedagógica del Contenido</h3>
                         <p><strong>Tipo de Archivo:</strong> Archivo de Imagen (${file.type.split('/')[1].toUpperCase()})</p>
-                        <p><strong>Análisis Pedagógico Visual (simulada):</strong></p>
                         <ul>
                             <li><strong>Claridad y Propósito:</strong> <span style="color:#28a745;">Alta.</span> La imagen parece clara y su propósito comunicativo (ilustrar, explicar, decorar) es evidente.</li>
                             <li><strong>Relevancia Contextual:</strong> <span style="color:#ffc107;">Media.</span> La imagen podría ser relevante para el contexto pedagógico, pero su conexión explícita con un tema específico podría fortalecerse con un pie de foto más descriptivo o un texto que la referencie directamente.</li>
                             <li><strong>Calidad y Legibilidad:</strong> <span style="color:#28a745;">Buena.</span> La resolución y el contraste son adecuados. Si contiene texto, este es legible.</li>
                             <li><strong>Impacto Didáctico:</strong> <span style="color:#ffc107;">Potencial.</span> La imagen tiene potencial para ser una herramienta didáctica, pero se beneficiaría de un pequeño análisis de los puntos clave o preguntas que dirijan la atención del estudiante.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada y alineada con principios pedagógicos):</p>
+                    `;
+                    observationsContent = `
+                        <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
                         <ul>
-                            <li><strong>1. Pie de Foto Contextualizado:</strong> El pie de foto debe no solo describir la imagen, sino vincularla directamente al concepto pedagógico que ilustra y a la realidad guatemalteca si es pertinente.</li>
-                            <li><strong>2. Metáfora Visual Explícita:</strong> Si la imagen es una metáfora, considerar añadir una breve explicación de cómo se relaciona con el tema para facilitar la comprensión abstracta de jóvenes y adultos.</li>
-                            <li><strong>3. Accesibilidad Visual:</strong> Asegurar que la imagen tenga un "texto alternativo" (alt text) descriptivo para lectores de pantalla, cumpliendo con las normas de accesibilidad educativa.</li>
-                            <li><strong>4. Impacto Cultural:</strong> Evaluar si la imagen representa de manera sensible y apropiada la diversidad cultural de Guatemala, o si podría contextualizarse mejor para reflejarla.</li>
-                            <li><strong>5. Claridad de Información:</strong> Si la imagen contiene gráficos o diagramas, verificar que la información sea legible, sin sobrecarga, y que las etiquetas sean claras y concisas.</li>
-                            <li><strong>6. Función Didáctica Clara:</strong> Cada imagen debe tener un objetivo didáctico claro (ej. ilustrar un proceso, comparar elementos, contextualizar un concepto) y esto debe ser evidente para el estudiante.</li>
-                            <li><strong>7. Evitar Estereotipos:</strong> Analizar la imagen para identificar y eliminar posibles estereotipos culturales, de género o sociales que puedan estar presentes.</li>
-                            <li><strong>8. Calidad para Impresión/Digital:</strong> Asegurar que la resolución de la imagen sea adecuada tanto para visualización en pantalla como para una posible impresión, sin pixelado excesivo.</li>
-                            <li><strong>9. Preguntas Guía en la Imagen:</strong> Integrar pequeñas preguntas directamente relacionadas con la imagen (si el formato lo permite) para fomentar la observación activa y el pensamiento crítico.</li>
-                            <li><strong>10. Integración con el Texto:</strong> La imagen debe estar estratégicamente ubicada cerca del texto al que hace referencia, para mantener la coherencia y evitar distracciones.</li>
-                            <li><strong>11. Relevancia y Actualidad:</strong> Verificar que la imagen sea actual y relevante para la temática y la audiencia, evitando elementos desactualizados que puedan desmotivar.</li>
-                            <li><strong>12. Optimización de Peso:</strong> Optimizar el tamaño de archivo de la imagen para asegurar una carga rápida en entornos con conectividad limitada, común en algunas zonas de Guatemala.</li>
+                            <li><strong>1. Relevancia Cultural y Visual:</strong> Asegurar que las imágenes reflejen la diversidad multiétnica de Guatemala y, si es posible, escenarios relevantes para el personal de salud en áreas rurales y los departamentos meta de TulaSalud.</li>
+                            <li><strong>2. Apoyo Visual a Contenidos de Salud Clave:</strong> Las imágenes deben complementar y reforzar los temas de salud materna, infantil, nutrición y vigilancia epidemiológica, que son centrales para TulaSalud.</li>
+                            <li><strong>3. Claridad y Comprensibilidad para Acceso Limitado:</strong> La información visual debe ser clara y fácilmente interpretable, incluso para personal con conectividad limitada o dispositivos móviles básicos, facilitando la mejora de cobertura.</li>
+                            <li><strong>4. Impacto en la Cobertura y Acceso:</strong> Sugerir el uso de imágenes que simbolicen o muestren la mejora en la cobertura de servicios de salud a poblaciones postergadas a través de la tele-educación.</li>
+                            <li><strong>5. Fomento del Enfoque Comunitario:</strong> Evaluar si las imágenes pueden inspirar o mostrar un enfoque comunitario en la prestación de servicios de salud, un pilar de la atención primaria y los programas de TulaSalud.</li>
+                            <li><strong>6. Accesibilidad (Descripciones Detalladas):</strong> Proporcionar descripciones "alt text" detalladas para garantizar la accesibilidad a todos los usuarios, en línea con la necesidad de llegar a una población diversa.</li>
+                            <li><strong>7. Contexto de Atención Primaria:</strong> Las imágenes deben evocar o ilustrar escenarios de atención primaria de salud, ya que esta es la base de la formación promovida por TulaSalud.</li>
+                            <li><strong>8. Aplicabilidad Práctica del Personal:</strong> Las imágenes pueden mostrar procesos de salud, uso de equipos TIC o interacciones paciente-personal relevantes para el desarrollo de competencias prácticas en el uso de E-Salud.</li>
+                            <li><strong>9. Simbolismo de Progreso:</strong> Utilizar imágenes que transmitan el impacto positivo de la tele-educación en la mejora de la calidad de vida y la salud en las comunidades guatemaltecas.</li>
+                            <li><strong>10. Optimización para Distribución Remota:</strong> Asegurar que las imágenes estén optimizadas en tamaño y formato para una distribución eficiente a través de plataformas de tele-educación, considerando limitaciones de ancho de banda en áreas rurales.</li>
+                            <li><strong>11. Coherencia con Mensajes de Prevención:</strong> Si la imagen aborda un tema de salud, debe reforzar mensajes clave de prevención y promoción de la salud materna e infantil.</li>
+                            <li><strong>12. Potencial de Interacción y Capacitación:</strong> Si es para un entorno web, considerar la inclusión de "hotspots" interactivos que brinden información adicional sobre elementos específicos de la imagen relevantes para la capacitación del personal.</li>
                         </ul>
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="generateDetailedImageDescription()">Generar Descripción Detallada ✨</button>';
                 } else if (file.type.includes('presentation') || file.type.includes('powerpoint')) {
-                    fileType = 'Presentación (PPT/PPTX)';
-                    initialAnalysis = `
-                        <p><strong>Tipo de Archivo:</strong> ${fileType}</p>
-                        <p><strong>Análisis Pedagógico de Presentación (simulada):</strong></p>
+                    evaluationContent = `
+                        <h3>Evaluación Pedagógica del Contenido</h3>
+                        <p><strong>Tipo de Archivo:</strong> Presentación (PPT/PPTX)</p>
                         <ul>
                             <li><strong>Estructura Lógica:</strong> <span style="color:#28a745;">Buena.</span> La secuencia de diapositivas parece seguir un orden coherente, con una clara introducción y desarrollo.</li>
                             <li><strong>Densidad de Información por Diapositiva:</strong> <span style="color:#ffc107;">Media.</span> Algunas diapositivas podrían contener demasiada información textual, lo que podría dificultar la retención para la audiencia.</li>
@@ -572,25 +636,28 @@
                             <li><strong>Uso de Elementos Multimedia:</strong> <span style="color:#ffc107;">Suficiente.</span> Si hay videos o audios, están bien integrados, pero se podrían explorar más recursos interactivos.</li>
                             <li><strong>Apoyo Visual al Discurso:</strong> <span style="color:#28a745;">Efectivo.</span> Las imágenes y gráficos complementan el mensaje principal de las diapositivas.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada y alineada con políticas educativas guatemaltecas para jóvenes y adultos):</p>
+                    `;
+                    observationsContent = `
+                        <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
                         <ul>
-                            <li><strong>1. Principio de Claridad (Pocos Puntos por Diapositiva):</strong> Reducir la densidad textual en las diapositivas (máx. 6-8 líneas, no frases completas), priorizando los puntos clave y el apoyo visual para facilitar el seguimiento de jóvenes y adultos.</li>
-                            <li><strong>2. Fomento de la Interacción Activa:</strong> Integrar momentos para preguntas, debates o actividades prácticas que promuevan la participación y el intercambio de experiencias, acorde a la andragogía.</li>
-                            <li><strong>3. Inclusión y Diversidad:</strong> Asegurar que las imágenes, ejemplos y lenguaje reflejen la diversidad cultural y lingüística de Guatemala, evitando sesgos y promoviendo la equidad.</li>
-                            <li><strong>4. Estructura Lógica y Navegación:</strong> Fortalecer el hilo conductor entre diapositivas y, si es extenso, incluir una agenda o barra de progreso visual para orientar al estudiante.</li>
-                            <li><strong>5. Ejemplos Relevantes y Contextualizados:</strong> Utilizar ejemplos y casos de estudio que sean pertinentes a la realidad guatemalteca y a las experiencias de vida de los jóvenes y adultos.</li>
-                            <li><strong>6. Diseño de Información Limpio:</strong> Optimizar el uso del espacio en blanco, el tamaño de la fuente y los contrastes de color para maximizar la legibilidad y minimizar la fatiga visual.</li>
-                            <li><strong>7. Llamadas a la Acción Educativas:</strong> Si la presentación busca una acción, guiar claramente al estudiante hacia ella (ej. "Aplica esto en tu comunidad", "Reflexiona sobre X").</li>
-                            <li><strong>8. Adaptabilidad para Modos de Aprendizaje:</strong> Considerar que la presentación pueda ser utilizada de forma autodirigida o con un facilitador, y que sea efectiva en ambos escenarios.</li>
-                            <li><strong>9. Evaluación Formativa Integrada:</strong> Incluir pequeñas preguntas de autoevaluación o momentos para la reflexión personal que permitan al estudiante verificar su comprensión durante la presentación.</li>
-                            <li><strong>10. Uso Estratégico de Multimedia:</strong> Incorporar videos cortos, audios o infografías interactivas (si el entorno lo permite) para explicar conceptos complejos de forma más dinámica y atractiva.</li>
-                            <li><strong>11. Coherencia con Competencias:</strong> Alinear el contenido y los objetivos de cada diapositiva con las competencias clave establecidas en el Currículo Nacional Base para la educación de adultos.</li>
-                            <li><strong>12. Guía para el Facilitador:</strong> Si la presentación está diseñada para ser guiada, se podría añadir (internamente o en notas) sugerencias para el facilitador sobre cómo expandir cada punto y moderar la discusión.</li>
+                            <li><strong>1. Relevancia y Aplicabilidad Local:</strong> Priorizar ejemplos y casos de estudio extraídos de la realidad de los servicios de salud y comunidades rurales en los departamentos meta de TulaSalud, aumentando la pertinencia para el personal.</li>
+                            <li><strong>2. Brevedad y Enfoque al Grano:</strong> Dada la carga de trabajo del personal de salud, cada diapositiva debe transmitir su mensaje de forma concisa (máx. 3-5 puntos clave o una idea principal), optimizando el tiempo de capacitación.</li>
+                            <li><strong>3. Integración Estratégica de TIC:</strong> Sugerir cómo la presentación puede maximizar el uso de las TIC (imágenes claras, videos cortos de procedimientos, infografías) para una educación efectiva a distancia que mejore la cobertura en salud.</li>
+                            <li><strong>4. Fortalecimiento de Competencias Específicas:</strong> El contenido debe estar claramente orientado a mejorar competencias en salud materna, infantil, nutrición, y vigilancia epidemiológica, alineado con los objetivos de TulaSalud.</li>
+                            <li><strong>5. Enfoque Intercultural y de Género:</strong> Asegurar que la presentación sea culturalmente pertinente y promueva la equidad de género, adaptándose a la población multiétnica y multilingüe de Guatemala.</li>
+                            <li><strong>6. Participación Activa para Adultos:</strong> Diseñar diapositivas con preguntas de reflexión, estudios de caso o pequeños retos que inviten al personal de salud a aplicar lo aprendido en sus contextos.</li>
+                            <li><strong>7. Visualización de Datos Clave:</strong> Si se presentan datos (ej. sobre mortalidad), usar gráficos claros y sencillos que comuniquen el mensaje de forma efectiva y accesible, con relevancia para la toma de decisiones en salud.</li>
+                            <li><strong>8. Accesibilidad Técnica en Zonas Rurales:</strong> Verificar que la presentación sea compatible con diversas plataformas y dispositivos, incluyendo aquellos con menor capacidad de conexión, para asegurar la accesibilidad en áreas postergadas.</li>
+                            <li><strong>9. Promoción de la E-Salud Comunitaria:</strong> Si aplica, resaltar el papel de la presentación en el impulso y apoyo al uso de sistemas comunitarios de E-Salud por el personal de salud.</li>
+                            <li><strong>10. Orientación a la Atención Primaria de Salud:</strong> El contenido debe reforzar las prácticas y principios de la atención primaria, base de la formación de Auxiliares de Enfermería Comunitaria y otros profesionales de TulaSalud.</li>
+                            <li><strong>11. Mensajes Motivacionales y de Retención:</strong> Incorporar elementos que reconozcan el valor del personal de salud en áreas remotas y que refuercen su compromiso con la misión de TulaSalud, abordando la alta rotación.</li>
+                            <li><strong>12. Guía para Facilitadores (si aplica):</strong> Si la presentación es para ser guiada, sugerir la inclusión de notas o recursos para el facilitador que ayuden a contextualizar aún más el contenido para las realidades locales y los objetivos de TulaSalud.</li>
                         </ul>
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="suggestSpeakerPoints()">Sugerir Puntos Clave para el Orador ✨</button>';
                 } else {
-                    initialAnalysis = `<p><strong>Tipo de Archivo:</strong> Tipo de archivo desconocido</p><p>Lo siento, el Analizador Pedagógico TeleEducación no puede procesar este tipo de archivo en este momento. Por favor, sube un PDF, una imagen o una presentación (PPT/PPTX).</p>`;
+                    evaluationContent = `<p><strong>Tipo de Archivo:</strong> Tipo de archivo desconocido</p><p>Lo siento, el Analizador Pedagógico TeleEducación no puede procesar este tipo de archivo en este momento. Por favor, sube un PDF, una imagen o una presentación (PPT/PPTX).</p>`;
+                    observationsContent = ''; // No hay observaciones si no se puede procesar el archivo
                 }
 
                 // Oculta el indicador de carga principal y muestra los resultados
@@ -604,7 +671,18 @@
                 fileInput.value = ''; 
                 selectedFile = null; // Reinicia el archivo seleccionado para evitar re-análisis sin nueva selección
 
-                analysisContent.innerHTML = initialAnalysis + '<div class="llm-feature-buttons button-group">' + llmButtons + '</div>'; 
+                // Insertar las tarjetas en el analysisContent
+                analysisContent.innerHTML = `
+                    <div class="evaluation-card">
+                        ${evaluationContent}
+                    </div>
+                    <div class="observations-card">
+                        ${observationsContent}
+                    </div>
+                    <div class="llm-feature-buttons button-group">
+                        ${llmButtons}
+                    </div>
+                `;
                 resultsArea.style.display = 'block'; 
                 actionButtons.style.display = 'flex'; 
             }, 3000); // Simula un retraso de 3 segundos para el análisis inicial
@@ -619,20 +697,20 @@
 
             setTimeout(() => {
                 const questions = [
-                    "¿Cuál es el objetivo principal del documento y a quién está dirigido específicamente dentro del contexto guatemalteco?",
-                    "Explica con tus propias palabras al menos dos conceptos clave presentados en el texto, y cómo se relacionan con tu experiencia o la realidad de tu comunidad.",
-                    "Identifica y describe un ejemplo o caso práctico que se utilice para ilustrar un concepto complejo. ¿Podrías pensar en un ejemplo similar de tu entorno?",
-                    "Según el documento, ¿qué elementos visuales (gráficos, imágenes, infografías) son más efectivos para la comprensión del tema para jóvenes y adultos, y por qué?",
-                    "Si tuvieras que mejorar una sección del documento para una mayor claridad y pertinencia cultural, ¿cuál sería y qué cambio harías?",
-                    "¿Qué preguntas adicionales te surgen después de leer este contenido que el documento no aborda completamente, especialmente en relación con desafíos o oportunidades en Guatemala?",
-                    "¿Cómo crees que la estructura del documento (ej. uso de títulos, subtítulos, viñetas, resúmenes) ayuda o dificulta la comprensión para un aprendizaje autodirigido?",
-                    "Si fueras a enseñar este tema a alguien en tu comunidad, ¿qué parte del documento usarías como punto de partida y qué adaptarías para su contexto?",
-                    "¿Qué tipo de recurso complementario (video breve, infografía sobre un caso local, simulación sencilla) crees que sería más útil para profundizar en este documento, alineado con las modalidades de teleeducación?",
-                    "Identifica una fortaleza clave en el diseño de la información o en el enfoque pedagógico del documento que facilite el aprendizaje de jóvenes y adultos en el contexto guatemalteco."
+                    "¿Cómo se relaciona el objetivo principal de este documento con la misión de TulaSalud de reducir la mortalidad materna e infantil en los departamentos meta de Alta Verapaz, Huehuetenango, Sololá y Quiché?",
+                    "Explica con tus propias palabras dos conceptos clave presentados y cómo el personal de salud en áreas rurales, multiétnicas y multilingües de Guatemala podría aplicarlos para mejorar la atención primaria.",
+                    "Identifica un ejemplo o caso práctico. ¿Cómo podría este ejemplo ser adaptado o enriquecido para reflejar la realidad específica de una comunidad rural guatemalteca, considerando las dificultades de acceso?",
+                    "Según el documento, ¿qué elementos visuales serían más efectivos para un Auxiliar de Enfermería Comunitaria capacitado por TulaSalud, considerando su contexto de tele-educación y la importancia de la nutrición en estas poblaciones?",
+                    "Si tuvieras que mejorar una sección de este documento para que se alinee más con las directrices de Tele Capacitación de TulaSalud sobre salud reproductiva y el fortalecimiento de competencias del personal, ¿qué cambio harías?",
+                    "¿Qué preguntas adicionales te surgen sobre cómo este contenido podría ser implementado para fortalecer las competencias del personal de salud en el uso de las TIC para la vigilancia epidemiológica en zonas postergadas?",
+                    "¿De qué manera la estructura del documento promueve (o podría promover mejor) la formación a distancia con un enfoque intercultural y de género, tan crucial para TulaSalud?",
+                    "Si este documento fuera parte de un diplomado de TulaSalud, ¿qué tipo de actividad práctica sugerirías para asegurar que los participantes apliquen el conocimiento directamente en los servicios de salud en sus regiones de origen?",
+                    "¿Qué tipo de recurso complementario (ej. un micro-video de un caso real de atención materna en Huehuetenango o una infografía sobre nutrición adaptada a la dieta local) crees que sería más útil para este documento, alineado con el uso de TIC de TulaSalud?",
+                    "Identifica una fortaleza clave en el diseño de la información que facilite el aprendizaje y contribuya directamente a la mejora de la cobertura en salud y las capacidades del MSPAS para la población materno-infantil y niños menores de cinco años."
                 ];
                 let output = '<h3>Preguntas de Comprensión Sugeridas por IA ✨</h3><ul>';
                 questions.forEach(q => { output += `<li>${q}</li>`; });
-                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido, con un enfoque en la relevancia para jóvenes y adultos en el contexto educativo guatemalteco.</em></p>';
+                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido, con un enfoque en la relevancia para jóvenes y adultos y la alineación con las políticas educativas guatemaltecas y el perfil de Tele Educación de TulaSalud.</em></p>';
                 llmOutput.innerHTML = output;
                 llmLoadingIndicator.style.display = 'none';
             }, 2500); // Simula un retraso de 2.5 segundos para la generación de preguntas
@@ -649,19 +727,22 @@
                 const description = `
                     <h3>Descripción Detallada de Imagen Sugerida por IA ✨</h3>
                     <p>La IA interpreta esta imagen como una representación altamente conceptual de un entorno de aprendizaje dinámico, probablemente en el ámbito de la teleeducación. Se observa una paleta de colores que evoca profesionalismo y claridad, con elementos que sugieren interconexión y flujo de información.</p>
-                    <p><strong>Análisis Pedagógico Visual y Contextual:</strong></p>
+                    <p><strong>Análisis Pedagógico Visual (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud):</strong></p>
                     <ul>
-                        <li><strong>Propósito Didáctico:</strong> La imagen sirve como metáfora visual para el proceso de aprendizaje digital, enfatizando la interacción de ideas y la conectividad, un concepto clave en la teleeducación moderna.</li>
-                        <li><strong>Relevancia para Jóvenes y Adultos:</strong> Su diseño moderno y limpio puede ser atractivo para la audiencia de jóvenes y adultos, sugiriendo un enfoque innovador en la educación.</li>
-                        <li><strong>Conexión Contextual (Guatemala):</strong> La abstracción permite que la imagen sea adaptable, pero se podría sugerir una variante que incorpore sutilmente elementos visuales propios del entorno guatemalteco (ej., patrones textiles, paisajes, etc.) para mayor identificación.</li>
-                        <li><strong>Accesibilidad y Claridad:</strong> La simplicidad de las formas y los contrastes de color facilitan la percepción visual. Se recomienda verificar que no haya elementos que puedan confundir a personas con ciertas discapacidades visuales.</li>
-                        <li><strong>Potencial de Discusión:</strong> La imagen puede ser un excelente punto de partida para discutir cómo la tecnología facilita el acceso al conocimiento y la interconexión en el aprendizaje a distancia.</li>
+                        <li><strong>Propósito Didáctico en Tele-Educación:</strong> La imagen sirve como metáfora visual para el proceso de aprendizaje digital, enfatizando la interacción de ideas y la conectividad, fundamental para la modalidad a distancia de TulaSalud y la mejora de cobertura en salud.</li>
+                        <li><strong>Relevancia para la Audiencia de TulaSalud:</strong> Su diseño moderno y limpio puede ser atractivo para el personal de salud (auxiliares de enfermería, técnicos en salud rural, médicos), sugiriendo un enfoque innovador en la capacitación a distancia.</li>
+                        <li><strong>Contextualización Regional (Guatemala):</strong> Aunque abstracta, esta imagen podría complementarse con elementos visuales sutiles que la conecten a la realidad de las comunidades multiétnicas, multilingües y rurales de los departamentos meta de TulaSalud (Alta Verapaz, Huehuetenango, Sololá o Quiché) para mayor identificación.</li>
+                        <li><strong>Fomento del Uso de TIC para Competencias:</strong> La imagen visualiza un flujo de información digital, lo cual refuerza el mensaje de TulaSalud sobre el uso de las TIC para mejorar las competencias del recurso humano en salud y apoyar el uso de sistemas de E-Salud.</li>
+                        <li><strong>Impacto en la Salud Materna e Infantil:</strong> Se puede interpretar como la interconexión de datos y conocimientos que, a través de la tele-capacitación, contribuye a la reducción de la mortalidad materna e infantil, y al aumento de la capacidad del MSPAS.</li>
+                        <li><strong>Accesibilidad Visual:</strong> La simplicidad de las formas y los contrastes de color facilitan la percepción visual, importante para el personal que podría acceder a los materiales en diversas condiciones y con posibles limitaciones de infraestructura.</li>
+                        <li><strong>Potencial de Discusión:</strong> La imagen puede ser un excelente punto de partida para discutir cómo las tecnologías superan las barreras geográficas y de acceso, facilitando el conocimiento y la interconexión en el aprendizaje a distancia para el personal de salud en zonas remotas.</li>
                     </ul>
-                    <p><strong>Sugerencias para el uso óptimo:</strong></p>
+                    <p><strong>Sugerencias para el uso óptimo en Tele Capacitación de TulaSalud:</strong></p>
                     <ul>
-                        <li>Integrar con un texto que la referencie explícitamente y explique la metáfora visual en el contexto de la teleeducación de jóvenes y adultos en Guatemala.</li>
-                        <li>Considerar animación sutil si se usa en un entorno web para reforzar la idea de dinamismo del aprendizaje.</li>
-                        <li>Utilizarla como punto de partida para una discusión sobre la "arquitectura" del conocimiento en línea y sus implicaciones para la comunidad local.</li>
+                        <li>Integrar con un texto que la referencie explícitamente, explicando su metáfora visual en el contexto de la mejora de servicios de salud a través de la tele-educación, con énfasis en la atención primaria y la población vulnerable en Guatemala.</li>
+                        <li>Considerar animación sutil si se usa en un entorno web para reforzar la idea de dinamismo y flujo de información en la vigilancia epidemiológica o la capacitación continua.</li>
+                        <li>Utilizarla como punto de partida para una discusión sobre cómo la "arquitectura" del conocimiento en línea empodera al personal de salud en las regiones de TulaSalud para servir mejor a la población.</li>
+                        <li>Si se busca ilustrar temas específicos de salud (materna, infantil, nutrición), complementar con imágenes de casos de éxito o escenarios reales que resuenen con la experiencia del personal de salud en las comunidades guatemaltecas.</li>
                     </ul>
                 `;
                 llmOutput.innerHTML = description;
@@ -678,22 +759,22 @@
 
             setTimeout(() => {
                 const points = [
-                    "<strong>Diapositiva 1 (Título):</strong> 'Bienvenidos a X - El futuro de la TeleEducación en Guatemala'. Enfocarse en captar la atención con una pregunta relevante o una estadística local si es posible.",
-                    "<strong>Diapositiva 2 (Agenda):</strong> 'Qué cubriremos hoy y por qué es importante para ustedes'. Mencionar los puntos principales de manera atractiva, destacando los beneficios directos para los estudiantes adultos.",
-                    "<strong>Diapositva 3 (Problema/Contexto):</strong> 'El desafío actual de acceso a la educación en nuestra región...'. Presentar el problema o la necesidad que la presentación abordará, usando una anécdota o datos contextualizados a Guatemala.",
-                    "<strong>Diapositiva 4 (Nuestra Solución/Concepto):</strong> 'La respuesta de TulaSalud: [Concepto clave]'. Explicar la propuesta de valor de forma clara y concisa, resaltando cómo empodera a los estudiantes adultos.",
-                    "<strong>Diapositiva 5 (Metodología/Proceso):</strong> 'Cómo lo hacemos: [Pasos principales] y cómo se alinea con el aprendizaje de adultos'. Describir el proceso en 3-5 pasos sencillos, usando analogías o ejemplos de la vida real.",
-                    "<strong>Diapositiva 6 (Beneficios y Aplicabilidad):</strong> 'Impacto y Resultados Clave para el desarrollo personal y comunitario'. Resaltar los beneficios tangibles, utilizando viñetas y un lenguaje persuasivo, conectándolos con las aspiraciones de la audiencia.",
-                    "<strong>Diapositiva 7 (Caso de Éxito Local):</strong> 'Historias Reales de impacto en Guatemala'. Presentar un breve estudio de caso o testimonio de un estudiante o comunidad local para dar credibilidad y conectar emocionalmente.",
-                    "<strong>Diapositiva 8 (Innovación Futura y Sostenibilidad):</strong> 'Mirando hacia adelante: [Nuevas características/proyectos] y cómo contribuimos al desarrollo sostenible'. Compartir la visión a futuro y cómo la plataforma seguirá evolucionando en beneficio de la educación para adultos.",
-                    "<strong>Diapositiva 9 (Preguntas y Respuestas):</strong> 'Su voz es importante'. Anticipar preguntas comunes y preparar respuestas concisas, o invitar a la audiencia a preguntar, fomentando un diálogo abierto.",
-                    "<strong>Diapositiva 10 (Llamada a la Acción):</strong> 'Únete a la TeleEducación del futuro hoy mismo'. Dejar claro el siguiente paso para la audiencia (ej. registrarse, contactar, explorar la plataforma), facilitando el acceso.",
-                    "<strong>Diapositiva 11 (Agradecimientos y Contacto):</strong> '¡Gracias por su tiempo e interés en el futuro de la educación!'. Incluir información de contacto visible.",
-                    "<strong>Diapositiva 12 (Recursos Adicionales):</strong> 'Para saber más...'. Opcional: Proporcionar enlaces, códigos QR o materiales complementarios que amplíen el tema y estén disponibles en línea."
+                    "<strong>Diapositiva 1 (Título):</strong> 'Bienvenidos a la Tele Capacitación de TulaSalud: Mejorando la Salud Materna e Infantil en Guatemala'. Conectar con la misión central y el impacto directo en las comunidades de los departamentos meta (Alta Verapaz, Huehuetenango, Sololá y Quiché).",
+                    "<strong>Diapositiva 2 (Agenda y Beneficios):</strong> 'Lo que aprenderán hoy para fortalecer sus competencias y mejorar la cobertura en salud'. Destacar cómo la capacitación contribuirá directamente a los objetivos de TulaSalud y del MSPAS para madres y niños.",
+                    "<strong>Diapositva 3 (El Desafío Guatemalteco):</strong> 'Superando barreras: la salud en poblaciones multiétnicas, multilingües, rurales y postergadas'. Contextualizar el problema que TulaSalud aborda con la tele-educación, haciendo énfasis en las dificultades de acceso.",
+                    "<strong>Diapositiva 4 (Nuestro Enfoque - Tele-Educación):</strong> 'Cómo TulaSalud utiliza las TIC para el desarrollo de competencias en salud a distancia y el impulso de la E-Salud'. Explicar la metodología y sus ventajas para el personal en ejercicio (Auxiliares de Enfermería, Técnicos, Médicos).",
+                    "<strong>Diapositiva 5 (Temas Clave de TulaSalud):</strong> 'Profundizando en salud materna, infantil, nutrición y vigilancia epidemiológica'. Desglosar los contenidos esenciales, vinculándolos con la práctica diaria del personal de salud en la atención primaria.",
+                    "<strong>Diapositiva 6 (Casos de Éxito y Lecciones Aprendidas):</strong> 'El impacto en la práctica: Ejemplos de nuestros departamentos meta'. Presentar casos reales de éxito de TulaSalud o sus colaboradores en la reducción de mortalidad o mejora de servicios en Alta Verapaz, Huehuetenango, Sololá o Quiché.",
+                    "<strong>Diapositiva 7 (Uso de Tecnología para Vigilancia Epidemiológica):</strong> 'Fortaleciendo la E-Salud comunitaria y la recopilación de datos para la toma de decisiones'. Explicar cómo el equipamiento y la capacitación en TIC apoyan la vigilancia y el acceso a servicios básicos.",
+                    "<strong>Diapositiva 8 (Enfoque Intercultural y de Género):</strong> 'Atención con pertinencia cultural y equidad para nuestra población diversa'. Abordar cómo la formación respeta y se adapta a la diversidad de las comunidades guatemaltecas, un pilar fundamental de TulaSalud.",
+                    "<strong>Diapositiva 9 (Preguntas y Aplicación Práctica):</strong> 'Aplicando lo aprendido: Preguntas y escenarios clínicos basados en la realidad local'. Fomentar la discusión y la resolución de problemas basados en la experiencia del personal y los desafíos reales.",
+                    "<strong>Diapositiva 10 (Sostenibilidad y Futuro de la Capacitación):</strong> 'El camino hacia la mejora continua: el compromiso de TulaSalud y el rol del personal'. Inspirar al personal sobre el impacto a largo plazo de su formación y su papel en el fortalecimiento del MSPAS.",
+                    "<strong>Diapositiva 11 (Agradecimientos y Compromiso):</strong> '¡Gracias por su compromiso con la salud de Guatemala y con la misión de TulaSalud!'. Reconocer el valor del personal de salud y su rol crucial en la atención a la población vulnerable.",
+                    "<strong>Diapositiva 12 (Recursos y Contacto):</strong> 'Recursos adicionales para su formación y apoyo continuo en el uso de las TIC y los servicios de salud'. Proporcionar enlaces a materiales de apoyo y formas de contacto para asistencia técnica continua, como parte de la estrategia de TulaSalud."
                 ];
                 let output = '<h3>Puntos Clave para el Orador Sugeridos por IA ✨</h3><ul>';
-                points.forEach(p => { output += `<li>${p}</li>`; });
-                output += '</ul><p><em>Estos puntos son sugerencias detalladas para enriquecer tu presentación, centrándote en la claridad, el impacto pedagógico y la relevancia para la educación de jóvenes y adultos en el contexto guatemalteco.</em></p>';
+                points.forEach(q => { output += `<li>${q}</li>`; });
+                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido, con un enfoque en la relevancia para jóvenes y adultos en el contexto guatemalteco, alineado con las políticas educativas guatemaltecas y el perfil de Tele Educación de TulaSalud.</em></p>';
                 llmOutput.innerHTML = output;
                 llmLoadingIndicator.style.display = 'none';
             }, 2500); // Simula un retraso
@@ -711,8 +792,6 @@
             llmOutput.innerHTML = ''; // Limpia el contenido generado por LLM
             loadingIndicator.style.display = 'none'; // Oculta el indicador de carga principal
             llmLoadingIndicator.style.display = 'none'; // Oculta el indicador de carga del LLM
-            uploadArea.style.display = 'flex'; // Asegura que el área de subida sea visible
-            analyzeButton.style.display = 'block'; // Asegura que el botón de análisis sea visible
             actionButtons.style.display = 'none'; // Oculta los botones de acción post-análisis
         }
 
