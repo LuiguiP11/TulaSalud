@@ -406,6 +406,7 @@
         const actionButtons = document.getElementById('actionButtons');
         const resetButton = document.getElementById('resetButton');
         const closePageButton = document.getElementById('closePageButton');
+        const container = document.querySelector('.container'); // Referencia al contenedor para mensajes
 
         let selectedFile = null;
 
@@ -507,7 +508,7 @@
                 if (file.type.includes('pdf')) {
                     initialAnalysis = `
                         <p><strong>Tipo de Archivo:</strong> Documento PDF</p>
-                        <p><strong>Evaluación Pedagógica del Contenido (simulada):</strong></p>
+                        <p><strong>Evaluación Pedagógica del Contenido:</strong></p>
                         <ul>
                             <li><strong>Claridad Conceptual:</strong> <span style="color:#28a745;">Alta.</span> Las definiciones y conceptos clave parecen estar bien explicados.</li>
                             <li><strong>Estructura y Flujo:</strong> <span style="color:#ffc107;">Media.</span> La organización general es lógica, pero algunas transiciones entre secciones podrían ser más fluidas.</li>
@@ -515,20 +516,20 @@
                             <li><strong>Uso de Ejemplos/Analogías:</strong> <span style="color:#ffc107;">Suficiente.</span> Se identifican algunos ejemplos, pero la incorporación de más casos prácticos podría mejorar la comprensión.</li>
                             <li><strong>Relevancia de Elementos Visuales:</strong> <span style="color:#28a745;">Buena.</span> Las imágenes o gráficos detectados apoyan el texto de manera efectiva.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada):</p>
+                        <p><strong>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos):</p>
                         <ul>
-                            <li><strong>1. Coherencia de Estructura:</strong> Considere añadir una tabla de contenido interactiva si el documento excede las 5 páginas, y un breve resumen de los puntos clave al inicio de cada capítulo o sección principal para facilitar la navegación y comprensión rápida.</li>
-                            <li><strong>2. Enganche del Lector:</strong> Integrar preguntas reflexivas al final de cada subsección o proponer micro-actividades (ej. "Piensa en un ejemplo...") que fomenten la aplicación del conocimiento y la interacción con el material.</li>
-                            <li><strong>3. Recursos Complementarios:</strong> Sugerir la inclusión de códigos QR o enlaces directos a videos explicativos, simulaciones interactivas o lecturas adicionales que enriquezcan la comprensión de temas complejos.</li>
-                            <li><strong>4. Glosario de Términos:</strong> Si el documento introduce terminología especializada, un glosario al final facilitaría el aprendizaje, especialmente para audiencias menos familiarizadas con el tema.</li>
-                            <li><strong>5. Resúmenes de Sección:</strong> Al final de cada sección importante, añadir un breve "Para recordar" o "Ideas Clave" que condense la información más relevante.</li>
-                            <li><strong>6. Consistencia de Formato:</strong> Asegurar que la tipografía, los tamaños de fuente y los espaciados sean consistentes en todo el documento para mejorar la legibilidad y la experiencia visual.</li>
-                            <li><strong>7. Uso de Infografías:</strong> Transformar datos o procesos complejos en infografías claras y concisas, que puedan reemplazar grandes bloques de texto y facilitar la asimilación visual de la información.</li>
-                            <li><strong>8. Accesibilidad del Contenido:</strong> Evaluar el contraste de color entre el texto y el fondo, y asegurar que las imágenes tengan descripciones alt text para usuarios con discapacidades visuales.</li>
-                            <li><strong>9. Evaluación Formativa:</strong> Integrar pequeños cuestionarios o ejercicios de autoevaluación (sin calificar) al final de unidades temáticas para que el lector pueda verificar su comprensión.</li>
-                            <li><strong>10. Narrativa o Casos de Estudio:</strong> Si aplica, introducir el contenido a través de una pequeña historia o un caso de estudio real que genere interés y muestre la aplicabilidad del tema desde el inicio.</li>
-                            <li><strong>11. Evitar Bloques de Texto Densos:</strong> Fragmentar párrafos largos en unidades más cortas y digeribles, utilizando listas con viñetas o numeradas cuando sea apropiado.</li>
-                            <li><strong>12. Interacción con Datos:</strong> Si se presentan datos estadísticos, considerar el uso de gráficos interactivos (si el formato lo permite) en lugar de solo imágenes estáticas.</li>
+                            <li><strong>1. Contextualización Local:</strong> Integrar ejemplos y referencias socioculturales guatemaltecas (ej. casos de estudio de comunidades, desafíos locales) para aumentar la relevancia del contenido según los principios del Currículo Nacional Base (CNB) para jóvenes y adultos.</li>
+                            <li><strong>2. Andragogía Aplicada:</strong> Asegurar que el material fomente el aprendizaje autodirigido y se conecte con las experiencias previas de los adultos, un pilar fundamental en la educación de personas jóvenes y adultas.</li>
+                            <li><strong>3. Interacción y Participación Activa:</strong> Incorporar más actividades interactivas, preguntas de debate o escenarios de resolución de problemas que promuevan la participación activa, en consonancia con las metodologías participativas sugeridas en las políticas educativas.</li>
+                            <li><strong>4. Claridad en Objetivos de Aprendizaje:</strong> Establecer objetivos de aprendizaje claros y alcanzables al inicio de cada sección, que resuenen con las necesidades y metas de los estudiantes adultos.</li>
+                            <li><strong>5. Resúmenes Prácticos:</strong> Incluir resúmenes concisos al final de cada unidad, enfocados en la aplicación práctica del conocimiento en la vida diaria o laboral, un aspecto valorado en la educación para adultos.</li>
+                            <li><strong>6. Lenguaje Inclusivo y Accesible:</strong> Revisar el lenguaje para garantizar que sea inclusivo, respetuoso de la diversidad cultural y lingüística de Guatemala, y accesible para diferentes niveles de alfabetización.</li>
+                            <li><strong>7. Elementos Visuales con Propósito Pedagógico:</strong> Optimizar los elementos visuales (gráficos, imágenes) para que no solo decoren, sino que expliquen conceptos complejos o ilustren situaciones relevantes para la audiencia.</li>
+                            <li><strong>8. Fomento del Pensamiento Crítico:</strong> Diseñar actividades o preguntas que inviten al análisis crítico de la información y a la formación de una opinión propia, en línea con el desarrollo de competencias del CNB.</li>
+                            <li><strong>9. Orientación a la Resolución de Problemas:</strong> Estructurar el contenido de manera que los temas se presenten como problemas a resolver, permitiendo a los estudiantes aplicar sus conocimientos para encontrar soluciones.</li>
+                            <li><strong>10. Retroalimentación Formativa:</strong> Sugerir la implementación de mecanismos de autoevaluación o mini-ejercicios con retroalimentación inmediata, para que los estudiantes puedan monitorear su propio progreso y ajustar su aprendizaje.</li>
+                            <li><strong>11. Pertinencia Sociocultural:</strong> Asegurar que el contenido refleje la realidad sociocultural de Guatemala, incluyendo referencias a su historia, geografía, tradiciones y desafíos actuales.</li>
+                            <li><strong>12. Adaptabilidad de Formato:</strong> Considerar formatos alternativos (ej. audio, video, infografías interactivas) para segmentos del contenido que puedan beneficiarse de una presentación multimodal, mejorando la accesibilidad y el engagement.</li>
                         </ul>
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="generateComprehensionQuestions()">Generar Preguntas de Comprensión ✨</button>';
@@ -542,26 +543,27 @@
                             <li><strong>Calidad y Legibilidad:</strong> <span style="color:#28a745;">Buena.</span> La resolución y el contraste son adecuados. Si contiene texto, este es legible.</li>
                             <li><strong>Impacto Didáctico:</strong> <span style="color:#ffc107;">Potencial.</span> La imagen tiene potencial para ser una herramienta didáctica, pero se beneficiaría de un pequeño análisis de los puntos clave o preguntas que dirijan la atención del estudiante.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada):</p>
+                        <p><strong>Observaciones de Mejora (simulada y alineada con principios pedagógicos):</p>
                         <ul>
-                            <li><strong>1. Pie de Foto Descriptivo:</strong> Añadir un pie de foto conciso que no solo describa la imagen, sino que también explique su relevancia directa para el contenido pedagógico.</li>
-                            <li><strong>2. Elementos Interactivos (Web):</strong> Si se usa en un contexto web, considerar el uso de "hotspots" o áreas clicables en la imagen que revelen información adicional o definiciones al pasar el ratón.</li>
-                            <li><strong>3. Descripción Alt Text:</strong> Asegurar que la imagen tenga una descripción de texto alternativa (alt text) robusta para mejorar la accesibilidad para usuarios con lectores de pantalla.</li>
-                            <li><strong>4. Ubicación Estratégica:</strong> Evaluar si la posición de la imagen dentro del documento es la más óptima para su propósito didáctico, preferiblemente cerca del texto que explica su contenido.</li>
-                            <li><strong>5. Claridad de Anotaciones:</strong> Si la imagen contiene anotaciones, etiquetas o flechas, asegurarse de que estas sean claras, grandes y de alto contraste.</li>
-                            <li><strong>6. Redundancia Controlada:</strong> Utilizar la imagen para complementar o ilustrar, no para duplicar textualmente la información ya presente en el cuerpo del texto.</li>
-                            <li><strong>7. Relevancia Cultural:</strong> Si la imagen incluye elementos culturales, verificar que sean apropiados y comprensibles para la audiencia objetivo global o específica.</li>
-                            <li><strong>8. Optimización de Carga:</strong> Asegurar que el tamaño del archivo de la imagen esté optimizado para una carga rápida en la página web, sin comprometer excesivamente la calidad visual.</li>
-                            <li><strong>9. Coherencia Estilística:</strong> Si hay varias imágenes en el documento, mantener un estilo visual coherente (ej. ilustraciones, fotografías, diagramas) para una apariencia unificada.</li>
-                            <li><strong>10. Preguntas Guiadas:</strong> Proponer 1 o 2 preguntas que el estudiante pueda responder observando la imagen, fomentando el pensamiento crítico y la observación activa.</li>
-                            <li><strong>11. Uso de Metáforas Visuales:</strong> Si aplica, explorar el uso de imágenes que funcionen como metáforas visuales para conceptos abstractos.</li>
-                            <li><strong>12. Evitar Distracciones:</strong> Asegurarse de que el fondo o los elementos periféricos de la imagen no distraigan del punto principal que se quiere comunicar.</li>
+                            <li><strong>1. Pie de Foto Contextualizado:</strong> El pie de foto debe no solo describir la imagen, sino vincularla directamente al concepto pedagógico que ilustra y a la realidad guatemalteca si es pertinente.</li>
+                            <li><strong>2. Metáfora Visual Explícita:</strong> Si la imagen es una metáfora, considerar añadir una breve explicación de cómo se relaciona con el tema para facilitar la comprensión abstracta de jóvenes y adultos.</li>
+                            <li><strong>3. Accesibilidad Visual:</strong> Asegurar que la imagen tenga un "texto alternativo" (alt text) descriptivo para lectores de pantalla, cumpliendo con las normas de accesibilidad educativa.</li>
+                            <li><strong>4. Impacto Cultural:</strong> Evaluar si la imagen representa de manera sensible y apropiada la diversidad cultural de Guatemala, o si podría contextualizarse mejor para reflejarla.</li>
+                            <li><strong>5. Claridad de Información:</strong> Si la imagen contiene gráficos o diagramas, verificar que la información sea legible, sin sobrecarga, y que las etiquetas sean claras y concisas.</li>
+                            <li><strong>6. Función Didáctica Clara:</strong> Cada imagen debe tener un objetivo didáctico claro (ej. ilustrar un proceso, comparar elementos, contextualizar un concepto) y esto debe ser evidente para el estudiante.</li>
+                            <li><strong>7. Evitar Estereotipos:</strong> Analizar la imagen para identificar y eliminar posibles estereotipos culturales, de género o sociales que puedan estar presentes.</li>
+                            <li><strong>8. Calidad para Impresión/Digital:</strong> Asegurar que la resolución de la imagen sea adecuada tanto para visualización en pantalla como para una posible impresión, sin pixelado excesivo.</li>
+                            <li><strong>9. Preguntas Guía en la Imagen:</strong> Integrar pequeñas preguntas directamente relacionadas con la imagen (si el formato lo permite) para fomentar la observación activa y el pensamiento crítico.</li>
+                            <li><strong>10. Integración con el Texto:</strong> La imagen debe estar estratégicamente ubicada cerca del texto al que hace referencia, para mantener la coherencia y evitar distracciones.</li>
+                            <li><strong>11. Relevancia y Actualidad:</strong> Verificar que la imagen sea actual y relevante para la temática y la audiencia, evitando elementos desactualizados que puedan desmotivar.</li>
+                            <li><strong>12. Optimización de Peso:</strong> Optimizar el tamaño de archivo de la imagen para asegurar una carga rápida en entornos con conectividad limitada, común en algunas zonas de Guatemala.</li>
                         </ul>
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="generateDetailedImageDescription()">Generar Descripción Detallada ✨</button>';
                 } else if (file.type.includes('presentation') || file.type.includes('powerpoint')) {
+                    fileType = 'Presentación (PPT/PPTX)';
                     initialAnalysis = `
-                        <p><strong>Tipo de Archivo:</strong> Presentación (PPT/PPTX)</p>
+                        <p><strong>Tipo de Archivo:</strong> ${fileType}</p>
                         <p><strong>Análisis Pedagógico de Presentación (simulada):</strong></p>
                         <ul>
                             <li><strong>Estructura Lógica:</strong> <span style="color:#28a745;">Buena.</span> La secuencia de diapositivas parece seguir un orden coherente, con una clara introducción y desarrollo.</li>
@@ -570,20 +572,20 @@
                             <li><strong>Uso de Elementos Multimedia:</strong> <span style="color:#ffc107;">Suficiente.</span> Si hay videos o audios, están bien integrados, pero se podrían explorar más recursos interactivos.</li>
                             <li><strong>Apoyo Visual al Discurso:</strong> <span style="color:#28a745;">Efectivo.</span> Las imágenes y gráficos complementan el mensaje principal de las diapositivas.</li>
                         </ul>
-                        <p><strong>Observaciones de Mejora (simulada):</p>
+                        <p><strong>Observaciones de Mejora (simulada y alineada con políticas educativas guatemaltecas para jóvenes y adultos):</p>
                         <ul>
-                            <li><strong>1. Principio de Pareto (80/20):</strong> Reducir la cantidad de texto por diapositiva a puntos clave, utilizando más elementos visuales y dejando la explicación detallada para el orador. Máximo 6-8 líneas de texto por diapositiva.</li>
-                            <li><strong>2. Interacción con la Audiencia:</strong> Incluir diapositivas dedicadas a preguntas y respuestas, encuestas rápidas o ejercicios de "piensa y comparte" para mantener la participación activa.</li>
-                            <li><strong>3. Accesibilidad del Contenido:</strong> Asegurar un alto contraste entre el texto y el fondo, usar fuentes claras y un tamaño mínimo de 24pt para el texto principal. Considerar subtítulos para videos/audios.</li>
-                            <li><strong>4. Transiciones Lógicas:</strong> Fortalecer las frases de transición entre diapositivas o secciones para guiar al público a través del flujo de la presentación.</li>
-                            <li><strong>5. Uso de Íconos y Gráficos:</strong> Priorizar el uso de iconos y gráficos vectoriales sobre imágenes de mapa de bits cuando sea posible para claridad y escalabilidad, y para reducir la densidad de texto.</li>
-                            <li><strong>6. Navegación Visual:</strong> Si es una presentación larga, incluir un indicador de progreso o una agenda visual en cada diapositiva para que la audiencia sepa dónde se encuentra.</li>
-                            <li><strong>7. Llamadas a la Acción Claras:</strong> Si la presentación tiene un objetivo específico, asegurar que las llamadas a la acción o los puntos clave a recordar estén claramente definidos en las diapositivas finales.</li>
-                            <li><strong>8. Tiempo por Diapositiva:</strong> Estimar el tiempo promedio de visualización por diapositiva. Si es excesivo, considerar dividir la información en más diapositivas o simplificarla.</li>
-                            <li><strong>9. Narrativa Coherente:</strong> Asegurarse de que cada diapositiva contribuya a la narrativa general de la presentación, evitando información irrelevante o desviaciones temáticas.</li>
-                            <li><strong>10. Práctica de Presentación:</strong> Si el orador es un humano, sugerir ensayar la presentación con un enfoque en la claridad y el ritmo, complementando las diapositivas en lugar de solo leerlas.</li>
-                            <li><strong>11. Resumen al Final:</strong> Añadir una diapositiva final de "Conclusiones Clave" o "Puntos para Llevar a Casa" que sintetice los mensajes más importantes.</li>
-                            <li><strong>12. Evitar el Efecto "Ruido Visual":</strong> Limitar el número de elementos visuales en una sola diapositiva para evitar la sobrecarga cognitiva.</li>
+                            <li><strong>1. Principio de Claridad (Pocos Puntos por Diapositiva):</strong> Reducir la densidad textual en las diapositivas (máx. 6-8 líneas, no frases completas), priorizando los puntos clave y el apoyo visual para facilitar el seguimiento de jóvenes y adultos.</li>
+                            <li><strong>2. Fomento de la Interacción Activa:</strong> Integrar momentos para preguntas, debates o actividades prácticas que promuevan la participación y el intercambio de experiencias, acorde a la andragogía.</li>
+                            <li><strong>3. Inclusión y Diversidad:</strong> Asegurar que las imágenes, ejemplos y lenguaje reflejen la diversidad cultural y lingüística de Guatemala, evitando sesgos y promoviendo la equidad.</li>
+                            <li><strong>4. Estructura Lógica y Navegación:</strong> Fortalecer el hilo conductor entre diapositivas y, si es extenso, incluir una agenda o barra de progreso visual para orientar al estudiante.</li>
+                            <li><strong>5. Ejemplos Relevantes y Contextualizados:</strong> Utilizar ejemplos y casos de estudio que sean pertinentes a la realidad guatemalteca y a las experiencias de vida de los jóvenes y adultos.</li>
+                            <li><strong>6. Diseño de Información Limpio:</strong> Optimizar el uso del espacio en blanco, el tamaño de la fuente y los contrastes de color para maximizar la legibilidad y minimizar la fatiga visual.</li>
+                            <li><strong>7. Llamadas a la Acción Educativas:</strong> Si la presentación busca una acción, guiar claramente al estudiante hacia ella (ej. "Aplica esto en tu comunidad", "Reflexiona sobre X").</li>
+                            <li><strong>8. Adaptabilidad para Modos de Aprendizaje:</strong> Considerar que la presentación pueda ser utilizada de forma autodirigida o con un facilitador, y que sea efectiva en ambos escenarios.</li>
+                            <li><strong>9. Evaluación Formativa Integrada:</strong> Incluir pequeñas preguntas de autoevaluación o momentos para la reflexión personal que permitan al estudiante verificar su comprensión durante la presentación.</li>
+                            <li><strong>10. Uso Estratégico de Multimedia:</strong> Incorporar videos cortos, audios o infografías interactivas (si el entorno lo permite) para explicar conceptos complejos de forma más dinámica y atractiva.</li>
+                            <li><strong>11. Coherencia con Competencias:</strong> Alinear el contenido y los objetivos de cada diapositiva con las competencias clave establecidas en el Currículo Nacional Base para la educación de adultos.</li>
+                            <li><strong>12. Guía para el Facilitador:</strong> Si la presentación está diseñada para ser guiada, se podría añadir (internamente o en notas) sugerencias para el facilitador sobre cómo expandir cada punto y moderar la discusión.</li>
                         </ul>
                     `;
                     llmButtons = '<button class="llm-feature-button" onclick="suggestSpeakerPoints()">Sugerir Puntos Clave para el Orador ✨</button>';
@@ -595,8 +597,8 @@
                 loadingIndicator.style.display = 'none';
                 
                 // Estos elementos solo se muestran DESPUÉS de que el análisis inicial haya terminado
-                uploadArea.style.display = 'flex'; // Puede ser necesario para un nuevo ciclo
-                analyzeButton.style.display = 'block'; // Puede ser necesario para un nuevo ciclo
+                uploadArea.style.display = 'flex'; 
+                analyzeButton.style.display = 'block'; 
                 analyzeButton.disabled = true; // Deshabilita hasta nueva selección
                 uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu archivo aquí, o haz click para seleccionar'; 
                 fileInput.value = ''; 
@@ -617,20 +619,20 @@
 
             setTimeout(() => {
                 const questions = [
-                    "¿Cuál es el objetivo principal del documento y a quién está dirigido?",
-                    "Explica con tus propias palabras al menos dos conceptos clave presentados en el texto.",
-                    "Identifica y describe un ejemplo o caso práctico que se utilice para ilustrar un concepto complejo.",
-                    "Según el documento, ¿qué elementos visuales (gráficos, imágenes) son más efectivos para la comprensión del tema?",
-                    "Si tuvieras que mejorar una sección del documento para una mayor claridad, ¿cuál sería y qué cambio harías?",
-                    "¿Qué preguntas adicionales te surgen después de leer este contenido que el documento no aborda completamente?",
-                    "¿Cómo crees que la estructura del documento (ej. uso de títulos, subtítulos, viñetas) ayuda o dificulta la comprensión?",
-                    "Si fueras a enseñar este tema a alguien, ¿qué parte del documento usarías como punto de partida y por qué?",
-                    "¿Qué tipo de recurso complementario (video, infografía, simulación) crees que sería más útil para este documento?",
-                    "Identifica una fortaleza clave en el diseño de la información que facilite el aprendizaje."
+                    "¿Cuál es el objetivo principal del documento y a quién está dirigido específicamente dentro del contexto guatemalteco?",
+                    "Explica con tus propias palabras al menos dos conceptos clave presentados en el texto, y cómo se relacionan con tu experiencia o la realidad de tu comunidad.",
+                    "Identifica y describe un ejemplo o caso práctico que se utilice para ilustrar un concepto complejo. ¿Podrías pensar en un ejemplo similar de tu entorno?",
+                    "Según el documento, ¿qué elementos visuales (gráficos, imágenes, infografías) son más efectivos para la comprensión del tema para jóvenes y adultos, y por qué?",
+                    "Si tuvieras que mejorar una sección del documento para una mayor claridad y pertinencia cultural, ¿cuál sería y qué cambio harías?",
+                    "¿Qué preguntas adicionales te surgen después de leer este contenido que el documento no aborda completamente, especialmente en relación con desafíos o oportunidades en Guatemala?",
+                    "¿Cómo crees que la estructura del documento (ej. uso de títulos, subtítulos, viñetas, resúmenes) ayuda o dificulta la comprensión para un aprendizaje autodirigido?",
+                    "Si fueras a enseñar este tema a alguien en tu comunidad, ¿qué parte del documento usarías como punto de partida y qué adaptarías para su contexto?",
+                    "¿Qué tipo de recurso complementario (video breve, infografía sobre un caso local, simulación sencilla) crees que sería más útil para profundizar en este documento, alineado con las modalidades de teleeducación?",
+                    "Identifica una fortaleza clave en el diseño de la información o en el enfoque pedagógico del documento que facilite el aprendizaje de jóvenes y adultos en el contexto guatemalteco."
                 ];
                 let output = '<h3>Preguntas de Comprensión Sugeridas por IA ✨</h3><ul>';
                 questions.forEach(q => { output += `<li>${q}</li>`; });
-                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido.</em></p>';
+                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido, con un enfoque en la relevancia para jóvenes y adultos en el contexto educativo guatemalteco.</em></p>';
                 llmOutput.innerHTML = output;
                 llmLoadingIndicator.style.display = 'none';
             }, 2500); // Simula un retraso de 2.5 segundos para la generación de preguntas
@@ -647,19 +649,19 @@
                 const description = `
                     <h3>Descripción Detallada de Imagen Sugerida por IA ✨</h3>
                     <p>La IA interpreta esta imagen como una representación altamente conceptual de un entorno de aprendizaje dinámico, probablemente en el ámbito de la teleeducación. Se observa una paleta de colores que evoca profesionalismo y claridad, con elementos que sugieren interconexión y flujo de información.</p>
-                    <p><strong>Análisis Pedagógico Visual:</strong></p>
+                    <p><strong>Análisis Pedagógico Visual y Contextual:</strong></p>
                     <ul>
-                        <li><strong>Propósito Didáctico:</strong> La imagen sirve como metáfora visual para el proceso de aprendizaje digital, enfatizando la interacción de ideas y la conectividad.</li>
-                        <li><strong>Composición:</strong> El uso de líneas limpias y formas geométricas sugiere orden y estructura, facilitando la interpretación visual de conceptos abstractos.</li>
-                        <li><strong>Impacto Emocional:</strong> Transmite una sensación de modernidad, eficiencia y colaboración, lo cual es positivo en un contexto educativo.</li>
-                        <li><strong>Puntos Focales:</strong> Los elementos centrales de la composición (posibles iconos o puntos de datos) atraen la mirada, sugiriendo información clave.</li>
-                        <li><strong>Aplicabilidad:</strong> Ideal para introducciones de módulos, diapositivas sobre metodologías de aprendizaje activo o como fondo para citas inspiradoras en teleeducación.</li>
+                        <li><strong>Propósito Didáctico:</strong> La imagen sirve como metáfora visual para el proceso de aprendizaje digital, enfatizando la interacción de ideas y la conectividad, un concepto clave en la teleeducación moderna.</li>
+                        <li><strong>Relevancia para Jóvenes y Adultos:</strong> Su diseño moderno y limpio puede ser atractivo para la audiencia de jóvenes y adultos, sugiriendo un enfoque innovador en la educación.</li>
+                        <li><strong>Conexión Contextual (Guatemala):</strong> La abstracción permite que la imagen sea adaptable, pero se podría sugerir una variante que incorpore sutilmente elementos visuales propios del entorno guatemalteco (ej., patrones textiles, paisajes, etc.) para mayor identificación.</li>
+                        <li><strong>Accesibilidad y Claridad:</strong> La simplicidad de las formas y los contrastes de color facilitan la percepción visual. Se recomienda verificar que no haya elementos que puedan confundir a personas con ciertas discapacidades visuales.</li>
+                        <li><strong>Potencial de Discusión:</strong> La imagen puede ser un excelente punto de partida para discutir cómo la tecnología facilita el acceso al conocimiento y la interconexión en el aprendizaje a distancia.</li>
                     </ul>
                     <p><strong>Sugerencias para el uso óptimo:</strong></p>
                     <ul>
-                        <li>Integrar con un texto que la referencie explícitamente y explique la metáfora visual.</li>
-                        <li>Considerar animación sutil si se usa en un entorno web para reforzar la idea de dinamismo.</li>
-                        <li>Utilizarla como punto de partida para una discusión sobre la "arquitectura" del conocimiento en línea.</li>
+                        <li>Integrar con un texto que la referencie explícitamente y explique la metáfora visual en el contexto de la teleeducación de jóvenes y adultos en Guatemala.</li>
+                        <li>Considerar animación sutil si se usa en un entorno web para reforzar la idea de dinamismo del aprendizaje.</li>
+                        <li>Utilizarla como punto de partida para una discusión sobre la "arquitectura" del conocimiento en línea y sus implicaciones para la comunidad local.</li>
                     </ul>
                 `;
                 llmOutput.innerHTML = description;
@@ -676,22 +678,22 @@
 
             setTimeout(() => {
                 const points = [
-                    "<strong>Diapositiva 1 (Título):</strong> 'Bienvenidos a X - El futuro de la TeleEducación'. Enfocarse en captar la atención, quizás con una estadística impactante o una pregunta retórica.",
-                    "<strong>Diapositiva 2 (Agenda):</strong> 'Qué cubriremos hoy'. Mencionar los puntos principales de manera atractiva, destacando cómo beneficiará a la audiencia.",
-                    "<strong>Diapositva 3 (Problema/Contexto):</strong> 'El desafío actual...'. Presentar el problema o la necesidad que la presentación abordará, usando una anécdota o datos.",
-                    "<strong>Diapositiva 4 (Nuestra Solución/Concepto):</strong> 'La respuesta de TulaSalud: [Concepto clave]'. Explicar la propuesta de valor de forma clara y concisa.",
-                    "<strong>Diapositiva 5 (Metodología/Proceso):</strong> 'Cómo lo hacemos: [Pasos principales]'. Describir el proceso en 3-5 pasos sencillos, usando analogías si es posible.",
-                    "<strong>Diapositiva 6 (Beneficios):</strong> 'Impacto y Resultados Clave'. Resaltar los beneficios tangibles para el usuario/estudiante, utilizando viñetas y un lenguaje persuasivo.",
-                    "<strong>Diapositiva 7 (Caso de Éxito):</strong> 'Historias Reales'. Presentar un breve estudio de caso o testimonio para dar credibilidad y conectar emocionalmente.",
-                    "<strong>Diapositiva 8 (Innovación Futura):</strong> 'Mirando hacia adelante: [Nuevas características/proyectos]'. Compartir la visión a futuro y cómo la plataforma seguirá evolucionando.",
-                    "<strong>Diapositiva 9 (Preguntas Frecuentes/Q&A):</strong> 'Resolviendo tus dudas'. Anticipar preguntas comunes y preparar respuestas concisas, o invitar a la audiencia a preguntar.",
-                    "<strong>Diapositiva 10 (Llamada a la Acción):</strong> 'Únete a la TeleEducación del futuro'. Dejar claro el siguiente paso para la audiencia (ej. registrarse, contactar, explorar la plataforma).",
-                    "<strong>Diapositiva 11 (Agradecimientos):</strong> '¡Gracias por su tiempo e interés!'. Incluir información de contacto visible.",
-                    "<strong>Diapositiva 12 (Recursos Adicionales):</strong> 'Para saber más...'. Opcional: Proporcionar enlaces, códigos QR o materiales complementarios."
+                    "<strong>Diapositiva 1 (Título):</strong> 'Bienvenidos a X - El futuro de la TeleEducación en Guatemala'. Enfocarse en captar la atención con una pregunta relevante o una estadística local si es posible.",
+                    "<strong>Diapositiva 2 (Agenda):</strong> 'Qué cubriremos hoy y por qué es importante para ustedes'. Mencionar los puntos principales de manera atractiva, destacando los beneficios directos para los estudiantes adultos.",
+                    "<strong>Diapositva 3 (Problema/Contexto):</strong> 'El desafío actual de acceso a la educación en nuestra región...'. Presentar el problema o la necesidad que la presentación abordará, usando una anécdota o datos contextualizados a Guatemala.",
+                    "<strong>Diapositiva 4 (Nuestra Solución/Concepto):</strong> 'La respuesta de TulaSalud: [Concepto clave]'. Explicar la propuesta de valor de forma clara y concisa, resaltando cómo empodera a los estudiantes adultos.",
+                    "<strong>Diapositiva 5 (Metodología/Proceso):</strong> 'Cómo lo hacemos: [Pasos principales] y cómo se alinea con el aprendizaje de adultos'. Describir el proceso en 3-5 pasos sencillos, usando analogías o ejemplos de la vida real.",
+                    "<strong>Diapositiva 6 (Beneficios y Aplicabilidad):</strong> 'Impacto y Resultados Clave para el desarrollo personal y comunitario'. Resaltar los beneficios tangibles, utilizando viñetas y un lenguaje persuasivo, conectándolos con las aspiraciones de la audiencia.",
+                    "<strong>Diapositiva 7 (Caso de Éxito Local):</strong> 'Historias Reales de impacto en Guatemala'. Presentar un breve estudio de caso o testimonio de un estudiante o comunidad local para dar credibilidad y conectar emocionalmente.",
+                    "<strong>Diapositiva 8 (Innovación Futura y Sostenibilidad):</strong> 'Mirando hacia adelante: [Nuevas características/proyectos] y cómo contribuimos al desarrollo sostenible'. Compartir la visión a futuro y cómo la plataforma seguirá evolucionando en beneficio de la educación para adultos.",
+                    "<strong>Diapositiva 9 (Preguntas y Respuestas):</strong> 'Su voz es importante'. Anticipar preguntas comunes y preparar respuestas concisas, o invitar a la audiencia a preguntar, fomentando un diálogo abierto.",
+                    "<strong>Diapositiva 10 (Llamada a la Acción):</strong> 'Únete a la TeleEducación del futuro hoy mismo'. Dejar claro el siguiente paso para la audiencia (ej. registrarse, contactar, explorar la plataforma), facilitando el acceso.",
+                    "<strong>Diapositiva 11 (Agradecimientos y Contacto):</strong> '¡Gracias por su tiempo e interés en el futuro de la educación!'. Incluir información de contacto visible.",
+                    "<strong>Diapositiva 12 (Recursos Adicionales):</strong> 'Para saber más...'. Opcional: Proporcionar enlaces, códigos QR o materiales complementarios que amplíen el tema y estén disponibles en línea."
                 ];
                 let output = '<h3>Puntos Clave para el Orador Sugeridos por IA ✨</h3><ul>';
                 points.forEach(p => { output += `<li>${p}</li>`; });
-                output += '</ul><p><em>Estos puntos son sugerencias detalladas para enriquecer tu presentación, centrándote en la claridad y el impacto pedagógico.</em></p>';
+                output += '</ul><p><em>Estos puntos son sugerencias detalladas para enriquecer tu presentación, centrándote en la claridad, el impacto pedagógico y la relevancia para la educación de jóvenes y adultos en el contexto guatemalteco.</em></p>';
                 llmOutput.innerHTML = output;
                 llmLoadingIndicator.style.display = 'none';
             }, 2500); // Simula un retraso
@@ -726,9 +728,17 @@
 
         // Función para mostrar mensajes personalizados (en lugar de alert)
         function displayMessage(message, type = "info") {
+            // Eliminar cualquier mensaje existente para evitar duplicados
+            const existingMessageBox = container.querySelector('.message-box');
+            if (existingMessageBox) {
+                existingMessageBox.remove();
+            }
+
             // Crear un div para el mensaje
             const messageBox = document.createElement('div');
             messageBox.textContent = message;
+            messageBox.className = 'message-box'; // Añadir una clase para facilitar la selección
+
             messageBox.style.padding = '15px';
             messageBox.style.borderRadius = '8px';
             messageBox.style.marginTop = '20px';
