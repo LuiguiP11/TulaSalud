@@ -1139,8 +1139,10 @@
                     }
                 };
 
-                const apiKey = ""; // Leave as-is, Canvas will provide
+                const apiKey = ""; // IMPORTANT: For Canvas environment with gemini-2.0-flash, leave this empty. Canvas injects the key at runtime.
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                console.log("Gemini API URL being called for questions:", apiUrl); // Added console log
 
                 try {
                     console.log("Fetching Gemini API for questions...");
@@ -1268,8 +1270,10 @@
                     }
                 };
 
-                const apiKey = ""; // Leave as-is, Canvas will provide
+                const apiKey = ""; // IMPORTANT: For Canvas environment with gemini-2.0-flash, leave this empty. Canvas injects the key at runtime.
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                console.log("Gemini API URL being called for observations:", apiUrl); // Added console log
 
                 try {
                     console.log("Fetching Gemini API for observations...");
