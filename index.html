@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Incluye mammoth.js para procesar DOCX en el navegador -->
     <script src="https://unpkg.com/mammoth@1.4.15/mammoth.browser.min.js"></script>
-    <!-- Chart.js ya no es necesario si se elimina la gráfica -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
     <style>
         /* Estilos generales */
         body {
@@ -374,22 +372,6 @@
             color: #888888; /* Gris más claro para el texto del footer */
         }
 
-        /* Eliminado: Estilos para la gráfica circular */
-        /*
-        .chart-container {
-            position: relative;
-            margin: 30px auto;
-            width: 80%;
-            max-width: 400px;
-            height: auto;
-            border: 1px solid #444444;
-            border-radius: 10px;
-            background-color: #333333;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-        */
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -443,12 +425,6 @@
             #alertDialog > div, #infoDialog > div {
                 padding: 20px;
             }
-            /* Eliminado: .chart-container para móviles */
-            /*
-            .chart-container {
-                width: 90%;
-            }
-            */
         }
 
         @media (max-width: 480px) {
@@ -501,12 +477,6 @@
             #alertDialog > div, #infoDialog > div {
                 padding: 15px;
             }
-            /* Eliminado: .chart-container para móviles */
-            /*
-            .chart-container {
-                width: 100%;
-            }
-            */
         }
     </style>
 </head>
@@ -543,12 +513,6 @@
             <div id="analysisContent">
                 <!-- Las tarjetas se insertarán aquí dinámicamente -->
             </div>
-            <!-- Contenedor para la gráfica circular (ELIMINADO) -->
-            <!--
-            <div class="chart-container">
-                <canvas id="evaluationPieChart"></canvas>
-            </div>
-            -->
             <!-- Nuevo indicador de carga para las funciones LLM -->
             <div class="llm-loading-indicator" id="llmLoadingIndicator">
                 <div class="spinner"></div>
@@ -611,12 +575,6 @@
             const infoDialog = document.getElementById('infoDialog');
             const infoDialogCloseButton = document.getElementById('infoDialogCloseButton');
 
-
-            // Eliminado: Referencia al canvas del gráfico
-            // const evaluationPieChartCanvas = document.getElementById('evaluationPieChart'); 
-            // let evaluationPieChartInstance = null; 
-
-
             let selectedFile = null;
             let docxExtractedContent = ''; 
             let currentEvaluationResults = []; 
@@ -627,9 +585,7 @@
             let areQuestionsGenerated = false;
             let areObservationsGenerated = false;
 
-
             // Check if critical elements are found. If not, log and display an error.
-            // Se elimina la verificación de evaluationPieChartCanvas
             if (!uploadArea || !fileInput || !analyzeButton || !loadingIndicator || !loadingMessage || !resultsArea || !analysisContent || !llmLoadingIndicator || !llmOutput || !actionButtons || !resetButton || !closePageButton || !container || !alertDialog || !alertDialogMessage || !alertDialogCloseButton || !infoButton || !infoDialog || !infoDialogCloseButton) {
                 console.error("Error: Uno o más elementos críticos del DOM no se encontraron al inicializar el script.");
                 showAlertDialog("Error al iniciar la aplicación: Algunos elementos de la interfaz no se cargaron correctamente. Por favor, recarga la página.");
@@ -859,11 +815,8 @@
 
             window.performExpertEvaluation = function(contentHtml, fileName) {
                 const results = [];
-                // La verificación de isHealthRelatedByName se mantiene para los criterios internos que la usen,
-                // pero no afectará el flujo principal de detención del análisis.
                 const isHealthRelatedByName = !fileName.toLowerCase().includes('no_salud');
 
-                // Helper para buscar elementos en el HTML
                 const htmlContains = (pattern) => contentHtml.toLowerCase().includes(pattern.toLowerCase());
                 const countHeadings = (level) => (contentHtml.match(new RegExp(`<h${level}>`, 'g')) || []).length;
                 const countLists = () => (contentHtml.match(/<ul|ol>/g) || []).length;
@@ -874,10 +827,7 @@
                 };
                 const countTables = () => (contentHtml.match(/<table/g) || []).length;
 
-
                 // --- Criterios de Evaluación ---
-
-                // Relevancia y Pertinencia (EJA y Contexto Local)
                 results.push({
                     char: "Contenido significativo y basado en experiencias",
                     status: isHealthRelatedByName ? "CUMPLE" : "NO CUMPLE",
@@ -1139,29 +1089,37 @@
                     }
                 };
 
-                const apiKey = ""; // IMPORTANT: For Canvas environment with gemini-2.0-flash, leave this empty. Canvas injects the key at runtime.
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                // CAMBIO CLAVE PARA VERCEL: La URL de la función ahora es /api/<nombre-del-archivo-de-la-funcion>
+                const functionUrl = `/api/gemini-proxy`; 
 
-                console.log("Gemini API URL being called for questions:", apiUrl); // Added console log
+                console.log("DEBUG: Enviando solicitud a la Vercel Function para preguntas:", functionUrl);
 
                 try {
-                    console.log("Fetching Gemini API for questions...");
-                    const response = await fetch(apiUrl, {
+                    const response = await fetch(functionUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({ 
+                            model: 'gemini-2.0-flash', 
+                            payload: payload 
+                        })
                     });
 
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        console.error(`DEBUG: Error en la respuesta de la Vercel Function (${response.status}): ${errorBody}`);
+                        throw new Error(`Error en la función Vercel: ${response.status} - ${errorBody}`);
+                    }
+
                     const result = await response.json();
-                    console.log("Gemini API response for questions:", result);
+                    console.log("DEBUG: Respuesta completa de la Vercel Function para preguntas:", result);
 
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
                         const jsonString = result.candidates[0].content.parts[0].text;
-                        console.log("Raw JSON string for questions:", jsonString);
+                        console.log("DEBUG: Cadena JSON cruda para preguntas:", jsonString);
                         const questions = JSON.parse(jsonString);
-                        console.log("Parsed questions:", questions);
+                        console.log("DEBUG: Preguntas parseadas:", questions);
 
                         let output = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><ul>';
                         if (Array.isArray(questions) && questions.length > 0) {
@@ -1173,18 +1131,17 @@
                         llmOutput.innerHTML = output;
                         areQuestionsGenerated = true; // Mark as generated successfully
                     } else {
-                        llmOutput.innerHTML = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><p>Hubo un problema al generar las preguntas. Por favor, inténtalo de nuevo.</p>';
-                        console.error("Respuesta inesperada de la API de Gemini:", result);
+                        llmOutput.innerHTML = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><p>Hubo un problema al generar las preguntas. La respuesta de la IA fue inesperada.</p>';
+                        console.error("DEBUG: Respuesta inesperada de la Vercel Function (estructura):", result);
                     }
                 } catch (error) {
-                    llmOutput.innerHTML = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><p>Error al comunicarse con el modelo de IA para generar preguntas. Por favor, inténtalo de nuevo.</p>';
-                    console.error("Error en la llamada a la API de Gemini:", error);
+                    llmOutput.innerHTML = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><p>Error al comunicarse con el modelo de IA para generar preguntas. Por favor, verifica la consola del navegador para más detalles.</p>';
+                    console.error("DEBUG: Error en la llamada a la Vercel Function para preguntas:", error);
                 } finally {
                     llmLoadingIndicator.style.display = 'none';
-                    // Re-enable all LLM buttons after generation is complete
                     if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
                     if (detailedObservationsButton) detailedObservationsButton.disabled = false;
-                    console.log("Finished generateComprehensionQuestions.");
+                    console.log("DEBUG: Finalizó generateComprehensionQuestions.");
                 }
             };
 
@@ -1270,29 +1227,37 @@
                     }
                 };
 
-                const apiKey = ""; // IMPORTANT: For Canvas environment with gemini-2.0-flash, leave this empty. Canvas injects the key at runtime.
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                // CAMBIO CLAVE PARA VERCEL: La URL de la función ahora es /api/<nombre-del-archivo-de-la-funcion>
+                const functionUrl = `/api/gemini-proxy`; 
 
-                console.log("Gemini API URL being called for observations:", apiUrl); // Added console log
+                console.log("DEBUG: Enviando solicitud a la Vercel Function para observaciones:", functionUrl);
 
                 try {
-                    console.log("Fetching Gemini API for observations...");
-                    const response = await fetch(apiUrl, {
+                    const response = await fetch(functionUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({ 
+                            model: 'gemini-2.0-flash', 
+                            payload: payload 
+                        })
                     });
 
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        console.error(`DEBUG: Error en la respuesta de la Vercel Function (${response.status}): ${errorBody}`);
+                        throw new Error(`Error en la función Vercel: ${response.status} - ${errorBody}`);
+                    }
+
                     const result = await response.json();
-                    console.log("Gemini API response for observations:", result);
+                    console.log("DEBUG: Respuesta completa de la Vercel Function para observaciones:", result);
 
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
                         const jsonString = result.candidates[0].content.parts[0].text;
-                        console.log("Raw JSON string for observations:", jsonString);
+                        console.log("DEBUG: Cadena JSON cruda para observaciones:", jsonString);
                         const observations = JSON.parse(jsonString);
-                        console.log("Parsed observations:", observations);
+                        console.log("DEBUG: Observaciones parseadas:", observations);
 
                         let detailedObservationsHtml = `
                             <div class="observations-card" style="
@@ -1335,26 +1300,25 @@
                             <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
                                 <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
                                 <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
-                                <p style="color: #E0E0E0;">Hubo un problema al generar las observaciones detalladas. Por favor, inténtalo de nuevo.</p>
+                                <p style="color: #E0E0E0;">Hubo un problema al generar las observaciones detalladas. La respuesta de la IA fue inesperada.</p>
                             </div>
                         `;
-                        console.error("Respuesta inesperada de la API de Gemini:", result);
+                        console.error("DEBUG: Respuesta inesperada de la Vercel Function (estructura):", result);
                     }
                 } catch (error) {
                     llmOutput.innerHTML = `
                         <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
                             <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
                             <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
-                            <p style="color: #E0E0E0;">Error al comunicarse con el modelo de IA para generar observaciones. Por favor, inténtalo de nuevo.</p>
+                            <p style="color: #E0E0E0;">Error al comunicarse con el modelo de IA para generar observaciones. Por favor, verifica la consola del navegador para más detalles.</p>
                         </div>
                     `;
-                    console.error("Error en la llamada a la API de Gemini:", error);
+                    console.error("DEBUG: Error en la llamada a la Vercel Function para observaciones:", error);
                 } finally {
                     llmLoadingIndicator.style.display = 'none';
-                    // Re-enable all LLM buttons after generation is complete
                     if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
                     if (detailedObservationsButton) detailedObservationsButton.disabled = false;
-                    console.log("Finished generateDetailedObservations.");
+                    console.log("DEBUG: Finalizó generateDetailedObservations.");
                 }
             };
 
@@ -1445,8 +1409,6 @@
                 }
             }
 
-            // La lista de healthKeywords se mantiene, pero la función analyzeHealthSectorRelevance
-            // y su uso en startAnalysis han sido eliminados.
             const healthKeywords = new Set([
                 "anatomía", "esqueleto", "articulaciones", "músculos", "órganos", "corazón", "pulmones", "riñones", "hígado",
                 "bazo", "páncreas", "estómago", "intestinos", "cerebro", "médula espinal", "vejiga", "útero", "ovarios",
@@ -1576,41 +1538,6 @@
                 "muerte", "embarazo", "feto muerto", "muerte al nacer", "aborto", "aborto espontáneo", "aborto inducido",
                 "funcionalidad inadecuada", "problemas hereditarios"
             ]);
-
-
-            /**
-             * Elimina esta función ya que la verificación de relevancia no es necesaria.
-             */
-            /*
-            function analyzeHealthSectorRelevance(documentText) {
-                const normalizedText = documentText.toLowerCase()
-                                                .replace(/[\u00AD]/g, '')
-                                                .replace(/[^a-z0-9áéíóúüñ\s\-\/]/g, ' ')
-                                                .replace(/\s+/g, ' ')
-                                                .trim();
-
-                console.log("Normalized text for relevance analysis (first 500 chars):", normalizedText.substring(0, 500) + "...");
-
-                const foundKeywords = new Set();
-                let termsToFind = Array.from(healthKeywords);
-                termsToFind.sort((a, b) => b.length - a.length);
-
-                termsToFind.forEach(keyword => {
-                    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(`(^|\\b)${escapedKeyword}(\\b|$)`, 'g');
-
-                    if (regex.test(normalizedText)) {
-                        foundKeywords.add(keyword);
-                    }
-                });
-                
-                const percentage = (foundKeywords.size / healthKeywords.size) * 100;
-                console.log(`Términos de salud encontrados: ${foundKeywords.size} de ${healthKeywords.size}`);
-                console.log("Términos encontrados:", Array.from(foundKeywords).join(", "));
-                console.log(`Porcentaje de relevancia para el sector salud: ${percentage.toFixed(2)}%`);
-                return percentage;
-            }
-            */
 
 
             // Maneja el clic en el botón de analizar
