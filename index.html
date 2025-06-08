@@ -760,7 +760,7 @@
                     case "Promoción de la autonomía":
                         return `La autonomía en el aprendizaje es clave para la EJA. Un material que no permite el autoaprendizaje limita el acceso al conocimiento y la flexibilidad necesaria para jóvenes y adultos con responsabilidades laborales y familiares.`;
                     case "Concordancia curricular":
-                        return `La alineación curricular asegura que el material contribuye a los objetivos educativos formalmente y no formales, facilitando su integración en programas de EJA y asegurando la coherencia con las directrices nacionales.`;
+                        return `La alineación curricular asegura que el material contribuye a los objetivos educativos formales y no formales, facilitando su integración en programas de EJA y asegurando la coherencia con las directrices nacionales.`;
                     case "Valores y principios":
                         return `Un material que no promueve valores democráticos, de inclusión y equidad puede perpetuar desigualdades y contradecir los principios de desarrollo sostenible y respeto a la diversidad que TulaSalud defiende.`;
                     case "Políticas de salud pública":
@@ -1078,9 +1078,10 @@
             };
 
             window.generateComprehensionQuestions = async function() {
-                // If questions are already generated, show an alert and return
+                console.log("generateComprehensionQuestions called!");
                 if (areQuestionsGenerated) {
                     showAlertDialog("Las Preguntas de Comprensión ya fueron generadas.");
+                    console.log("Questions already generated, returning.");
                     return;
                 }
 
@@ -1101,6 +1102,7 @@
                     // Re-enable buttons if no generation was needed
                     if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
                     if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                    console.log("No deficiencies, questions not needed.");
                     return;
                 }
 
@@ -1141,6 +1143,7 @@
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 try {
+                    console.log("Fetching Gemini API for questions...");
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1148,12 +1151,15 @@
                     });
 
                     const result = await response.json();
+                    console.log("Gemini API response for questions:", result);
 
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
                         const jsonString = result.candidates[0].content.parts[0].text;
+                        console.log("Raw JSON string for questions:", jsonString);
                         const questions = JSON.parse(jsonString);
+                        console.log("Parsed questions:", questions);
 
                         let output = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><ul>';
                         if (Array.isArray(questions) && questions.length > 0) {
@@ -1176,13 +1182,15 @@
                     // Re-enable all LLM buttons after generation is complete
                     if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
                     if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                    console.log("Finished generateComprehensionQuestions.");
                 }
             };
 
             window.generateDetailedObservations = async function() {
-                // If observations are already generated, show an alert and return
+                console.log("generateDetailedObservations called!");
                 if (areObservationsGenerated) {
                     showAlertDialog("Las Observaciones de Mejora ya fueron generadas.");
+                    console.log("Observations already generated, returning.");
                     return;
                 }
 
@@ -1209,6 +1217,7 @@
                     // Re-enable buttons if no generation was needed
                     if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
                     if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                    console.log("No deficiencies, observations not needed.");
                     return;
                 }
 
@@ -1263,6 +1272,7 @@
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 try {
+                    console.log("Fetching Gemini API for observations...");
                     const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1270,12 +1280,15 @@
                     });
 
                     const result = await response.json();
+                    console.log("Gemini API response for observations:", result);
 
                     if (result.candidates && result.candidates.length > 0 &&
                         result.candidates[0].content && result.candidates[0].content.parts &&
                         result.candidates[0].content.parts.length > 0) {
                         const jsonString = result.candidates[0].content.parts[0].text;
+                        console.log("Raw JSON string for observations:", jsonString);
                         const observations = JSON.parse(jsonString);
+                        console.log("Parsed observations:", observations);
 
                         let detailedObservationsHtml = `
                             <div class="observations-card" style="
@@ -1337,6 +1350,7 @@
                     // Re-enable all LLM buttons after generation is complete
                     if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
                     if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                    console.log("Finished generateDetailedObservations.");
                 }
             };
 
@@ -1627,6 +1641,7 @@
              * @param {File} file - El archivo a "analizar".
              */
             async function startAnalysis(file) {
+                console.log("Starting analysis for file:", file.name);
                 uploadArea.style.display = 'none';
                 analyzeButton.style.display = 'none';
                 infoButton.style.display = 'none'; // Ocultar el botón de info durante el análisis
@@ -1643,6 +1658,7 @@
                     loadingMessage.textContent = 'Procesando documento Word...'; // Mensaje específico
                     try {
                         docxExtractedContent = await extractDocxContent(file);
+                        console.log("DOCX content extracted. Length:", docxExtractedContent.length);
                     } catch (error) {
                         console.error("Error al procesar DOCX:", error);
                         displayMessage("Hubo un problema al procesar el documento Word. Asegúrate de que es un archivo .docx válido.", "error");
@@ -1655,31 +1671,6 @@
                     return; // Salir si el tipo de archivo es incorrecto
                 }
 
-                // Eliminado: Bloque de análisis de relevancia del sector salud
-                /*
-                const plainTextContent = docxExtractedContent.replace(/<[^>]*>/g, '');
-                const healthRelevancePercentage = analyzeHealthSectorRelevance(plainTextContent);
-
-                if (healthRelevancePercentage <= 15) {
-                    loadingIndicator.style.display = 'none';
-                    resultsArea.style.display = 'block';
-                    actionButtons.style.display = 'flex';
-                    analysisContent.innerHTML = `
-                        <h2><i class="fas fa-exclamation-triangle"></i> Relevancia del Documento</h2>
-                        <p style="font-weight: bold; color: #FFD700;">El documento no tiene relación significativa con el sector salud (Relevancia: ${healthRelevancePercentage.toFixed(2)}%).</p>
-                        <p>Por favor, asegúrate de que el contenido esté directamente relacionado con temas de salud para un análisis pedagógico más profundo.</p>
-                    `;
-                    if (evaluationPieChartInstance) {
-                        evaluationPieChartInstance.destroy();
-                        evaluationPieChartInstance = null;
-                    }
-                    const llmFeatureButtonsContainer = document.querySelector('.llm-feature-buttons');
-                    if (llmFeatureButtonsContainer) llmFeatureButtonsContainer.style.display = 'none';
-                    llmOutput.innerHTML = '';
-                    return;
-                }
-                */
-
                 loadingMessage.textContent = 'Realizando evaluación experta del contenido pedagógico...'; // Continue with existing analysis
                 try {
                     // Simular la llamada a la IA (LLM) con un retardo para la evaluación experta
@@ -1690,6 +1681,7 @@
                             resolve(evaluation);
                         }, 2500); // Simulated delay for expert evaluation
                     });
+                    console.log("Expert evaluation results:", currentEvaluationResults);
                 }
                 catch (error) {
                     console.error("Error durante la evaluación experta simulada:", error);
@@ -1707,7 +1699,7 @@
                     <h2><i class="fas fa-microscope"></i> Evaluación Experta del Material Didáctico</h2>
                     <p><strong>Tipo de Documento:</strong> Word (.docx)</p>
                     <p><strong>Nombre del Archivo:</strong> ${file.name}</p>
-                    <p>Como experto en educación de jóvenes y adultos (EJA), salud pública en Guatemala y proyectos de desarrollo comunitario de TulaSalud en Alta Verapaz, he evaluado el documento en Word con las características necesarias para ser un material didáctico efectivo y adecuado para jóvenes y adultos en Cobán, Alta Verapaz, con un enfoque en salud y alineado con los objetivos de TulaSalud.</p>
+                    <p style="text-align: justify;">Como herramienta digital he evaluado el documento en Word con las características necesarias para ser un material didáctico efectivo y adecuado para jóvenes y adultos en Cobán, Alta Verapaz, con un enfoque en salud y alineado con los objetivos de TulaSalud, así como las políticas educativa para la educación de jovenes y adultos.<br><br>A continuación presento el resultado del análisis:</p>
                 `;
 
                 evaluationHtml += `<div class="evaluation-card" style="margin-top: 30px;"><h3>Resultados de la Evaluación por Criterios</h3><ul>`;
@@ -1730,9 +1722,6 @@
                 
                 analysisContent.innerHTML = evaluationHtml;
 
-                // Eliminado: Llamada a renderizar la gráfica circular
-                // renderPieChart(cumpleCount, noCumpleCount);
-
                 // Después de mostrar la evaluación inicial, si hay observaciones NO CUMPLE,
                 // se muestra el botón para generar las observaciones detalladas.
                 let llmFeatureButtonsContainer = document.querySelector('.llm-feature-buttons');
@@ -1740,6 +1729,9 @@
                     llmFeatureButtonsContainer = document.createElement('div');
                     llmFeatureButtonsContainer.className = 'llm-feature-buttons button-group';
                     analysisContent.appendChild(llmFeatureButtonsContainer);
+                    console.log("LLM feature buttons container created and appended.");
+                } else {
+                    console.log("LLM feature buttons container already exists.");
                 }
                 llmFeatureButtonsContainer.innerHTML = window.getLLMButtonsForFileType(file.type);
                 llmFeatureButtonsContainer.style.display = 'flex'; // Ensure visible
@@ -1751,86 +1743,30 @@
                 if (comprehensionQuestionsButton) {
                     comprehensionQuestionsButton.onclick = window.generateComprehensionQuestions;
                     comprehensionQuestionsButton.disabled = false; // Ensure enabled on initial display
+                    console.log("Comprehension Questions button assigned and enabled.");
                 }
                 if (detailedObservationsButton) {
                     detailedObservationsButton.onclick = window.generateDetailedObservations;
                     detailedObservationsButton.disabled = false; // Ensure enabled on initial display
+                    console.log("Detailed Observations button assigned and enabled.");
                 }
                 // Reset the questions and observations generated state for a new analysis
                 areQuestionsGenerated = false;
                 areObservationsGenerated = false;
+                console.log("Analysis completed. LLM buttons reset and visible.");
             }
-
-            /**
-             * Eliminado: Función para renderizar la gráfica circular.
-             */
-            /*
-            function renderPieChart(cumple, noCumple) {
-                if (evaluationPieChartInstance) {
-                    evaluationPieChartInstance.destroy();
-                }
-
-                const data = {
-                    labels: ['Cumple', 'No Cumple'],
-                    datasets: [{
-                        data: [cumple, noCumple],
-                        backgroundColor: [
-                            'rgb(32, 178, 170)',
-                            'rgb(255, 99, 132)'
-                        ],
-                        hoverOffset: 4
-                    }]
-                };
-
-                const config = {
-                    type: 'pie',
-                    data: data,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: '#E0E0E0',
-                                    font: {
-                                        size: 14
-                                    }
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Resumen de Criterios',
-                                color: '#00BFFF',
-                                font: {
-                                    size: 18
-                                }
-                            }
-                        }
-                    }
-                };
-
-                evaluationPieChartInstance = new Chart(evaluationPieChartCanvas, config);
-            }
-            */
 
             /**
              * Reinicia el estado de la UI a su condición inicial para permitir la carga de un nuevo archivo.
              */
             function resetUIState() {
+                console.log("Resetting UI state.");
                 selectedFile = null;
                 fileInput.value = '';
                 uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu documento Word (.docx) aquí, o haz click para seleccionar';
                 analyzeButton.disabled = true;
                 docxExtractedContent = ''; // Reiniciar el resultado del DOCX
                 currentEvaluationResults = []; // Reiniciar los resultados de la evaluación
-
-                // Eliminado: Destruir la instancia del gráfico al reiniciar la UI
-                /*
-                if (evaluationPieChartInstance) {
-                    evaluationPieChartInstance.destroy();
-                    evaluationPieChartInstance = null;
-                }
-                */
 
                 resetUIForNewFile();
 
@@ -1841,6 +1777,7 @@
                 // Reset the questions and observations generated state
                 areQuestionsGenerated = false;
                 areObservationsGenerated = false;
+                console.log("UI state reset complete.");
             }
 
             // Función auxiliar para resetear elementos de la UI
@@ -1859,6 +1796,7 @@
                 if (llmFeatureButtonsContainer) {
                     llmFeatureButtonsContainer.style.display = 'none';
                 }
+                console.log("Resetting UI for new file: hiding results and showing upload area.");
             }
 
             // Event listeners para los nuevos botones de acción
