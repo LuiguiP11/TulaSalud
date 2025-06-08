@@ -6,6 +6,10 @@
     <title>Analizador Pedagógico TeleEducación - TulaSalud</title>
     <!-- Incluye Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Incluye mammoth.js para procesar DOCX en el navegador -->
+    <script src="https://unpkg.com/mammoth@1.4.15/mammoth.browser.min.js"></script>
+    <!-- Chart.js ya no es necesario si se elimina la gráfica -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
     <style>
         /* Estilos generales */
         body {
@@ -115,7 +119,7 @@
         }
 
         /* Estilos base para todos los botones */
-        .upload-button, .llm-feature-button, .action-button {
+        .upload-button, .llm-feature-button, .action-button, .info-button {
             padding: 12px 25px;
             border: none;
             border-radius: 8px;
@@ -143,6 +147,16 @@
         .llm-feature-button:hover {
             background-color: #6A1AAB;
         }
+        /* Estilo para el botón de información */
+        .info-button {
+            background-color: #20B2AA; /* Verde azulado */
+            margin-left: 15px; /* Espacio para separar del grupo de botones */
+        }
+        .info-button:hover {
+            background-color: #1A928A;
+            transform: translateY(-2px);
+        }
+
 
         /* Estilos para los botones de acción al final */
         .action-button {
@@ -244,7 +258,7 @@
             padding: 20px;
             margin-top: 20px; /* Espacio entre las tarjetas */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra suave para efecto de elevación */
-            border: 1px solid #444444; /* Borde sutil */
+            border: 1px solid #E0E0E0; /* Borde blanco para la tarjeta de evaluación */
         }
 
         /* Justifica el texto dentro de las tarjetas */
@@ -254,14 +268,12 @@
         .evaluation-card ul li, .evaluation-card ol li {
             text-align: justify;
         }
-        .observations-card p, .observations-card ul, .observations-card ol {
-            text-align: justify;
-        }
-        .observations-card ul li, .observations-card ol li {
-            text-align: justify;
-        }
+        /* **ESTILOS ESPECÍFICOS PARA LA TARJETA DE OBSERVACIONES (OVERRIDE)** */
+        /* Eliminamos los estilos CSS para .observations-card aquí,
+           ya que los aplicaremos directamente como inline styles
+           en la función JavaScript para mayor control, según la solicitud. */
 
-        .evaluation-card h3, .observations-card h3 {
+        .evaluation-card h3 {
             color: #00BFFF; /* Título de la evaluación y observaciones (ahora el mismo color) */
             margin-top: 0;
             margin-bottom: 15px;
@@ -293,6 +305,67 @@
             display: none; /* Oculto por defecto, se muestra con JS */
         }
 
+        /* Estilos para el cuadro de diálogo de alerta */
+        #alertDialog, #infoDialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #alertDialog > div, #infoDialog > div {
+            background-color: #282828;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 600px; /* Increased max-width for info dialog */
+            width: 90%; /* Ajuste para responsividad */
+            box-sizing: border-box; /* Incluye padding en el ancho */
+            max-height: 80vh; /* Para que sea scrollable si el contenido es largo */
+            overflow-y: auto; /* Permite scroll vertical */
+        }
+
+        #alertDialog p, #infoDialog p {
+            color: #E0E0E0;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            text-align: justify; /* Justifica el texto del info dialog */
+        }
+        #infoDialog h3 {
+            color: #00BFFF;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #infoDialog ul {
+            text-align: left;
+            margin-left: 20px;
+            color: #D0D0D0;
+        }
+        #infoDialog li {
+            margin-bottom: 8px;
+        }
+
+
+        #alertDialog button, #infoDialog button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #alertDialog button:hover, #infoDialog button:hover {
+            background-color: #0056b3;
+        }
 
         /* Footer */
         .footer {
@@ -301,7 +374,22 @@
             color: #888888; /* Gris más claro para el texto del footer */
         }
 
-        /* Media Queries para responsividad */
+        /* Eliminado: Estilos para la gráfica circular */
+        /*
+        .chart-container {
+            position: relative;
+            margin: 30px auto;
+            width: 80%;
+            max-width: 400px;
+            height: auto;
+            border: 1px solid #444444;
+            border-radius: 10px;
+            background-color: #333333;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        */
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -324,7 +412,8 @@
                 font-size: 1em;
             }
             .button-group .upload-button,
-            .button-group .llm-feature-button {
+            .button-group .llm-feature-button,
+            .info-button { /* También ajustar el botón de info */
                 width: calc(50% - 15px); /* Dos botones por fila */
                 margin: 0; /* Reset margin from general rules */
             }
@@ -351,6 +440,15 @@
             .evaluation-card h3, .observations-card h3 {
                 font-size: 1.2em;
             }
+            #alertDialog > div, #infoDialog > div {
+                padding: 20px;
+            }
+            /* Eliminado: .chart-container para móviles */
+            /*
+            .chart-container {
+                width: 90%;
+            }
+            */
         }
 
         @media (max-width: 480px) {
@@ -382,7 +480,8 @@
             }
             .button-group .upload-button,
             .button-group .llm-feature-button,
-            .action-buttons-after-analysis .action-button {
+            .action-buttons-after-analysis .action-button,
+            .info-button { /* También ajustar el botón de info */
                 width: calc(100% - 20px); /* Botón de ancho completo en móvil */
                 padding: 12px;
                 margin: 0; /* Sin margen lateral */
@@ -399,6 +498,15 @@
             .evaluation-card h3, .observations-card h3 {
                 font-size: 1.1em;
             }
+            #alertDialog > div, #infoDialog > div {
+                padding: 15px;
+            }
+            /* Eliminado: .chart-container para móviles */
+            /*
+            .chart-container {
+                width: 100%;
+            }
+            */
         }
     </style>
 </head>
@@ -412,21 +520,22 @@
         </div>
 
         <h1><i class="fas fa-brain"></i> Analizador Pedagógico TeleEducación - TulaSalud</h1>
-        <p>Sube tus archivos PDF, imágenes o presentaciones para un análisis impulsado por IA.</p>
+        <p>Sube tus documentos Word (.docx) para un análisis impulsado por IA.</p>
 
         <div class="upload-area" id="uploadArea">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p>Arrastra y suelta tu archivo aquí, o haz click para seleccionar</p>
-            <input type="file" id="fileInput" accept=".pdf, image/jpeg, image/png, .ppt, .pptx">
+            <i class="fas fa-file-word"></i> <!-- Icono de Word -->
+            <p>Arrastra y suelta tu documento Word (.docx) aquí, o haz click para seleccionar</p>
+            <input type="file" id="fileInput" accept=".docx"> <!-- Aceptar solo .docx -->
         </div>
 
         <div class="button-group">
-            <button class="upload-button" id="analyzeButton" disabled>Analizar Archivo</button>
+            <button class="upload-button" id="analyzeButton" disabled>Analizar Documento</button>
+            <button class="info-button" id="infoButton"><i class="fas fa-info-circle"></i> Información</button> <!-- Nuevo botón de información -->
         </div>
 
         <div class="loading-indicator" id="loadingIndicator">
             <div class="spinner"></div>
-            <p>Analizando archivo con el Modelo de IA...</p>
+            <p id="loadingMessage">Cargando...</p> <!-- Mensaje de carga dinámico -->
         </div>
 
         <div class="results-area" id="resultsArea" style="display: none;">
@@ -434,6 +543,12 @@
             <div id="analysisContent">
                 <!-- Las tarjetas se insertarán aquí dinámicamente -->
             </div>
+            <!-- Contenedor para la gráfica circular (ELIMINADO) -->
+            <!--
+            <div class="chart-container">
+                <canvas id="evaluationPieChart"></canvas>
+            </div>
+            -->
             <!-- Nuevo indicador de carga para las funciones LLM -->
             <div class="llm-loading-indicator" id="llmLoadingIndicator">
                 <div class="spinner"></div>
@@ -446,7 +561,7 @@
 
         <!-- Nuevos botones de acción que se muestran después del análisis -->
         <div class="action-buttons-after-analysis" id="actionButtons">
-            <button class="action-button reset-button" id="resetButton"><i class="fas fa-redo"></i> Cargar otro archivo</button>
+            <button class="action-button reset-button" id="resetButton"><i class="fas fa-redo"></i> Cargar otro documento</button>
             <button class="action-button close-button" id="closePageButton"><i class="fas fa-times-circle"></i> Cerrar Página</button>
         </div>
 
@@ -455,432 +570,1337 @@
         </div>
     </div>
 
+    <!-- Cuadro de diálogo de alerta -->
+    <div id="alertDialog" style="display: none;">
+        <div>
+            <p id="alertDialogMessage"></p>
+            <button id="alertDialogCloseButton">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- Cuadro de diálogo de información -->
+    <div id="infoDialog" style="display: none;">
+        <div>
+            <h3><i class="fas fa-info-circle"></i> Información del Analizador Pedagógico</h3>
+            <p style="text-align: justify;">Como parte fundamental de la formación en la Maestría para Personas Jóvenes y Adultas, de la Escuela de Posgrado de la Facultad de Humanidades de la Universidad de San Carlos de Guatemala, y como producto final del curso de Seminario II, se desarrolló esta herramienta con el objetivo claro de ayudar al departamento de Tele Educación de TulaSalud a evaluar la calidad del material didáctico, la misma busca asegurar que dicho material no solo cumpla con los elementos propuestos por la política educativa para personas jóvenes y adultas, sino que también esté alineado con los objetivos y la visión de la institución.<br><br>Autor: Lic. Luis Ygnacio Ponce Sierra</p>
+            <button id="infoDialogCloseButton">Entendido</button>
+        </div>
+    </div>
+
     <script>
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const analyzeButton = document.getElementById('analyzeButton');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const resultsArea = document.getElementById('resultsArea');
-        const analysisContent = document.getElementById('analysisContent');
-        const llmLoadingIndicator = document.getElementById('llmLoadingIndicator');
-        const llmOutput = document.getElementById('llmOutput');
-        const actionButtons = document.getElementById('actionButtons');
-        const resetButton = document.getElementById('resetButton');
-        const closePageButton = document.getElementById('closePageButton');
-        const container = document.querySelector('.container'); // Referencia al contenedor para mensajes
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const analyzeButton = document.getElementById('analyzeButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const loadingMessage = document.getElementById('loadingMessage'); 
+            const resultsArea = document.getElementById('resultsArea');
+            const analysisContent = document.getElementById('analysisContent');
+            const llmLoadingIndicator = document.getElementById('llmLoadingIndicator');
+            const llmOutput = document.getElementById('llmOutput');
+            const actionButtons = document.getElementById('actionButtons');
+            const resetButton = document.getElementById('resetButton');
+            const closePageButton = document.getElementById('closePageButton');
+            const container = document.querySelector('.container');
 
-        let selectedFile = null;
+            const alertDialog = document.getElementById('alertDialog');
+            const alertDialogMessage = document.getElementById('alertDialogMessage');
+            const alertDialogCloseButton = document.getElementById('alertDialogCloseButton');
 
-        // Previene el comportamiento por defecto de arrastrar y soltar
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false); // También para el body
-        });
+            const infoButton = document.getElementById('infoButton');
+            const infoDialog = document.getElementById('infoDialog');
+            const infoDialogCloseButton = document.getElementById('infoDialogCloseButton');
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
 
-        // Resalta el área al arrastrar el archivo
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = '#00BFFF', false);
-        });
+            // Eliminado: Referencia al canvas del gráfico
+            // const evaluationPieChartCanvas = document.getElementById('evaluationPieChart'); 
+            // let evaluationPieChartInstance = null; 
 
-        // Vuelve al borde normal al salir del área
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = '#444444', false);
-        });
 
-        // Maneja la caída del archivo
-        uploadArea.addEventListener('drop', handleDrop, false);
+            let selectedFile = null;
+            let docxExtractedContent = ''; 
+            let currentEvaluationResults = []; 
 
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            // Asegura que solo se procese un archivo
-            if (files.length > 0) {
-                handleFileSelection(files[0]);
+            let comprehensionQuestionsButton = null;
+            let detailedObservationsButton = null;
+
+            let areQuestionsGenerated = false;
+            let areObservationsGenerated = false;
+
+
+            // Check if critical elements are found. If not, log and display an error.
+            // Se elimina la verificación de evaluationPieChartCanvas
+            if (!uploadArea || !fileInput || !analyzeButton || !loadingIndicator || !loadingMessage || !resultsArea || !analysisContent || !llmLoadingIndicator || !llmOutput || !actionButtons || !resetButton || !closePageButton || !container || !alertDialog || !alertDialogMessage || !alertDialogCloseButton || !infoButton || !infoDialog || !infoDialogCloseButton) {
+                console.error("Error: Uno o más elementos críticos del DOM no se encontraron al inicializar el script.");
+                showAlertDialog("Error al iniciar la aplicación: Algunos elementos de la interfaz no se cargaron correctamente. Por favor, recarga la página.");
+                return; // Stop execution if critical elements are missing
             }
-        }
 
-        // Abre el explorador de archivos al hacer click en el área de subida
-        uploadArea.addEventListener('click', () => fileInput.click());
 
-        // Maneja la selección de archivos desde el input
-        fileInput.addEventListener('change', (e) => {
-            // Asegura que solo se procese un archivo
-            if (e.target.files.length > 0) {
-                handleFileSelection(e.target.files[0]);
-            }
-        });
+            // Mapa para obtener la categoría de una característica
+            const characteristicToCategoryMap = {
+                "Contenido significativo y basado en experiencias": "Relevancia y Pertinencia (EJA y Contexto Local)",
+                "Contexto cultural y lingüístico": "Relevancia y Pertinencia (EJA y Contexto Local)",
+                "Actualidad y necesidades locales": "Relevancia y Pertinencia (EJA y Contexto Local)",
 
-        /**
-         * Maneja el archivo seleccionado, actualiza el UI y habilita el botón de análisis.
-         * Esta función se llama cuando se selecciona un nuevo archivo.
-         * @param {File} file - El archivo seleccionado.
-         */
-        function handleFileSelection(file) {
-            selectedFile = file;
-            // Muestra el nombre del archivo en el área de subida
-            uploadArea.querySelector('p').textContent = `Archivo seleccionado: ${selectedFile.name}`;
-            analyzeButton.disabled = false; // Habilita el botón de analizar
+                "Lenguaje sencillo y directo": "Claridad y Comprensibilidad",
+                "Organización lógica y visual": "Claridad y Comprensibilidad",
+                "Diseño amigable y accesible": "Claridad y Comprensibilidad",
 
-            // Resetea el estado de la UI para un nuevo archivo, pero manteniendo el archivo seleccionado
-            resultsArea.style.display = 'none';
-            llmOutput.innerHTML = '';
-            loadingIndicator.style.display = 'none';
-            llmLoadingIndicator.style.display = 'none';
-            actionButtons.style.display = 'none';
-            // Asegura que el área de subida y el botón de análisis estén visibles
-            uploadArea.style.display = 'flex';
-            analyzeButton.style.display = 'block';
-        }
+                "Fomento de la participación activa": "Adecuación Pedagógica y Didáctica",
+                "Enfoque en habilidades y competencias": "Adecuación Pedagógica y Didáctica",
+                "Promoción de la autonomía": "Adecuación Pedagógica y Didáctica",
 
-        // Maneja el clic en el botón de analizar
-        analyzeButton.addEventListener('click', () => {
-            if (selectedFile) {
-                startAnalysis(selectedFile);
-            } else {
-                // Usamos un modal o un mensaje dentro de la página en lugar de alert()
-                displayMessage("Por favor, selecciona un archivo para analizar.", "error");
-            }
-        });
+                "Concordancia curricular": "Alineación con Políticas Educativas y de Salud",
+                "Valores y principios": "Alineación con Políticas Educativas y de Salud",
+                "Políticas de salud pública": "Alineación con Políticas Educativas y de Salud",
+                "Evitar estereotipos": "Alineación con Políticas Educativas y de Salud",
 
-        /**
-         * Simula el proceso de análisis inicial de un archivo por una IA.
-         * @param {File} file - El archivo a "analizar".
-         */
-        function startAnalysis(file) {
-            // Oculta el área de subida y muestra el indicador de carga
-            uploadArea.style.display = 'none';
-            analyzeButton.style.display = 'none';
-            loadingIndicator.style.display = 'block';
-            resultsArea.style.display = 'none'; // Asegura que los resultados estén ocultos
-            llmOutput.innerHTML = ''; // Limpia el contenido LLM anterior
-            actionButtons.style.display = 'none'; // Oculta los botones de acción mientras se analiza
+                "Texto alternativo (Alt Text) para imágenes": "Accesibilidad para Personas con Deficiencia Visual",
+                "Estructura de encabezados y listas": "Accesibilidad para Personas con Deficiencia Visual",
+                "Contraste de color suficiente": "Accesibilidad para Personas con Deficiencia Visual",
+                "Tamaño de fuente ajustable": "Accesibilidad para Personas con Deficiencia Visual",
+                "Uso de texto en lugar de imágenes para información clave": "Accesibilidad para Personas con Deficiencia Visual",
+                "Accesibilidad de tablas y gráficos": "Accesibilidad para Personas con Deficiencia Visual",
 
-            // Simula el proceso de análisis inicial
-            setTimeout(() => {
-                // SIMULACIÓN: Determina si el contenido es relevante para el sector salud.
-                // En una aplicación real, esto implicaría un análisis de contenido profundo con un LLM.
-                // Para esta demostración, hay un 80% de probabilidad de que *no* sea relevante
-                // para que el usuario pueda ver el mensaje de "no detectado".
-                const isHealthRelatedContent = Math.random() < 0.2; 
+                "Precisión y veracidad científica": "Especificidades para el Sector Salud y TulaSalud",
+                "Mensajes de prevención y promoción de la salud": "Especificidades para el Sector Salud y TulaSalud",
+                "Fuentes confiables y reconocidas": "Especificidades para el Sector Salud y TulaSalud",
+                "Sensibilidad cultural y pertinencia local": "Especificidades para el Sector Salud y TulaSalud",
+                "Énfasis en el autocuidado y acceso a servicios": "Especificidades para el Sector Salud y TulaSalud",
+                "Concordancia con los programas de TulaSalud": "Especificidades para el Sector Salud y TulaSalud",
+                "Enfoque en la Comunicación para el Cambio Social y Comportamental (CCSC)": "Especificidades para el Sector Salud y TulaSalud"
+            };
 
-                let evaluationContent = '';
-                let observationsContent = '';
-                let llmButtons = '';
+            // --- DEFINICIONES DE FUNCIONES GLOBALES ---
+            // Estas funciones se adjuntan a 'window' para que puedan ser llamadas desde atributos onclick
+            // en el HTML o desde cualquier parte del script que las necesite.
 
-                if (file.type.includes('pdf') || file.type.includes('image') || file.type.includes('presentation') || file.type.includes('powerpoint')) {
-                    if (!isHealthRelatedContent) {
-                        evaluationContent = `
-                            <h3>Análisis de Contenido</h3>
-                            <p><strong>Tipo de Archivo:</strong> ${file.type.includes('pdf') ? 'Documento PDF' : file.type.includes('image') ? 'Archivo de Imagen' : 'Presentación (PPT/PPTX)'}</p>
-                            <p style="color:#DC3545; font-weight:bold; font-size:1.1em;">⚠️ Contenido No Detectado como Relacionado con el Sector Salud o Educación Comunitaria</p>
-                            <p>Nuestro análisis no detectó contenido directamente relacionado con el sector salud o educación comunitaria según el perfil de Tele Educación de TulaSalud. Por lo tanto, no se puede realizar una evaluación pedagógica detallada bajo estos criterios.</p>
-                            <p>Por favor, sube un archivo que trate sobre temas de salud, educación comunitaria o desarrollo social relevantes para la misión de TulaSalud en Guatemala.</p>
-                        `;
-                        observationsContent = `
-                            <h3>Observaciones de Mejora</h3>
-                            <p style="color:#DC3545;">No se pueden ofrecer observaciones de mejora específicas alineadas con las políticas de TulaSalud, ya que el contenido no se asocia con el sector de salud o educación comunitaria.</p>
-                        `;
-                        llmButtons = ''; // No mostrar botones LLM si no es relevante para la salud
-                    } else {
-                        // Lógica detallada original para contenido relacionado con la salud
-                        if (file.type.includes('pdf')) {
-                            evaluationContent = `
-                                <h3>Evaluación Pedagógica del Contenido</h3>
-                                <p><strong>Tipo de Archivo:</strong> Documento PDF</p>
-                                <ul>
-                                    <li><strong>Estructura y organización:</strong> El documento parece bien organizado por secciones, lo que facilita el seguimiento. Sin embargo, un "modelo guía" visual al inicio (como un diagrama de flujo) podría dar una visión general para adultos que prefieren un panorama antes del detalle.</li>
-                                    <li><strong>Lenguaje y alfabetización funcional:</strong> El vocabulario es mayormente accesible para personas con escolaridad básica. Términos como "vigilancia epidemiológica" podrían beneficiarse de ejemplos concretos o un glosario breve y contextualizado. Reforzar con situaciones cotidianas (ej., cómo se detecta una enfermedad en la comunidad) sería muy útil.</li>
-                                    <li><strong>Pertinencia cultural y lingüística:</strong> Los ejemplos actuales son generales. Sería valioso incluir referencias a la realidad rural e indígena de Guatemala (ej., uso de plantas medicinales tradicionales junto a medicina moderna, o cómo se gestionan los nacimientos en comunidades). Considerar la inclusión de frases o un glosario simple en idiomas mayas (q’eqchi’, k’iche’, mam) para mejorar la inclusividad.</li>
-                                    <li><strong>Conexión con Tele Educación de TulaSalud:</strong> No se identifican llamadas a la acción directas para estrategias de educación a distancia (ej., códigos QR para videos explicativos, enlaces a foros de discusión móvil). Aunque el contenido es relevante, no se menciona explícitamente su utilidad en la vigilancia materno-infantil o nutricional bajo el modelo de TulaSalud. Podría sugerirse la replicación mediante "plantillas" o "guías para el facilitador" al final del documento.</li>
-                                    <li><strong>Accesibilidad visual y técnica:</strong> El contraste de colores para el texto es bueno. El tamaño de letra es adecuado en general, pero asegurarse de que los gráficos o tablas incrustadas mantengan un tamaño de fuente legible (≥ 14 pts) en impresión y dispositivos móviles. Los elementos gráficos deben ser claros incluso en blanco y negro, sin depender de tonos sutiles.</li>
-                                    <li><strong>Enfoque andragógico:</strong> Se observa un buen intento de estructurar el contenido para adultos. Se podría incentivar más la participación activa añadiendo preguntas de reflexión al final de cada sección o pequeños ejercicios guiados que conecten el contenido con sus experiencias previas.</li>
-                                    <li><strong>Equidad de género y estructuras familiares:</strong> La representación de familias parece convencional. Podría ampliarse para incluir visuales o menciones textuales de familias monoparentales, reconstituidas, o con abuelos/cuidadores como figuras principales. Analizar la simbología de género para que sea inclusiva con identidades no binarias en futuros materiales, si es aplicable al contexto.</li>
-                                    <li><strong>Actualización y atribución de fuentes:</strong> No se encontró una fecha de última revisión o los responsables claros del contenido. Es fundamental incluir estos datos y acreditar a las instancias oficiales (MSPAS) y a TulaSalud, asegurando la vigencia y autoridad del material.</li>
-                                </ul>
-                            `;
-                            observationsContent = `
-                                <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
-                                <ul>
-                                    <li><strong>1. Contexto intercultural y multilingüe:</strong> Implementar glosarios bilingües (español–lenguas mayas como q’eqchi’, k’iche’, mam, etc.) al final del documento. Incorporar pequeños recuadros con frases o ejemplos de texto en idioma local que refuercen conceptos clave, especialmente para temas culturales sensibles.</li>
-                                    <li><strong>2. Ejemplos prácticos contextualizados:</strong> Desarrollar un caso guía de una familia rural guatemalteca que aborde condiciones prevalentes (desnutrición infantil, embarazo adolescente en zonas de difícil acceso). Incluir ejercicios prácticos paso a paso en el texto, con espacios designados para que el usuario anote sus propias observaciones o resultados.</li>
-                                    <li><strong>3. Adaptación a metodologías a distancia:</strong> Integrar códigos QR o enlaces directos a videos cortos (ej., demostraciones de procedimientos de salud) y audios (ej., testimonios en idiomas locales) que complementen el texto. Crear versiones imprimibles con alto contraste y formato amigable para dispositivos móviles de baja gama.</li>
-                                    <li><strong>4. Enriquecimiento de contenido de salud:</strong> Ampliar la sección de "función" o introducción con ejemplos específicos de riesgos biológicos, psicológicos y sociales directamente ligados a la salud materno-infantil y nutricional en Guatemala, con datos relevantes del MSPAS.</li>
-                                    <li><strong>5. Refuerzo visual de simbología:</strong> Si el documento contiene símbolos, sugerir la adición de iconos adicionales o leyendas ampliadas y visualmente claras para cada símbolo (edad, sexo, defunción, embarazo, etc.), asegurando su comprensión universal.</li>
-                                    <li><strong>6. Representación de estructuras familiares diversas:</strong> Incluir descripciones textuales o pequeños viñetas que presenten la diversidad de familias guatemaltecas (monoparentales, reconstituidas, multigeneracionales, con abuelos o tíos como cuidadores).</li>
-                                    <li><strong>7. Aspectos de género y ciclo de vida:</strong> Detallar cómo abordar la prevención del embarazo adolescente y los riesgos asociados en las comunidades rurales. Referenciar los programas gubernamentales o de TulaSalud relacionados con la salud sexual y reproductiva de jóvenes.</li>
-                                    <li><strong>8. Accesibilidad y usabilidad:</strong> Asegurar que el tamaño de fuente general del documento sea ≥ 14 pts, con interlineado adecuado. Verificar que el contraste de texto y fondo sea siempre alto, y que los trazos de cualquier gráfico sean lo suficientemente gruesos para legibilidad en condiciones diversas.</li>
-                                    <li><strong>9. Preguntas frecuentes (FAQs):</strong> Proponer un pequeño apartado al final del documento con preguntas comunes sobre el tema, como: "¿Cómo anoto si un familiar vive en el extranjero?", "¿Qué hago si no conozco la edad exacta de un familiar?", etc.</li>
-                                    <li><strong>10. Vinculación con servicios y contacto:</strong> Incluir contactos claros de TulaSalud (WhatsApp, correo electrónico, redes sociales o números de teléfono locales) para que el personal comunitario pueda solicitar tutorías o retroalimentación sobre el material.</li>
-                                    <li><strong>11. Módulos de Autoevaluación/Reflexión (Texto):</strong> Integrar pequeños ejercicios de autoevaluación o preguntas para la reflexión personal dentro del documento, que refuercen el aprendizaje y su vinculación con la práctica diaria.</li>
-                                    <li><strong>12. Promoción de la Colaboración Interinstitucional (Documento):</strong> Si el contenido se presta, sugerir cómo la información del documento puede fomentar la coordinación con la Dirección de Recursos Humanos del MSPAS y la Escuela Nacional de Enfermería de Cobán, reflejando el modelo colaborativo de TulaSalud.</li>
-                                </ul>
-                            `;
-                            llmButtons = '<button class="llm-feature-button" onclick="generateComprehensionQuestions()">Generar Preguntas de Comprensión ✨</button>';
-                        } else if (file.type.includes('image')) {
-                            evaluationContent = `
-                                <h3>Evaluación Pedagógica del Contenido</h3>
-                                <p><strong>Tipo de Archivo:</strong> Archivo de Imagen (${file.type.split('/')[1].toUpperCase()})</p>
-                                <ul>
-                                    <li><strong>Estructura y organización:</strong> La imagen es un elemento visual estático. Su "estructura" se basa en la composición y el flujo de la información gráfica. Para un aprendizaje incremental, podría ser parte de una secuencia de imágenes o de un material más amplio. Sugerir un pie de foto explicativo es clave para la organización.</li>
-                                    <li><strong>Lenguaje y alfabetización funcional:</strong> Si la imagen contiene texto, se evaluó su legibilidad y simplicidad. Los símbolos visuales son generalmente claros, pero algunos podrían requerir una leyenda adicional para ser universalmente comprendidos por audiencias con escolaridad básica en Guatemala.</li>
-                                    <li><strong>Pertinencia cultural y lingüística:</strong> La imagen (si aplica) debería incluir elementos visuales que resuenen con la realidad rural e indígena de Guatemala (ej., vestimenta, escenarios). Los símbolos o representaciones deben evitar sesgos culturales y ser comprensibles sin necesidad de textos complejos.</li>
-                                    <li><strong>Conexión con Tele Educación de TulaSalud:</strong> La imagen por sí misma no integra estrategias directas de educación a distancia, pero su formato la hace adaptable a plataformas digitales. Se evaluaría si puede ser utilizada para ilustrar puntos clave en la vigilancia epidemiológica materno-infantil o nutricional de TulaSalud.</li>
-                                    <li><strong>Accesibilidad visual y técnica:</strong> El contraste de la imagen y la legibilidad de cualquier texto incrustado son cruciales. Se evaluó que los detalles sean claros incluso en pantallas pequeñas de dispositivos móviles y que se mantengan inteligibles al imprimirse en blanco y negro o escanearse.</li>
-                                    <li><strong>Enfoque andragógico:</strong> Como imagen estática, su interactividad es limitada. El enfoque andragógico se lograría al complementarla con actividades o preguntas que inviten a la observación activa y a la conexión con experiencias previas del adulto.</li>
-                                    <li><strong>Equidad de género y estructuras familiares:</strong> Si la imagen representa personas o familias, se observó la diversidad en la representación de género y estructuras familiares. Se sugiere que futuras imágenes muestren una amplia gama de composiciones familiares y roles de género inclusivos.</li>
-                                    <li><strong>Actualización y atribución de fuentes:</strong> Una imagen por sí misma no suele tener fecha de revisión, pero es fundamental que el material pedagógico que la contenga especifique la fuente y fecha de creación/revisión.</li>
-                                </ul>
-                            `;
-                            observationsContent = `
-                                <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
-                                <ul>
-                                    <li><strong>1. Impacto Visual y Relevancia Cultural:</strong> Crear o seleccionar imágenes que reflejen explícitamente la diversidad multiétnica de Guatemala, incluyendo vestimenta, entornos y situaciones relevantes para las comunidades rurales y el personal de salud de los departamentos meta de TulaSalud.</li>
-                                    <li><strong>2. Claridad de Mensaje Visual:</strong> La imagen debe comunicar un mensaje de salud de forma inequívoca y accesible, considerando las limitaciones de conectividad en zonas rurales para la mejora de cobertura.</li>
-                                    <li><strong>3. Apoyo Visual a Contenidos de Salud Clave:</strong> Diseñar o seleccionar imágenes que complementen y refuercen visualmente temas centrales para TulaSalud, como procedimientos de salud materna, signos de alerta en niños, o guías nutricionales adaptadas a alimentos locales.</li>
-                                    <li><strong>4. Fomento de Competencias por Observación:</strong> Acompañar la imagen con preguntas guía o ejercicios visuales que dirijan la atención del adulto a puntos clave, fomentando la observación activa y la aplicación práctica de lo que la imagen muestra.</li>
-                                    <li><strong>5. Accesibilidad Visual y Descripciones:</strong> Asegurar alto contraste, trazos gruesos y tamaños de texto legibles para cualquier elemento incrustado. Proporcionar descripciones "alt text" detalladas para la imagen, facilitando la accesibilidad digital y comprensión.</li>
-                                    <li><strong>6. Simbolismo de Progreso y Acceso:</strong> Utilizar elementos visuales que simbolicen la mejora en la cobertura de servicios de salud y el impacto positivo de la tele-educación en las comunidades, mostrando el avance y la conectividad.</li>
-                                    <li><strong>7. Optimización para Distribución Remota (Imágenes):</strong> Asegurar que la imagen esté optimizada en tamaño y formato (ej., webp, JPG comprimido) para una descarga y visualización eficientes en dispositivos móviles y conexiones de baja velocidad.</li>
-                                    <li><strong>8. Coherencia con Mensajes de Prevención Visuales:</strong> Si la imagen aborda un tema de salud, debe reforzar visualmente mensajes clave de prevención y promoción de la salud materna e infantil de manera clara y directa.</li>
-                                    <li><strong>9. Potencial de Interacción y Discusión Visual:</strong> Si la imagen se usa en una plataforma digital, considerar la posibilidad de añadir "hotspots" interactivos que, al hacer clic, ofrezcan información adicional o preguntas relacionadas con el contenido visual.</li>
-                                    <li><strong>10. Reflejo de la Atención Primaria (Imágenes):</strong> Las imágenes deben evocar o ilustrar escenarios auténticos de atención primaria de salud en contextos rurales, mostrando la interacción del personal de salud con la comunidad.</li>
-                                    <li><strong>11. Motivación a Través de la Imagen:</strong> Utilizar imágenes inspiradoras que reconozcan el valor del personal de salud en áreas remotas y refuercen su compromiso con la misión de TulaSalud.</li>
-                                    <li><strong>12. Evidencia de Impacto Comunitario (Imágenes):</strong> Si es posible, incluir imágenes que muestren el impacto real de las acciones de TulaSalud en las comunidades, fortaleciendo la conexión del personal con su trabajo.</li>
-                                </ul>
-                            `;
-                            llmButtons = '<button class="llm-feature-button" onclick="generateDetailedImageDescription()">Generar Descripción Detallada ✨</button>';
-                        } else if (file.type.includes('presentation') || file.type.includes('powerpoint')) {
-                            evaluationContent = `
-                                <h3>Evaluación Pedagógica del Contenido</h3>
-                                <p><strong>Tipo de Archivo:</strong> Presentación (PPT/PPTX)</p>
-                                <ul>
-                                    <li><strong>Estructura y organización:</strong> La presentación sigue una secuencia lógica, con una introducción y desarrollo claros. Se podría beneficiar de una diapositiva "roadmap" al inicio para que la audiencia visualice el recorrido y los objetivos de aprendizaje para adultos.</li>
-                                    <li><strong>Lenguaje y alfabetización funcional:</strong> El lenguaje en las diapositivas es adecuado para audiencias con escolaridad básica, pero algunos términos técnicos pueden requerir una explicación oral adicional o una diapositiva de glosario. La simplificación de frases complejas en viñetas cortas es recomendable.</li>
-                                    <li><strong>Pertinencia cultural y lingüística:</strong> Las imágenes y ejemplos en la presentación podrían ser más culturalmente relevantes para las comunidades rurales e indígenas de Guatemala. Incluir ejemplos de interacciones comunitarias o visuales de prácticas locales mejoraría la conexión.</li>
-                                    <li><strong>Conexión con Tele Educación de TulaSalud:</strong> La presentación se adapta a una modalidad a distancia, pero podría integrar más elementos interactivos específicos (ej., encuestas rápidas, espacios para preguntas) o enlaces a recursos adicionales (videos, sitios web de TulaSalud). Es importante que se mencione explícitamente la utilidad del material en la vigilancia epidemiológica materno-infantil o nutricional que promueve TulaSalud.</li>
-                                    <li><strong>Accesibilidad visual y técnica:</strong> El contraste de colores y el tamaño de letra en las diapositivas son en general buenos. Se debe asegurar que las gráficas y diagramas sean fácilmente legibles en proyectores o pantallas compartidas, incluso con baja resolución. Evitar el exceso de texto por diapositiva.</li>
-                                    <li><strong>Enfoque andragógico:</strong> La presentación tiene potencial para incentivar la participación activa. Se pueden añadir preguntas de reflexión o pequeños casos de estudio en las diapositivas para estimular el pensamiento crítico y la aplicación práctica por parte de los jóvenes y adultos.</li>
-                                    <li><strong>Equidad de género y estructuras familiares:</strong> Se observa la representación de género, pero podría ampliarse para mostrar familias diversas (monoparentales, reconstituidas, multigeneracionales) en las imágenes y ejemplos de texto, reflejando la realidad guatemalteca.</li>
-                                    <li><strong>Actualización y atribución de fuentes:</strong> Es importante que la presentación incluya la fecha de última revisión y los responsables (institución, departamento del MSPAS, equipo de TulaSalud) para asegurar la credibilidad y vigencia del contenido.</li>
-                                </ul>
-                            `;
-                            observationsContent = `
-                                <h3>Observaciones de Mejora (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud)</h3>
-                                <ul>
-                                    <li><strong>1. Diseño para Tele-Presentación:</strong> Optimizar cada diapositiva para la comprensión a distancia, usando menos texto, más gráficos y un diseño limpio. Limitarse a 3-5 puntos clave por diapositiva.</li>
-                                    <li><strong>2. Relevancia y Aplicabilidad Local (Presentación):</strong> Incluir diapositivas dedicadas a casos de estudio y escenarios prácticos de salud relevantes para las comunidades rurales de los departamentos meta de TulaSalud, con datos y ejemplos locales.</li>
-                                    <li><strong>3. Fortalecimiento de Competencias Específicas (PPT):</strong> Asegurar que las diapositivas con contenido clave se centren en las competencias que TulaSalud busca fortalecer en salud materna, infantil, nutrición y vigilancia epidemiológica, usando ejemplos claros.</li>
-                                    <li><strong>4. Brevedad y Enfoque al Grano (Diapositivas):</strong> Reformular textos largos en viñetas concisas y fáciles de recordar. Cada diapositiva debe tener un mensaje principal claro, evitando la sobrecarga de información.</li>
-                                    <li><strong>5. Enfoque Intercultural y de Género (PPT):</strong> Utilizar imágenes y ejemplos en las diapositivas que sean culturalmente sensibles y representen la diversidad de género y etnias de Guatemala. Incluir un glosario visual o de texto con términos clave en idiomas mayas si es pertinente.</li>
-                                    <li><strong>6. Participación Activa para Adultos (Diapositivas):</strong> Integrar preguntas de discusión abiertas en diapositivas clave, o pequeños ejercicios interactivos (ej., "¿Qué harías en esta situación?") que promuevan la participación activa.</li>
-                                    <li><strong>7. Visualización de Datos Clave (Gráficos PPT):</strong> Si la presentación contiene datos, usar infografías o gráficos sencillos y de alto impacto visual que sean fáciles de interpretar y relevantes para la toma de decisiones en salud.</li>
-                                    <li><strong>8. Accesibilidad Técnica en Zonas Rurales (Presentación):</strong> Verificar que la presentación sea compatible con diversas versiones de software y dispositivos, y que el tamaño del archivo sea manejable para descargas en conexiones limitadas.</li>
-                                    <li><strong>9. Guía para Facilitadores (en PPT):</strong> Incluir notas para el orador en cada diapositiva, proporcionando contexto adicional, preguntas para el debate y adaptaciones sugeridas para diferentes audiencias o situaciones de formación.</li>
-                                    <li><strong>10. Mensajes Motivacionales y de Retención (PPT):</strong> Incorporar diapositivas que reconozcan el esfuerzo y el impacto del personal de salud en áreas remotas, y que refuercen su conexión con la misión de TulaSalud.</li>
-                                    <li><strong>11. Integración Estratégica de Multimedia (PPT):</strong> Recomendar la inclusión de videos cortos (idealmente auto-alojados o de baja resolución) o enlaces a recursos de audio que complementen el contenido de la diapositiva sin sobrecargarla.</li>
-                                    <li><strong>12. Promoción de la E-Salud Comunitaria (Contenido PPT):</strong> Si aplica, resaltar el papel de la presentación en el impulso y apoyo al uso de sistemas comunitarios de E-Salud por el personal de salud.</li>
-                                </ul>
-                            `;
-                            llmButtons = '<button class="llm-feature-button" onclick="suggestSpeakerPoints()">Sugerir Puntos Clave para el Orador ✨</button>';
-                        }
-                    }
-                } else { // Manejar tipos de archivo verdaderamente desconocidos
-                    evaluationContent = `
-                        <h3>Análisis de Contenido</h3>
-                        <p><strong>Tipo de Archivo:</strong> Tipo de archivo desconocido</p>
-                        <p style="color:#DC3545; font-weight:bold;">⚠️ Formato de Archivo No Compatible</p>
-                        <p>Lo siento, el Analizador Pedagógico TeleEducación no puede procesar este tipo de archivo en este momento. Por favor, sube un PDF, una imagen (JPG, PNG) o una presentación (PPT/PPTX).</p>
-                    `;
-                    observationsContent = `
-                        <h3>Observaciones de Mejora</h3>
-                        <p style="color:#DC3545;">No se pueden ofrecer observaciones de mejora para formatos de archivo no compatibles.</p>
-                    `;
-                    llmButtons = ''; // No mostrar botones LLM para tipos desconocidos
+            window.getCategory = function(characteristic) {
+                return characteristicToCategoryMap[characteristic] || "Categoría Desconocida";
+            };
+
+            window.elaborateObservation = function(char, reason, suggestion) {
+                switch (char) {
+                    case "Contenido significativo y basado en experiencias":
+                        return `El material carece de una integración cultural y lingüística activa, lo que limita su resonancia y apropiación por parte de la población meta predominantemente Q'eqchi' de Alta Verapaz.`;
+                    case "Contexto cultural y lingüístico":
+                        return `El material carece de una integración cultural y lingüística activa, lo que limita su resonancia y apropiación por parte de la población meta predominantemente Q'eqchi' de Alta Verapaz.`;
+                    case "Actualidad y necesidades locales":
+                        return `El contenido no se conecta explícitamente con los desafíos actuales y las necesidades de salud específicas que enfrentan las comunidades de Cobán y Alta Verapaz.`;
+                    case "Lenguaje sencillo y directo":
+                        return `El vocabulario utilizado puede ser demasiado técnico o complejo para jóvenes y adultos con escolaridad básica, dificultando la comprensión y el engagement.`;
+                    case "Organización lógica y visual":
+                        return `La estructura del documento no es clara, carece de una jerarquía visual lógica de títulos y subtítulos, o las imágenes no están bien integradas para facilitar la comprensión.`;
+                    case "Diseño amigable y accesible":
+                        return `El diseño general del material (fuentes, contraste de color, uso de espacio) no es óptimo para la legibilidad y puede representar una barrera para la comprensión visual.`;
+                    case "Fomento de la participación activa":
+                        return `El material es mayormente informativo y no incluye suficientes elementos interactivos que promuevan la reflexión, el diálogo o la aplicación práctica del conocimiento.`;
+                    case "Enfoque en habilidades y competencias":
+                        return `El documento no enfatiza o no guía suficientemente el desarrollo de habilidades prácticas y aplicables a la vida diaria o al contexto laboral de la audiencia.`;
+                    case "Promoción de la autonomía":
+                        return `La estructura o el contenido del material no facilitan que el joven o adulto pueda usarlo de manera independiente para el autoaprendizaje, requiriendo constante guía externa.`;
+                    case "Concordancia curricular":
+                        return `El material no ha sido explícitamente alineado o revisado en función de los objetivos y competencias clave definidos por el Ministerio de Educación de Guatemala para la EJA.`;
+                    case "Valores y principios":
+                        return `Los valores de inclusión, equidad y respeto no están suficientemente articulados o ejemplificados en el contenido o las imágenes del material.`;
+                    case "Políticas de salud pública":
+                        return `El documento no hace referencia clara o no se alinea con las políticas, campañas o normativas específicas del MSPAS de Guatemala pertinentes para la región de Alta Verapaz.`;
+                    case "Evitar estereotipos":
+                        return `El material contiene imágenes o lenguaje que, de forma sutil o explícita, perpetúan estereotipos de género, etnia, edad, o capacidad, lo que puede alienar a la audiencia.`;
+                    case "Texto alternativo (Alt Text) para imágenes":
+                        return `La ausencia o insuficiencia de texto alternativo en las imágenes del documento representa una barrera significativa para la accesibilidad, impidiendo que usuarios con deficiencia visual accedan a la información visual esencial.`;
+                    case "Estructura de encabezados y listas":
+                        return `La estructura de encabezados y listas no es consistente o no se ha formateado correctamente, lo que dificulta la navegación para lectores de pantalla y la comprensión de la jerarquía.`;
+                    case "Contraste de color suficiente":
+                        return `El contraste entre el texto y el fondo es insuficiente para garantizar una lectura fácil, especialmente para personas con baja visión o daltonismo.`;
+                    case "Tamaño de fuente ajustable":
+                        return `El diseño del texto no asegura que el material mantenga su legibilidad y formato cuando el usuario intenta aumentar el tamaño de la fuente.`;
+                    case "Uso de texto en lugar de imágenes para información clave":
+                        return `Se detectaron casos donde información esencial se transmite exclusivamente a través de imágenes, sin una alternativa textual completa, creando barreras para usuarios de lectores de pantalla.`;
+                    case "Accesibilidad de tablas y gráficos":
+                        return `Las tablas y gráficos presentes no están diseñados para ser accesibles, careciendo de encabezados claros o descripciones textuales que faciliten su comprensión por lectores de pantalla.`;
+                    case "Precisión y veracidad científica":
+                        return `La información de salud en el documento no es claramente respaldada por evidencia científica actualizada, o puede contener mitos, comprometiendo su credibilidad y eficacia educativa.`;
+                    case "Mensajes de prevención y promoción de la salud":
+                        return `El énfasis en la prevención de enfermedades y la promoción de hábitos saludables no es suficientemente claro o predominante en el contenido del material.`;
+                    case "Fuentes confiables y reconocidas":
+                        return `El documento no cita o no referencia de manera adecuada a fuentes oficiales y confiables (MSPAS, OPS/OMS) que respalden la información de salud presentada.`;
+                    case "Sensibilidad cultural y pertinencia local":
+                        return `El material no es suficientemente sensible o no integra las prácticas, creencias y cosmovisiones específicas de las comunidades indígenas de Alta Verapaz.`;
+                    case "Énfasis en el autocuidado y acceso a servicios":
+                        return `El documento no empodera suficientemente a los usuarios sobre decisiones de salud personal o no proporciona información clara y accesible sobre cómo acceder a los servicios de salud locales.`;
+                    case "Concordancia con los programas de TulaSalud":
+                        return `El material no se alinea de forma explícita o no refleja los proyectos y áreas de trabajo específicas de TulaSalud en Alta Verapaz (ej. telemedicina, salud materno-infantil).`;
+                    case "Enfoque en la Comunicación para el Cambio Social y Comportamental (CCSC)":
+                        return `El diseño del material carece de elementos estratégicos de CCSC que busquen influir positivamente en las actitudes y prácticas de salud de la comunidad de forma proactiva.`;
+                    default:
+                        return `El material no cumple con esta característica. ${reason || 'Razón no especificada.'}`;
+                }
+            };
+
+            window.elaborateJustification = function(char, reason, suggestion) {
+                switch (char) {
+                    case "Contenido significativo y basado en experiencias":
+                        return `Para la EJA, el aprendizaje es más efectivo cuando es significativo y se conecta con la realidad del aprendiz. Un material ajeno a sus experiencias limita la aplicación práctica y el interés de jóvenes y adultos en Alta Verapaz.`;
+                    case "Contexto cultural y lingüístico":
+                        return `En EJA, la pertinencia cultural y lingüística es fundamental para garantizar el aprendizaje significativo y el respeto a la identidad. Ignorar el Q'eqchi' o las cosmovisiones locales crea una barrera de acceso y dificulta la comprensión y aplicación de los mensajes de salud, socavando los esfuerzos de TulaSalud para el desarrollo comunitario inclusivo.`;
+                    case "Actualidad y necesidades locales":
+                        return `Abordar temas desactualizados o no relevantes para la comunidad de Cobán y Alta Verapaz reduce la urgencia y la motivación para el aprendizaje en salud pública, limitando el impacto de las intervenciones de TulaSalud.`;
+                    case "Lenguaje sencillo y directo":
+                        return `Un lenguaje complejo genera exclusión y frustración. La claridad es crucial para garantizar que todos los jóvenes y adultos, independientemente de su nivel de escolaridad, puedan comprender y aplicar la información de salud vital.`;
+                    case "Organización lógica y visual":
+                        return `Una estructura desordenada o visualmente confusa dificulta la asimilación de la información, el seguimiento del hilo pedagógico y el autoaprendizaje, disminuyendo la eficacia del material didáctico.`;
+                    case "Diseño amigable y accesible":
+                        return `Un diseño deficiente actúa como una barrera de acceso y disminuye la motivación para el aprendizaje. En el contexto rural de Alta Verapaz, donde los recursos visuales y tecnológicos pueden ser limitados, un diseño accesible y legible es crucial para la retención y aplicación del conocimiento de salud.`;
+                    case "Fomento de la participación activa":
+                        return `El aprendizaje en adultos es más efectivo cuando es activo y participativo. La falta de oportunidades para la reflexión y el diálogo reduce el compromiso y la capacidad de los jóvenes y adultos para analizar críticamente y aplicar el contenido de salud.`;
+                    case "Enfoque en habilidades y competencias":
+                        return `La EJA se centra en empoderar a los individuos con capacidades aplicables. Si el material no promueve el desarrollo de habilidades prácticas, su utilidad se limita a la transmisión de información teórica sin impacto real en la vida o la salud de la comunidad.`;
+                    case "Promoción de la autonomía":
+                        return `La autonomía en el aprendizaje es clave para la EJA. Un material que no permite el autoaprendizaje limita el acceso al conocimiento y la flexibilidad necesaria para jóvenes y adultos con responsabilidades laborales y familiares.`;
+                    case "Concordancia curricular":
+                        return `La alineación curricular asegura que el material contribuye a los objetivos educativos formalmente y no formales, facilitando su integración en programas de EJA y asegurando la coherencia con las directrices nacionales.`;
+                    case "Valores y principios":
+                        return `Un material que no promueve valores democráticos, de inclusión y equidad puede perpetuar desigualdades y contradecir los principios de desarrollo sostenible y respeto a la diversidad que TulaSalud defiende.`;
+                    case "Políticas de salud pública":
+                        return `La coherencia con las políticas del MSPAS garantiza que el material refuerza los mensajes y estrategias oficiales de salud pública en Guatemala, maximizando el impacto y la credibilidad de las intervenciones.`;
+                    case "Evitar estereotipos":
+                        return `La promoción de valores de equidad, inclusión y respeto es crucial en la EJA y en los proyectos de TulaSalud. Los estereotipos pueden alienar a segmentos de la población, reforzar prejuicios y socavar los mensajes de salud y desarrollo comunitario.`;
+                    case "Texto alternativo (Alt Text) para imágenes":
+                        return `La inclusión es un principio fundamental en EJA y salud pública. Para TulaSalud, es imperativo que los materiales sean accesibles para todos, incluyendo a las personas con discapacidad visual en Alta Verapaz. Sin alt text, la información visual se pierde, comprometiendo la comprensión y la equidad en el acceso al conocimiento de salud.`;
+                    case "Estructura de encabezados y listas":
+                        return `Una estructura lógica y accesible es vital para la navegación y comprensión del contenido por parte de usuarios de lectores de pantalla. La ausencia de una jerarquía clara puede hacer el material ininteligible o muy difícil de usar, lo que afecta la autonomía y la eficacia pedagógica.`;
+                    case "Contraste de color suficiente":
+                        return `La legibilidad es una base para el aprendizaje. Un contraste de color insuficiente excluye a personas con diversas condiciones visuales, limitando gravemente el alcance y la efectividad del material educativo en una población diversa.`;
+                    case "Tamaño de fuente ajustable":
+                        return `La capacidad de ajustar el tamaño de la fuente es una necesidad básica de accesibilidad para personas con baja visión. Sin esta flexibilidad, el material se vuelve inaccesible para una parte significativa de la población EJA.`;
+                    case "Uso de texto en lugar de imágenes para información clave":
+                        return `La dependencia exclusiva de imágenes para información crítica excluye a usuarios que no pueden ver las imágenes o que utilizan lectores de pantalla. Esto viola los principios de diseño inclusivo y limita el acceso equitativo a la información de salud vital.`;
+                    case "Accesibilidad de tablas y gráficos":
+                        return `Las tablas y gráficos que no son accesibles impiden que usuarios de lectores de pantalla comprendan datos complejos o relaciones importantes. Esto afecta la capacidad de los jóvenes y adultos para analizar información de salud y tomar decisiones informadas.`;
+                    case "Precisión y veracidad científica":
+                        return `La confianza en la información de salud es primordial, especialmente en contextos vulnerables. Presentar datos incorrectos o mitos puede llevar a prácticas perjudiciales y erosionar la credibilidad de los educadores y de TulaSalud, afectando la salud pública.`;
+                    case "Mensajes de prevención y promoción de la salud":
+                        return `La prevención es el pilar de la salud pública. Un material que no prioriza estos mensajes pierde una oportunidad clave para empoderar a la comunidad y reducir la carga de enfermedades en Alta Verapaz.`;
+                    case "Fuentes confiables y reconocidas":
+                        return `La credibilidad de la información de salud es vital. La ausencia de fuentes confiables puede generar desconfianza, promover la desinformación y socavar los esfuerzos de salud pública y los proyectos de TulaSalud.`;
+                    case "Sensibilidad cultural y pertinencia local":
+                        return `Ignorar la sensibilidad cultural puede invalidar el material, generar rechazo y limitar la efectividad de los mensajes de salud en comunidades indígenas, contradiciendo el enfoque de TulaSalud en el respeto a la cosmovisión local.`;
+                    case "Énfasis en el autocuidado y acceso a servicios":
+                        return `El documento no empodera suficientemente a los usuarios sobre decisiones de salud personal o no proporciona información clara y accesible sobre cómo acceder a los servicios de salud locales.`;
+                    case "Concordancia con los programas de TulaSalud":
+                        return `La alineación con los programas específicos de TulaSalud maximiza la sinergia y el impacto. Un material desvinculado puede no contribuir directamente a los objetivos de salud materno-infantil, nutrición o telemedicina de la organización.`;
+                    case "Enfoque en la Comunicación para el Cambio Social y Comportamental (CCSC)":
+                        return `Para lograr un impacto real en la salud pública, el material debe ir más allá de la información. La falta de un enfoque CCSC limita su capacidad para influir en actitudes, creencias y prácticas, que son clave para la salud comunitaria sostenible.`;
+                    default:
+                        return `Esta mejora es crucial para la eficacia general del material y su impacto en la población de Alta Verapaz, alineándose con los principios de la EJA y los objetivos de TulaSalud.`;
+                }
+            };
+
+            window.elaborateActions = function(char, reason, suggestion) {
+                switch (char) {
+                    case "Contenido significativo y basado en experiencias":
+                        return `1. Realizar grupos focales con jóvenes y adultos de Cobán y Alta Verapaz para identificar sus experiencias, desafíos de salud y conocimientos previos. 2. Rediseñar ejemplos y estudios de caso utilizando situaciones extraídas de estas conversaciones para asegurar la relevancia. 3. Incorporar testimonios de la comunidad (con consentimiento) que ilustren la aplicación práctica del contenido.`;
+                    case "Contexto cultural y lingüístico":
+                        return `1. Identificar términos clave de salud y EJA y traducirlos al Q'eqchi' (u otros idiomas mayas relevantes) para crear un glosario bilingüe. 2. Integrar dichos términos en los títulos o resúmenes de las secciones. 3. Reemplazar imágenes genéricas con fotografías o ilustraciones de personas y entornos que reflejen la diversidad de Alta Verapaz. 4. Desarrollar ejemplos o estudios de caso que incorporen prácticas culturales y dilemas de salud específicos de las comunidades indígenas de la región.`;
+                    case "Actualidad y necesidades locales":
+                        return `1. Consultar los informes más recientes del MSPAS y organizaciones locales sobre indicadores de salud en Alta Verapaz (ej. tasas de desnutrición, morbilidad materna e infantil). 2. Integrar estos datos y las problemáticas identificadas como puntos de partida para las secciones relevantes. 3. Añadir ejemplos de iniciativas comunitarias o programas de salud actuales en la región.`;
+                    case "Lenguaje sencillo y directo":
+                        return `1. Aplicar la técnica de 'plain language' (lenguaje claro y sencillo). 2. Utilizar oraciones cortas y estructuras gramaticales directas. 3. Realizar pruebas de legibilidad con la población meta para identificar y simplificar palabras o frases complejas. 4. Crear un glosario de términos técnicos esenciales con explicaciones sencillas.`;
+                    case "Organización lógica y visual":
+                        return `1. Implementar una estructura de jerarquía de títulos (H1 para el título principal, H2 para secciones, H3 para subsecciones) consistente. 2. Utilizar listas con viñetas o numeradas para desglosar información densa. 3. Asegurar que las imágenes y gráficos complementen el texto y estén colocados estratégicamente para mejorar la comprensión visual.`;
+                    case "Diseño amigable y accesible":
+                        return `1. Establecer una guía de estilo visual con tamaños de fuente mínimos (ej. 14pt para cuerpo de texto, 16pt para títulos) y tipos de letra sans-serif de fácil lectura. 2. Utilizar una relación de contraste mínima de 4.5:1 para el texto normal y 3:1 para el texto grande (según WCAG AA). 3. Asegurar un amplio uso de espacios en blanco y márgenes adecuados para evitar la sobrecarga visual.`;
+                    case "Fomento de la participación activa":
+                        return `1. Insertar preguntas de reflexión al final de cada sección o tema. 2. Proponer actividades prácticas o ejercicios breves que requieran que el lector aplique la información (ej. 'Analiza un caso de tu comunidad y propón una solución'). 3. Sugerir temas para debate en grupo o diálogo comunitario.`;
+                    case "Enfoque en habilidades y competencias":
+                        return `1. Formular los objetivos de aprendizaje de cada sección en términos de habilidades concretas (ej. 'Usted será capaz de identificar los síntomas de...'). 2. Incluir pasos a paso para procedimientos de salud o acciones prácticas que los usuarios puedan replicar. 3. Desarrollar escenarios prácticos que requieran la aplicación de múltiples habilidades.`;
+                    case "Promoción de la autonomía":
+                        return `1. Organizar el material en módulos o unidades temáticas auto-contenidas. 2. Incluir resúmenes concisos al inicio o final de cada módulo. 3. Proporcionar un índice detallado y un glosario completo. 4. Desarrollar actividades de auto-evaluación con retroalimentación para que el usuario pueda verificar su comprensión.`;
+                    case "Concordancia curricular":
+                        return `1. Obtener y revisar el Currículo Nacional Base (CNB) para la EJA en Guatemala. 2. Mapear explícitamente el contenido del documento con los estándares, competencias y ejes temáticos del CNB para EJA. 3. Alinear el vocabulario y los conceptos clave con los utilizados en el currículo oficial.`;
+                    case "Valores y principios":
+                        return `1. Integrar mensajes explícitos sobre derechos humanos, equidad de género, inclusión, respeto a la diversidad (cultural, sexual, de capacidades) y desarrollo sostenible. 2. Utilizar ejemplos y narrativas que refuercen estos valores en el contexto de la salud y la comunidad.`;
+                    case "Políticas de salud pública":
+                        return `1. Identificar las políticas, guías y campañas actuales del MSPAS de Guatemala relevantes para el tema del documento en Alta Verapaz. 2. Citar estas políticas o referenciarlas en el texto para legitimar la información. 3. Incluir llamados a la acción que promuevan la participación en programas de salud pública locales.`;
+                    case "Evitar estereotipos":
+                        return `1. Realizar una auditoría de todas las imágenes y el lenguaje para identificar y eliminar cualquier representación estereotipada de género, etnia, edad o capacidad o rol social. 2. Asegurar una representación diversa y equitativa de la población guatemalteca en todas las ilustraciones y ejemplos.`;
+                    case "Texto alternativo (Alt Text) para imágenes":
+                        return `1. Revisar todas las imágenes en el documento para identificar aquellas que son informativas (no meramente decorativas). 2. Para cada imagen informativa, redactar un 'alt text' conciso (máximo 120-150 caracteres) que describa su contenido y propósito, asegurando que sea relevante para el contexto del documento. 3. Para gráficos o infografías complejas, considerar añadir una descripción más detallada en el cuerpo del texto o en un anexo.`;
+                    case "Estructura de encabezados y listas":
+                        return `1. Utilizar los estilos de encabezado (Título 1, Título 2, etc.) de Word en orden jerárquico para definir la estructura del documento. 2. Formatear todas las listas (pasos, enumeraciones, características) utilizando las funciones de viñetas o numeración nativas de Word, en lugar de caracteres manuales o tabulaciones. 3. Evitar saltos de encabezado injustificados (ej. pasar de H1 a H3 directamente).`;
+                    case "Contraste de color suficiente":
+                        return `1. Realizar pruebas de contraste de color en todas las combinaciones de texto y fondo. Utilizar herramientas de verificación de contraste (ej. 'Colour Contrast Analyser' o extensiones de navegador como 'Axe DevTools'). 2. Ajustar los colores para cumplir con las pautas de accesibilidad (WCAG AA para texto normal, AAA para texto grande) para asegurar una alta legibilidad.`;
+                    case "Tamaño de fuente ajustable":
+                        return `1. Establecer el tamaño de fuente base en Word de manera que el texto sea legible por defecto (ej., 12-14 puntos para el cuerpo). 2. Evitar el uso de imágenes de texto que no se escalen bien. 3. Probar el documento con las funciones de zoom de Word y de los sistemas operativos para asegurar que el formato y la legibilidad se mantienen intactos al aumentar el tamaño.`;
+                    case "Uso de texto en lugar de imágenes para información clave":
+                        return `1. Identificar todas las imágenes que contienen texto o información crucial (ej., infografías, diagramas con etiquetas). 2. Extraer todo el texto esencial de estas imágenes y presentarlo también como texto editable y seleccionable en el cuerpo del documento. 3. Para gráficos complejos, proporcionar una transcripción completa o un resumen detallado del contenido de la imagen en un 'alt text' preciso.`;
+                    case "Accesibilidad de tablas y gráficos":
+                        return `1. Para tablas: Usar las herramientas de tabla de Word para definir explícitamente los encabezados de fila y columna. Evitar la fusión de celdas innecesaria. 2. Para gráficos: Añadir un título descriptivo y, crucialmente, una descripción detallada en el texto circundante o un pie de figura, que explique el objetivo del gráfico, los datos que representa y las conclusiones principales.`;
+                    case "Precisión y veracidad científica":
+                        return `1. Establecer un proceso de revisión por pares con profesionales de salud pública y expertos en los temas específicos para validar todo el contenido científico. 2. Actualizar el material anualmente (o con mayor frecuencia si es necesario) para reflejar los últimos avances en medicina y salud pública, y las directrices del MSPAS.`;
+                    case "Mensajes de prevención y promoción de la salud":
+                        return `1. Integrar secciones dedicadas a 'Cómo Prevenir...' o 'Hábitos Saludables para...' en cada tema de salud. 2. Usar llamados a la acción claros y repetitivos sobre la importancia de la prevención y la promoción. 3. Incluir ejemplos de cómo estas prácticas impactan positivamente en la vida cotidiana de las familias en Alta Verapaz.`;
+                    case "Fuentes confiables y reconocidas":
+                        return `1. Implementar un sistema de citas y referencias bibliográficas (ej. estilo APA, Vancouver) para todo el contenido de salud. 2. Limitar las fuentes a instituciones oficiales (MSPAS, OPS/OMS, CDC, INCAP), universidades reconocidas y publicaciones científicas revisadas por pares. 3. Incluir una lista de referencias al final del documento.`;
+                    case "Sensibilidad cultural y pertinencia local":
+                        return `1. Consultar a líderes comunitarios, terapeutas mayas o ancianos para asegurar que las recomendaciones de salud respeten y, si es posible, integren prácticas y cosmovisiones indígenas. 2. Evitar cualquier lenguaje o ejemplo que pueda ser percibido como occidentalocéntrico o que desvalorice las prácticas de salud tradicionales. 3. Incorporar historias o ejemplos de éxito de la propia comunidad.`;
+                    case "Énfasis en el autocuidado y acceso a servicios":
+                        return `1. Dedicar secciones claras a 'Qué Puedes Hacer por Tu Salud' y 'Dónde Buscar Ayudar'. 2. Proporcionar información precisa y actualizada sobre la ubicación y los servicios ofrecidos por los puestos de salud, centros de salud y hospitales en la región de Alta Verapaz. 3. Incluir números de teléfono o contactos de emergencia relevantes.`;
+                    case "Concordancia con los programas de TulaSalud":
+                        return `1. Revisar los documentos de los proyectos actuales de TulaSalud (salud materno-infantil, nutrición, telemedicina, etc.). 2. Asegurar que los mensajes, objetivos y ejemplos del material didáctico se alineen directamente con las metas y metodologías de estos programas. 3. Incluir un mensaje de TulaSalud al inicio o final del documento que explique su rol y apoyo.`;
+                    case "Enfoque en la Comunicación para el Cambio Social y Comportamental (CCSC)":
+                        return `1. Integrar elementos de persuasión ética: testimonios (con consentimiento), narrativas de cambio, y beneficios claros de adoptar nuevas prácticas. 2. Utilizar un lenguaje que empodere y motive, evitando el tono imperativo. 3. Diseñar llamados a la acción que sean específicos, alcanzables y relevantes para el contexto comunitario.`;
+                    default:
+                        return `Se recomienda ${suggestion.toLowerCase()}.`;
+                }
+            };
+
+            window.performExpertEvaluation = function(contentHtml, fileName) {
+                const results = [];
+                // La verificación de isHealthRelatedByName se mantiene para los criterios internos que la usen,
+                // pero no afectará el flujo principal de detención del análisis.
+                const isHealthRelatedByName = !fileName.toLowerCase().includes('no_salud');
+
+                // Helper para buscar elementos en el HTML
+                const htmlContains = (pattern) => contentHtml.toLowerCase().includes(pattern.toLowerCase());
+                const countHeadings = (level) => (contentHtml.match(new RegExp(`<h${level}>`, 'g')) || []).length;
+                const countLists = () => (contentHtml.match(/<ul|ol>/g) || []).length;
+                const countImages = () => (contentHtml.match(/<img/g) || []).length;
+                const countImagesWithAlt = () => {
+                    const imgTags = contentHtml.match(/<img[^>]*>/g) || [];
+                    return imgTags.filter(img => /alt\s*=\s*['"][^'"]+['"]/.test(img)).length;
+                };
+                const countTables = () => (contentHtml.match(/<table/g) || []).length;
+
+
+                // --- Criterios de Evaluación ---
+
+                // Relevancia y Pertinencia (EJA y Contexto Local)
+                results.push({
+                    char: "Contenido significativo y basado en experiencias",
+                    status: isHealthRelatedByName ? "CUMPLE" : "NO CUMPLE",
+                    reason: isHealthRelatedByName ? "" : "El nombre del documento sugiere falta de relación con temas de salud o experiencias comunitarias relevantes para EJA.",
+                    suggestion: isHealthRelatedByName ? "Considerar la inclusión explícita de más ejemplos o estudios de caso que reflejen directamente las experiencias laborales y familiares de jóvenes y adultos en Cobán, Alta Verapaz." : "Asegurar que el contenido aborde temáticas de salud y desarrollo comunitario directamente vinculadas a las vivencias y necesidades de la población de Alta Verapaz."
+                });
+
+                results.push({
+                    char: "Contexto cultural y lingüístico",
+                    status: htmlContains("q'eqchi'") || htmlContains("maya") || htmlContains("cosmovisión") ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se detectaron referencias explícitas a la lengua Q'eqchi' o elementos culturales de Alta Verapaz en el contenido extraído.",
+                    suggestion: "Incorporar frases clave en Q'eqchi' (o idiomas mayas relevantes) y utilizar imágenes o ejemplos que reflejen la diversidad cultural y étnica de la región, sus tradiciones y costumbres."
+                });
+
+                results.push({
+                    char: "Actualidad y necesidades locales",
+                    status: isHealthRelatedByName && (htmlContains("salud materna") || htmlContains("nutrición") || htmlContains("epidemiolog") || htmlContains("cobán") || htmlContains("alta verapaz")) ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se identificaron referencias claras a desafíos específicos o datos actuales de Cobán y Alta Verapaz en el contenido.",
+                    suggestion: "Incluir datos estadísticos actualizados de salud (ej. de MSPAS para Alta Verapaz) o menciones de programas/problemas específicos de la región (ej. desnutrición crónica, acceso a agua segura) para aumentar la pertinencia."
+                });
+
+                // Claridad y Comprensibilidad
+                results.push({
+                    char: "Lenguaje sencillo y directo",
+                    status: contentHtml.length > 500 && !htmlContains("tecnicismos_complejos_ejemplo") ? "CUMPLE" : "NO CUMPLE", // Simulación: si hay mucho texto y no hay palabras clave "complejas"
+                    reason: "El volumen de texto extraído no es suficiente para asegurar la simplicidad o podría contener tecnicismos. La evaluación real requeriría un análisis de NLP.",
+                    suggestion: "Revisar el vocabulario para asegurar que sea accesible para jóvenes y adultos con escolaridad básica. Evitar jerga técnica y usar analogías o explicaciones simples para conceptos complejos."
+                });
+
+                results.push({
+                    char: "Organización lógica y visual",
+                    status: countHeadings(1) > 0 && countHeadings(2) > 0 && countLists() > 0 ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se detectaron estructuras claras de encabezados o listas, lo que podría dificultar la comprensión y seguimiento del contenido.",
+                    suggestion: "Utilizar títulos (H1, H2, H3), subtítulos y listas con viñetas o numeradas para organizar la información de forma jerárquica y visualmente atractiva."
+                });
+                
+                results.push({
+                    char: "Diseño amigable y accesible",
+                    status: "NO CUMPLE", // Esto no se puede verificar directamente en el HTML extraído por mammoth.js
+                    reason: "El análisis del formato y legibilidad (fuentes, contraste, espacio en blanco) requiere una inspección visual directa del documento original, lo cual no es posible mediante la extracción HTML. Se asume un cumplimiento parcial o nulo por defecto en la simulación.",
+                    suggestion: "Asegurar un diseño limpio, con fuentes legible (tamaño mínimo 14 pts), alto contraste entre texto y fondo, y uso adecuado de espacios en blanco. Considerar la accesibilidad general para diversos dispositivos y condiciones de luz."
+                });
+
+                // Adecuación Pedagógica y Didáctica
+                results.push({
+                    char: "Fomento de la participación activa",
+                    status: htmlContains("actividad") || htmlContains("pregunta de reflexión") || htmlContains("discute") || htmlContains("ejercicio") || htmlContains("reflexiona") ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se identificaron elementos explícitos (preguntas, actividades, ejercicios) que promuevan la participación activa del lector.",
+                    suggestion: "Incluir preguntas de reflexión, actividades prácticas, o propuestas para discusión que inviten a los usuarios a aplicar lo aprendido y conectar con sus experiencias."
+                });
+
+                results.push({
+                    char: "Enfoque en habilidades y competencias",
+                    status: isHealthRelatedByName && (htmlContains("desarrollar habilidades") || htmlContains("aprenderá a")) ? "CUMPLE" : "NO CUMPLE",
+                    reason: "El enfoque en el desarrollo de habilidades prácticas no es claro, o el contenido no parece ser directamente aplicable a la vida diaria.",
+                    suggestion: "Formular los objetivos del material en términos de habilidades concretas (ej. 'al finalizar, usted podrá identificar...') y ofrecer actividades que permitan practicar estas habilidades aplicables a su contexto."
+                });
+
+                results.push({
+                    char: "Promoción de la autonomía",
+                    status: countHeadings(1) > 0 && countHeadings(2) > 0 && contentHtml.length > 1000 && countLists() > 0 ? "CUMPLE" : "NO CUMPLE", // Asume que buena estructura y extensión larga promueve autonomía
+                    reason: "La estructura del documento y la extensión del contenido no son óptimas para el autoaprendizaje independiente o semi-independiente.",
+                    suggestion: "Organizar el material en módulos claros, incluir resúmenes al final de cada sección, y añadir guías de estudio o auto-evaluación para facilitar el uso autónomo."
+                });
+
+                // Alineación con Políticas Educativas y de Salud
+                results.push({
+                    char: "Concordancia curricular",
+                    status: "NO CUMPLE", // Imposible de verificar sin acceso a currículos específicos
+                    reason: "No es posible determinar la alineación con los objetivos de aprendizaje de EJA del MINEDUC sin acceso a esos currículos específicos. Se asume que no cumple por defecto en la simulación.",
+                    suggestion: "Revisar y mapear explícitamente el contenido del documento con los objetivos de aprendizaje y las competencias clave del Currículo Nacional Base (CNB) para EJA en Guatemala."
+                });
+
+                results.push({
+                    char: "Valores y principios",
+                    status: isHealthRelatedByName && (htmlContains("inclusión") || htmlContains("respeto") || htmlContains("equidad") || htmlContains("derechos")) ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se detectaron mensajes explícitos que promuevan valores democráticos, de inclusión o equidad, o el contenido no se alinea con ellos.",
+                    suggestion: "Integrar mensajes y ejemplos que refuercen valores como la equidad, el respeto a la diversidad cultural y de género, la inclusión y la participación comunitaria para el desarrollo sostenible."
+                });
+
+                results.push({
+                    char: "Políticas de salud pública",
+                    status: htmlContains("msps") || htmlContains("ministerio de salud pública") || htmlContains("políticas de salud") ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se detectaron referencias explícitas a las políticas o campañas de salud pública del MSPAS de Guatemala para la región de Alta Verapaz.",
+                    suggestion: "Referenciar directamente las políticas, programas o normativas del Ministerio de Salud Pública y Asistencia Social (MSPAS) de Guatemala que son relevantes para el tema del documento en Alta Verapaz."
+                });
+
+                results.push({
+                    char: "Evitar estereotipos",
+                    status: "NO CUMPLE", // Imposible de verificar en imágenes extraídas o el lenguaje sin NLP avanzado
+                    reason: "No se puede asegurar que las imágenes o el lenguaje estén libres de estereotipos de género, etnia, edad o capacidad sin un análisis visual y de lenguaje profundo. Es un riesgo común que requiere revisión manual.",
+                    suggestion: "Revisar cuidadosamente todas las imágenes y el lenguaje utilizado para asegurar que representen de manera inclusiva y respetuosa a todas las personas, evitando cualquier tipo de estereotipo o sesgo."
+                });
+
+                // --- Nuevos Criterios de Accesibilidad para Personas con Deficiencia Visual ---
+                results.push({
+                    char: "Texto alternativo (Alt Text) para imágenes",
+                    status: countImages() > 0 && countImagesWithAlt() === countImages() ? "CUMPLE" : "NO CUMPLE", // Simulación: si hay imágenes y todas tienen alt
+                    reason: countImages() === 0 ? "No se detectaron imágenes en el documento." : (countImagesWithAlt() < countImages() ? "Algunas o todas las imágenes detectadas carecen de texto alternativo." : "No se pudo verificar la precisión del texto alternativo de las imágenes detectadas."),
+                    suggestion: "Asegurar que todas las imágenes relevantes tengan descripciones de texto alternativas (alt text) precisas y concisas, que permitan a los lectores de pantalla transmitir la información visual a usuarios con deficiencia visual."
+                });
+
+                results.push({
+                    char: "Estructura de encabezados y listas",
+                    status: countHeadings(1) > 0 && countHeadings(2) > 0 && countLists() > 0 ? "CUMPLE" : "NO CUMPLE",
+                    reason: "La estructura de encabezados y listas no es consistente o no se ha formateado correctamente, lo que dificulta la navegación para lectores de pantalla y la comprensión de la jerarquía.",
+                    suggestion: "Utilizar los estilos de encabezado (Título 1, Título 2, etc.) y los formatos de lista (viñetas, numeradas) nativos de Word para crear una estructura lógica y navegable para lectores de pantalla."
+                });
+
+                results.push({
+                    char: "Contraste de color suficiente",
+                    status: "NO CUMPLE", // Imposible de verificar sin un análisis de rendering
+                    reason: "El contraste entre el texto y el fondo no se puede verificar automáticamente desde el HTML extraído. Un bajo contraste puede dificultar la lectura para personas con baja visión.",
+                    suggestion: "Asegurar que el contraste entre el color del texto y el fondo sea suficientemente alto (ej. relación de contraste 4.5:1 para texto normal, 3:1 para texto grande, según WCAG AA) para facilitar la lectura."
+                });
+
+                results.push({
+                    char: "Tamaño de fuente ajustable",
+                    status: "NO CUMPLE", // Word documents are generally resizable, but this check applies to web rendering
+                    reason: "Aunque los documentos Word son generalmente ajustables, se debe asegurar que el texto sea adaptable y que el diseño no se rompa al aumentar el tamaño de la fuente. No es directamente verificable por el parser.",
+                    suggestion: "Utilizar un tamaño de fuente base legible (mínimo 12-14 pts) y asegurar que el documento mantenga su legibilidad y formato cuando el usuario aumente el zoom o el tamaño del texto."
+                });
+
+                results.push({
+                    char: "Uso de texto en lugar de imágenes para información clave",
+                    status: countImages() > 0 && countImagesWithAlt() !== countImages() ? "NO CUMPLE" : (countImages() === 0 ? "CUMPLE" : "NO CUMPLE"), // Modificado para evitar ambigüedad en la cadena y usar las funciones de conteo directamente
+                    reason: countImages() === 0 ? "No se detectaron imágenes en el documento, por lo que este criterio no aplica directamente." : (countImagesWithAlt() !== countImages() ? "Se detectaron imágenes que podrían contener información esencial solo en formato gráfico, sin una alternativa textual completa o correcta, haciéndola inaccesible para lectores de pantalla." : "No se pudo verificar la precisión del texto en imágenes o su redundancia textual. Es vital evitar información solo visual."),
+                    suggestion: "Evitar el uso de imágenes para transmitir información crucial que no esté también presente como texto. Si es imprescindible, proporcionar una transcripción completa o un resumen detallado del contenido de la imagen en un 'alt text' preciso."
+                });
+
+                results.push({
+                    char: "Accesibilidad de tablas y gráficos",
+                    status: countTables() > 0 ? "NO CUMPLE" : "CUMPLE", // Asume que si hay tablas, no son accesibles por defecto
+                    reason: countTables() > 0 ? "Las tablas detectadas pueden carecer de encabezados claros o descripciones textuales, dificultando su comprensión para lectores de pantalla." : "No se detectaron tablas o gráficos, por lo que este criterio no aplica directamente a este análisis. Sin embargo, se debe tener en cuenta si se añaden.",
+                    suggestion: "Asegurar que todas las tablas y gráficos tengan encabezados de columna/fila correctamente definidos y, si son complejos, proporcionar un resumen textual o una descripción en el cuerpo del documento para facilitar su comprensión."
+                });
+
+
+                // Especificidades para el Sector Salud y TulaSalud
+                results.push({
+                    char: "Precisión y veracidad científica",
+                    status: "NO CUMPLE", // Imposible de verificar contenido científico
+                    reason: "La veracidad científica y la actualización de la información requieren la revisión por expertos en salud pública, lo cual no es parte de este análisis automático. Se asume que no cumple por defecto en la simulación.",
+                    suggestion: "Asegurar que todo el contenido de salud sea preciso, actualizado y basado en la evidencia científica más reciente, validado por profesionales de la salud o instituciones reconocidas (ej. MSPAS, OPS/OMS)."
+                });
+
+                results.push({
+                    char: "Mensajes de prevención y promoción de la salud",
+                    status: isHealthRelatedByName && (htmlContains("prevención") || htmlContains("hábitos saludables") || htmlContains("autocuidado") || htmlContains("promoción de la salud")) ? "CUMPLE" : "NO CUMPLE",
+                    reason: "El énfasis en la prevención de enfermedades y la promoción de hábitos saludables no es suficientemente claro en el contenido.",
+                    suggestion: "Destacar proactivamente los mensajes sobre hábitos saludables, prevención de enfermedades comunes en la región (ej. IRA, EDA) y la importancia del autocuidado y la promoción de la salud comunitaria."
+                });
+
+                results.push({
+                    char: "Fuentes confiables y reconocidas",
+                    status: htmlContains("msps") || htmlContains("ops/oms") || htmlContains("fuente") || htmlContains("referencia") ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se detectaron citas o referencias a fuentes oficiales y confiables (MSPAS, OPS/OMS) que respalden la información.",
+                    suggestion: "Incluir un apartado de 'Referencias Bibliográficas' que cite claramente las fuentes oficiales y científicas de la información de salud presentada (ej. MSPAS, OPS/OMS, CDC, etc.)."
+                });
+
+                results.push({
+                    char: "Sensibilidad cultural y pertinencia local",
+                    status: htmlContains("tradiciones") || htmlContains("cosmovisión") || htmlContains("comunidades indígenas") || htmlContains("culturalmente relevante") ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se detectaron menciones explícitas a prácticas, creencias o cosmovisiones de las comunidades indígenas de Alta Verapaz.",
+                    suggestion: "Integrar ejemplos, terminología o recomendaciones que respeten y sean sensibles a las prácticas culturales y cosmovisiones locales de las comunidades indígenas de Alta Verapaz."
+                });
+
+                results.push({
+                    char: "Énfasis en el autocuidado y acceso a servicios",
+                    status: htmlContains("autocuidado") || htmlContains("acceso a servicios") || htmlContains("puesto de salud") || htmlContains("clínica") ? "CUMPLE" : "NO CUMPLE",
+                    reason: "El material no enfatiza suficientemente el empoderamiento del individuo en sus decisiones de salud o el conocimiento de los servicios de salud locales.",
+                    suggestion: "Fomentar activamente el autocuidado y proporcionar información clara sobre cómo y dónde acceder a los servicios de salud disponibles en las comunidades de Alta Verapaz."
+                });
+
+                results.push({
+                    char: "Concordancia con los programas de TulaSalud",
+                    status: htmlContains("tulasalud") || htmlContains("telemedicina") || htmlContains("salud materno-infantil") || htmlContains("nutrición") || htmlContains("desarrollo comunitario") ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se detectaron menciones explícitas o alineación clara con los proyectos y áreas de trabajo específicas de TulaSalud.",
+                    suggestion: "Vincular directamente el contenido con los proyectos y áreas de enfoque de TulaSalud (ej. telemedicina, salud materna e infantil, nutrición, desarrollo comunitario) para maximizar su impacto."
+                });
+
+                results.push({
+                    char: "Enfoque en la Comunicación para el Cambio Social y Comportamental (CCSC)",
+                    status: (htmlContains("promueve cambio") || htmlContains("influir en actitudes") || htmlContains("cambio de comportamiento") || htmlContains("comunicación para el cambio")) && isHealthRelatedByName ? "CUMPLE" : "NO CUMPLE",
+                    reason: "No se identificaron elementos claros de diseño que busquen influir positivamente en las actitudes y prácticas de salud a nivel comunitario.",
+                    suggestion: "Diseñar el material con un enfoque estratégico de CCSC, utilizando mensajes claros, llamados a la acción, testimonios o narrativas que motiven un cambio positivo en las actitudes y prácticas de salud."
+                });
+
+                return results;
+            };
+
+            window.getLLMButtonsForFileType = function(fileType) {
+                // Para DOCX, ofrecemos botones de preguntas y observaciones detalladas
+                return `
+                    <button class="llm-feature-button" id="comprehensionQuestionsButton">Generar Preguntas de Comprensión ✨</button>
+                    <button class="llm-feature-button" id="detailedObservationsButton">Generar Observaciones Detalladas ✨</button>
+                `;
+            };
+
+            window.generateComprehensionQuestions = async function() {
+                // If questions are already generated, show an alert and return
+                if (areQuestionsGenerated) {
+                    showAlertDialog("Las Preguntas de Comprensión ya fueron generadas.");
+                    return;
                 }
 
-                // Oculta el indicador de carga principal y muestra los resultados
+                llmLoadingIndicator.style.display = 'block';
+                llmOutput.innerHTML = ''; // Limpiar salida anterior
+
+                // Disable all LLM buttons at the start of the generation
+                if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = true;
+                if (detailedObservationsButton) detailedObservationsButton.disabled = true;
+                llmLoadingIndicator.querySelector('p').textContent = 'Generando Preguntas de Comprensión con IA...'; // Specific message
+
+                const noCumpleCriteria = currentEvaluationResults.filter(item => item.status === "NO CUMPLE");
+
+                if (noCumpleCriteria.length === 0) {
+                    llmOutput.innerHTML = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><p>Su documento cumple con todos los criterios evaluados. No se requieren preguntas de mejora en este momento.</p>';
+                    llmLoadingIndicator.style.display = 'none';
+                    areQuestionsGenerated = true; // Mark as generated
+                    // Re-enable buttons if no generation was needed
+                    if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
+                    if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                    return;
+                }
+
+                const numQuestions = Math.min(3, noCumpleCriteria.length); // Generate up to 3 questions, or fewer if less deficiencies
+
+                let promptContent = `Actúa como un consultor experto en diseño instruccional, salud pública y desarrollo de materiales educativos inclusivos para jóvenes y adultos en contextos rurales de Guatemala, con profundo conocimiento de los proyectos de TulaSalud en Alta Verapaz.
+                Genera ${numQuestions} preguntas de comprensión abiertas y reflexivas, específicamente diseñadas para evaluar la comprensión de las *deficiencias* identificadas en el material didáctico adjunto. Las preguntas deben ayudar al usuario a pensar críticamente sobre cómo mejorar el documento de Word en relación con estas deficiencias.
+                Concéntrate en la relevancia para la EJA, la salud pública en Guatemala (especialmente Alta Verapaz), y la alineación con los objetivos de TulaSalud y la accesibilidad. Evita preguntas repetitivas.
+
+                Deficiencias identificadas en la evaluación previa:
+                `;
+
+                noCumpleCriteria.forEach((item, index) => {
+                    promptContent += `\n\n--- Deficiencia ${index + 1} ---\n`;
+                    promptContent += `Característica: ${item.char}\n`;
+                    promptContent += `Observación: ${window.elaborateObservation(item.char, item.reason, item.suggestion)}\n`;
+                    promptContent += `Justificación/Impacto: ${window.elaborateJustification(item.char, item.reason, item.suggestion)}\n`;
+                    promptContent += `Acciones Sugeridas: ${window.elaborateActions(item.char, item.reason, item.suggestion)}\n`;
+                });
+
+                promptContent += `\nGenera un JSON con un array de ${numQuestions} preguntas de comprensión. Ejemplo: ["pregunta 1", "pregunta 2"]`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptContent }] });
+
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: { "type": "STRING" }
+                        }
+                    }
+                };
+
+                const apiKey = ""; // Leave as-is, Canvas will provide
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const jsonString = result.candidates[0].content.parts[0].text;
+                        const questions = JSON.parse(jsonString);
+
+                        let output = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><ul>';
+                        if (Array.isArray(questions) && questions.length > 0) {
+                            questions.forEach(q => { output += `<li>${q}</li>`; });
+                        } else {
+                            output += `<li>No se pudieron generar preguntas de comprensión basadas en las deficiencias identificadas.</li>`;
+                        }
+                        output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido, con un enfoque en la relevancia para jóvenes y adultos y la alineación con las políticas educativas guatemaltecas y el perfil de Tele Educación de TulaSalud.</em></p>';
+                        llmOutput.innerHTML = output;
+                        areQuestionsGenerated = true; // Mark as generated successfully
+                    } else {
+                        llmOutput.innerHTML = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><p>Hubo un problema al generar las preguntas. Por favor, inténtalo de nuevo.</p>';
+                        console.error("Respuesta inesperada de la API de Gemini:", result);
+                    }
+                } catch (error) {
+                    llmOutput.innerHTML = '<h3>Preguntas de Comprensión y Reflexión Sugeridas por la IA ✨</h3><p>Error al comunicarse con el modelo de IA para generar preguntas. Por favor, inténtalo de nuevo.</p>';
+                    console.error("Error en la llamada a la API de Gemini:", error);
+                } finally {
+                    llmLoadingIndicator.style.display = 'none';
+                    // Re-enable all LLM buttons after generation is complete
+                    if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
+                    if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                }
+            };
+
+            window.generateDetailedObservations = async function() {
+                // If observations are already generated, show an alert and return
+                if (areObservationsGenerated) {
+                    showAlertDialog("Las Observaciones de Mejora ya fueron generadas.");
+                    return;
+                }
+
+                llmLoadingIndicator.style.display = 'block';
+                llmOutput.innerHTML = ''; // Limpiar salida anterior
+
+                // Disable all LLM buttons at the start of the generation
+                if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = true;
+                if (detailedObservationsButton) detailedObservationsButton.disabled = true;
+                llmLoadingIndicator.querySelector('p').textContent = 'Generando Observaciones Detalladas con IA...'; // Specific message
+
+                const noCumpleCriteria = currentEvaluationResults.filter(item => item.status === "NO CUMPLE");
+
+                if (noCumpleCriteria.length === 0) {
+                    llmOutput.innerHTML = `
+                        <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+                            <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                            <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
+                            <p style="color: #E0E0E0;">¡Felicidades! Su documento cumple con todos los criterios evaluados. No se requieren observaciones de mejora adicionales en este momento.</p>
+                        </div>
+                    `;
+                    llmLoadingIndicator.style.display = 'none';
+                    areObservationsGenerated = true; // Mark as generated
+                    // Re-enable buttons if no generation was needed
+                    if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
+                    if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                    return;
+                }
+
+                let promptContent = `Actúa como un consultor experto en diseño instruccional, salud pública y desarrollo de materiales educativos inclusivos para jóvenes y adultos en contextos rurales de Guatemala, con profundo conocimiento de los proyectos de TulaSalud en Alta Verapaz. También eres un experto en diseño web y usabilidad.
+
+                Tu tarea es generar observaciones de mejora detalladas y accionables para un material didáctico (documento en Word), basándote exclusivamente en una evaluación previa. Esta evaluación identificó si el material CUMPLE o NO CUMPLE con criterios específicos de relevancia, claridad, pedagogía, alineación con políticas, accesibilidad (especialmente para deficiencia visual) y pertinencia para el sector salud/TulaSalud en Cobán, Alta Verapaz.
+
+                Solo debes generar observaciones para aquellas características que hayan sido marcadas como "NO CUMPLA" en la evaluación proporcionada.
+
+                Para cada característica que "NO CUMPLA", debes generar la siguiente información:
+                1.  **"char"**: La característica deficiente original.
+                2.  **"observacion"**: Una observación de mejora clara y específica. Esta observación debe ir más allá de la "sugerencia" básica y ofrecer una dirección más concreta para la implementación en el documento de Word.
+                3.  **"justificacion"**: Una justificación breve y concisa de por qué la mejora es importante en el contexto de la EJA, el sector salud o la accesibilidad en Alta Verapaz.
+                4.  **"acciones"**: Un ejemplo o una guía de acción detallada si la mejora lo amerita, para ilustrar cómo podría implementarse directamente en el documento de Word.
+
+                Presenta la salida como un JSON con un array de objetos, donde cada objeto contiene 'char', 'observacion', 'justificacion', y 'acciones' para cada deficiencia detectada.
+
+                Deficiencias identificadas en la evaluación previa (usa esta información para generar las observaciones, justificaciones y acciones):
+                `;
+
+                noCumpleCriteria.forEach((item, index) => {
+                    promptContent += `\n\n--- Deficiencia ${index + 1} ---\n`;
+                    promptContent += `Característica: ${item.char}\n`;
+                    promptContent += `Razón: ${item.reason}\n`;
+                    promptContent += `Sugerencia previa: ${item.suggestion}\n`;
+                });
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptContent }] });
+
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    "char": { "type": "STRING" },
+                                    "observacion": { "type": "STRING" },
+                                    "justificacion": { "type": "STRING" },
+                                    "acciones": { "type": "STRING" }
+                                },
+                                "propertyOrdering": ["char", "observacion", "justificacion", "acciones"]
+                            }
+                        }
+                    }
+                };
+
+                const apiKey = ""; // Leave as-is, Canvas will provide
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const jsonString = result.candidates[0].content.parts[0].text;
+                        const observations = JSON.parse(jsonString);
+
+                        let detailedObservationsHtml = `
+                            <div class="observations-card" style="
+                                background-color: #3A3A3A; /* Fondo gris oscuro */
+                                color: #E0E0E0; /* Texto blanco */
+                                border: 1px solid #E0E0E0; /* Borde blanco */
+                                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                                border-radius: 8px; /* Esquinas redondeadas */
+                                padding: 20px;
+                                margin-bottom: 20px;
+                                font-family: Arial, sans-serif;
+                            ">
+                                <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                                <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
+                        `;
+
+                        if (Array.isArray(observations) && observations.length > 0) {
+                            observations.forEach((obs, index) => {
+                                detailedObservationsHtml += `
+                                    <h3><strong style="color: #8A2BE2;">${window.getCategory(obs.char)}</strong></h3>
+                                    <h4 style="color: #00BFFF; margin-bottom: 5px;"><strong>Deficiencia Detectada:</strong> ${obs.char}</h4>
+                                    <ul style="list-style-type: none; padding-left: 0;">
+                                        <li style="margin-bottom: 8px;">• <strong style="color: #E0E0E0;">Observación de Mejora:</strong> ${obs.observacion}</li>
+                                        <li style="margin-bottom: 8px;">• <strong style="color: #E0E0E0;">Justificación/Impacto:</strong> ${obs.justificacion}</li>
+                                        <li style="margin-bottom: 8px;">• <strong style="color: #E0E0E0;">Acciones Sugeridas:</strong> ${obs.acciones}</li>
+                                    </ul>
+                                    ${index < observations.length - 1 ? '<hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px; margin-top: 20px;">' : ''}
+                                `;
+                            });
+                        } else {
+                            detailedObservationsHtml += `<p style="color: #E0E0E0;">No se pudieron generar observaciones de mejora detalladas basadas en las deficiencias identificadas.</p>`;
+                        }
+
+                        detailedObservationsHtml += `</div>`; // Cierra la tarjeta
+
+                        llmOutput.innerHTML = detailedObservationsHtml;
+                        areObservationsGenerated = true; // Mark as generated successfully
+                    } else {
+                        llmOutput.innerHTML = `
+                            <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+                                <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                                <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
+                                <p style="color: #E0E0E0;">Hubo un problema al generar las observaciones detalladas. Por favor, inténtalo de nuevo.</p>
+                            </div>
+                        `;
+                        console.error("Respuesta inesperada de la API de Gemini:", result);
+                    }
+                } catch (error) {
+                    llmOutput.innerHTML = `
+                        <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+                            <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                            <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
+                            <p style="color: #E0E0E0;">Error al comunicarse con el modelo de IA para generar observaciones. Por favor, inténtalo de nuevo.</p>
+                        </div>
+                    `;
+                    console.error("Error en la llamada a la API de Gemini:", error);
+                } finally {
+                    llmLoadingIndicator.style.display = 'none';
+                    // Re-enable all LLM buttons after generation is complete
+                    if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
+                    if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                }
+            };
+
+            /**
+             * Muestra un cuadro de diálogo de alerta personalizado.
+             * @param {string} message - El mensaje a mostrar.
+             */
+            function showAlertDialog(message) {
+                alertDialogMessage.textContent = message;
+                alertDialog.style.display = 'flex'; // Show the modal
+            }
+
+            // Event listener for the alert dialog's close button
+            alertDialogCloseButton.addEventListener('click', () => {
+                alertDialog.style.display = 'none'; // Hide the modal
+            });
+
+            // Event listener for the info button
+            infoButton.addEventListener('click', () => {
+                infoDialog.style.display = 'flex'; // Show the info modal
+            });
+
+            // Event listener for the info dialog's close button
+            infoDialogCloseButton.addEventListener('click', () => {
+                infoDialog.style.display = 'none'; // Hide the info modal
+            });
+
+            // --- FIN DE DEFINICIONES DE FUNCIONES GLOBALES ---
+
+            // Previene el comportamiento por defecto de arrastrar y soltar
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            // Resalta el área al arrastrar el archivo
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = '#00BFFF', false);
+            });
+
+            // Vuelve al borde normal al salir del área
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = '#444444', false);
+            });
+
+            // Maneja la caída del archivo
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    handleFileSelection(files[0]);
+                }
+            }
+
+            // Abre el explorador de archivos al hacer click en el área de subida
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Maneja la selección de archivos desde el input
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+
+            /**
+             * Maneja el archivo seleccionado, actualiza el UI y habilita el botón de análisis.
+             * @param {File} file - El archivo seleccionado.
+             */
+            function handleFileSelection(file) {
+                // Verificar que el archivo sea .docx
+                if (file.name.toLowerCase().endsWith('.docx')) {
+                    selectedFile = file;
+                    uploadArea.querySelector('p').textContent = `Documento seleccionado: ${selectedFile.name}`;
+                    analyzeButton.disabled = false;
+                    resetUIForNewFile();
+                } else {
+                    displayMessage("Por favor, selecciona un archivo Word (.docx).", "error");
+                    selectedFile = null;
+                    fileInput.value = ''; // Limpiar el input para permitir nueva selección
+                    analyzeButton.disabled = true;
+                }
+            }
+
+            // La lista de healthKeywords se mantiene, pero la función analyzeHealthSectorRelevance
+            // y su uso en startAnalysis han sido eliminados.
+            const healthKeywords = new Set([
+                "anatomía", "esqueleto", "articulaciones", "músculos", "órganos", "corazón", "pulmones", "riñones", "hígado",
+                "bazo", "páncreas", "estómago", "intestinos", "cerebro", "médula espinal", "vejiga", "útero", "ovarios",
+                "testículos", "glándulas", "tiroides", "suprarrenales", "sistema linfático", "vasos sanguíneos", "arterias",
+                "venas", "capilares", "nervios", "fisiología", "homeostasis", "metabolismo", "respiración celular", "ciclo cardíaco",
+                "filtración glomerular", "producción de orina", "digestión", "absorción", "sistema inmunológico", "sistema endocrino",
+                "hormonas", "sistema nervioso", "impulsos nerviosos", "supino", "prono", "decúbito lateral", "fowler", "trendelenburg",
+                "signos vitales", "frecuencia cardíaca", "pulso radial", "pulso carotídeo", "pulso femoral", "frecuencia respiratoria",
+                "temperatura", "oral", "axilar", "rectal", "timpánica", "presión arterial", "sistólica", "diastólica",
+                "saturación de oxígeno", "spo2", "dolor", "escala de dolor", "nivel de conciencia", "alerta", "somnoliento",
+                "estuporoso", "comatoso", "síntomas", "subjetivos", "náuseas", "mareo", "fatiga", "objetivos", "fiebre", "vómito",
+                "diarrea", "erupción cutánea", "examen físico", "inspección", "palpación", "percusión", "auscultación",
+                "somatometría", "peso", "talla", "perímetro cefálico", "perímetro braquial", "evaluación nutricional",
+                "infecciones", "bacterianas", "neumonía bacteriana", "infecciones urinarias", "tuberculosis", "virales", "gripe",
+                "dengue", "chikungunya", "zika", "rotavirus", "vih/sida", "covid-19", "hepatitis a", "hepatitis b", "hepatitis c",
+                "parasitarias", "amebiasis", "giardiasis", "malaria", "ascaris", "uncinariasis",
+                "enfermedades crónicas no transmisibles", "ecnt", "diabetes mellitus", "diabetes tipo 1", "diabetes tipo 2",
+                "diabetes gestacional", "hipertensión arterial", "enfermedades cardiovasculares", "infarto", "insuficiencia cardíaca",
+                "enfermedades respiratorias crónicas", "asma", "epoc", "enfermedades renales crónicas", "enfermedades de la piel",
+                "escabiosis", "sarna", "micosis", "hongos", "dermatitis", "anemias", "ferropénica", "megaloblástica",
+                "deficiencias nutricionales", "desnutrición aguda", "desnutrición moderada", "desnutrición severa",
+                "desnutrición crónica", "deficiencia de vitamina a", "deficiencia de yodo", "salud mental", "depresión", "ansiedad",
+                "estrés postraumático", "violencia", "desastres", "fármaco", "medicamento", "dosis", "vía", "indicación",
+                "contraindicación", "efecto adverso", "interacción medicamentosa", "alergia", "oral", "sublingual",
+                "intramuscular", "im", "subcutánea", "sc", "intravenosa", "iv", "tópica", "inhalada", "rectal", "vaginal",
+                "ótica", "oftálmica", "cálculo de dosis", "regla de tres", "unidades de medida", "mg", "mcg", "ml", "ui", "g",
+                "tipos de medicamentos", "analgésicos", "paracetamol", "ibuprofeno", "antipiréticos", "antibióticos", "amoxicilina",
+                "cotrimoxazol", "antiinflamatorios", "antihipertensivos", "hipoglucemiantes", "desparasitantes", "albendazol",
+                "mebendazol", "sueros de rehidratación oral", "sro", "vacunas", "vitaminas", "minerales", "hierro", "ácido fólico",
+                "zinc", "cadena de frío", "almacenamiento", "transporte", "monitoreo de temperatura", "termómetro", "termos",
+                "accesibilidad", "equidad", "participación comunitaria", "intersectorialidad", "tecnología apropiada", "costo-eficacia",
+                "prevención", "prevención primaria", "prevención secundaria", "prevención terciaria", "promoción de la salud",
+                "atención integral", "tasa de incidencia", "tasa de prevalencia", "morbilidad", "mortalidad", "letalidad",
+                "factor de riesgo", "cadena epidemiológica", "agente", "huésped", "ambiente", "programas de vigilancia",
+                "enfermedades de declaración obligatoria", "brotes epidemiológicos", "mapeo de casos", "cribado", "tamizaje",
+                "pruebas de detección temprana", "agua", "potabilización", "almacenamiento seguro", "filtrado", "hervido",
+                "saneamiento", "disposición de excretas", "letrinas", "inodoros", "manejo de aguas residuales", "recolección de basura",
+                "disposición de basura", "higiene", "lavado de manos", "higiene personal", "higiene de alimentos", "higiene de la vivienda",
+                "control de vectores", "mosquitos", "aedes aegypti", "dengue", "chikungunya", "zika", "roedores", "moscas",
+                "metodologías", "charlas educativas", "demostraciones prácticas", "material didáctico", "afiches", "folletos",
+                "visitas domiciliarias", "actores comunitarios", "líderes comunitarios", "comadronas", "cocodes",
+                "consejos comunitarios de desarrollo", "voluntarios de salud", "mesas de salud", "empoderamiento comunitario",
+                "toma de decisiones informadas", "apropiación de la salud", "dieta balanceada",
+                "seguridad alimentaria y nutricional", "soberanía alimentaria", "lactancia materna", "exclusiva", "primeros 6 meses",
+                "continuada", "técnica de amamantamiento", "banco de leche materna comunitaria", "alimentación complementaria",
+                "alimentos fortificados", "preparación adecuada", "diversidad de alimentos", "programas nutricionales",
+                "suplementación", "micronutrientes", "monitoreo nutricional", "recuperación nutricional", "atpe",
+                "alimento terapéutico listo para el consumo", "antropometría", "índice de masa corporal", "imc",
+                "tablas de crecimiento de la oms", "peso/talla", "talla/edad", "peso/edad", "perímetro cefálico",
+                "salud materna", "preconcepción", "embarazo", "parto", "puerperio", "ácido fólico", "chequeo de salud",
+                "control prenatal", "8 controles", "riesgo obstétrico", "señales de peligro en el embarazo", "sangrado",
+                "dolor de cabeza intenso", "visión borrosa", "hinchazón de cara y manos", "fiebre", "contracciones antes de tiempo",
+                "disminución de movimientos fetales", "trabajo de parto", "fases", "dilatación", "borramiento", "contracciones",
+                "expulsión", "alumbramiento", "posición del parto", "vertical", "horizontal", "atención del parto limpio",
+                "puerperio fisiológico", "puerperio patológico", "señales de peligro en el puerperio", "sangrado excesivo",
+                "dolor abdominal intenso", "mal olor en loquios", "mama dolorosa y enrojecida", "complicaciones",
+                "hemorragia postparto", "hpp", "preeclampsia", "eclampsia", "sepsis", "parto pretérmino", "aborto",
+                "planificación familiar", "métodos anticonceptivos", "hormonales", "diu", "barrera", "permanentes",
+                "consejería en planificación familiar", "recién nacido", "atención inmediata", "ligadura del cordón umbilical",
+                "profilaxis ocular", "vitamina k", "apego precoz", "termorregulación", "tamizaje neonatal",
+                "hipotiroidismo congénito", "fenilcetonuria", "crecimiento y desarrollo", "c-cd", "hitos del desarrollo", "motor",
+                "lenguaje", "social", "cognitivo", "curvas de crecimiento", "estimulación temprana", "inmunizaciones",
+                "esquema de vacunación", "bcg", "pentavalente", "rotavirus", "neumococo", "srp", "dpt", "td", "vph",
+                "anti-polio", "cadena de frío de vacunas", "enfermedades prevalentes en la infancia",
+                "infecciones respiratorias agudas", "ira", "neumonía", "bronquiolitis", "enfermedad diarreica aguda", "eda",
+                "deshidratación", "sro", "parasitosis", "varicela", "sarampión", "detección y manejo", "imci",
+                "atención integrada a las enfermedades prevalentes de la infancia", "educación sexual integral", "its",
+                "infecciones de transmisión sexual", "vih", "sífilis", "gonorrea", "clamidia", "vph", "virus del papiloma humano",
+                "cáncer cervicouterino", "cáncer de mama", "papanicolaou", "pap", "autoexamen de mama", "mamografía",
+                "violencia basada en género", "vbg", "identificación", "primera ayuda psicológica",
+                "referencia a servicios de apoyo legal y psicológico", "pas", "proteger", "avisar", "socorrer",
+                "evaluación de la víctima", "abc", "vía aérea", "respiración", "circulación", "evaluación secundaria",
+                "de cabeza a pies", "triaje", "clasificación de pacientes por gravedad", "hemorragias", "arterial", "venosa",
+                "capilar", "control", "presión directa", "elevación", "torniquete", "choque", "shock", "hipovolémico",
+                "cardiogénico", "anafiláctico", "séptico", "signos y manejo inicial", "fracturas y esguinces", "inmovilización",
+                "vendajes", "signos", "deformidad", "hinchazón", "quemaduras", "1er grado", "2do grado", "3er grado",
+                "extensión", "regla de los 9", "manejo inicial", "intoxicaciones y envenenamientos", "vías de exposición",
+                "primeros auxilios específicos", "atragantamiento", "maniobra de heimlich", "convulsiones",
+                "posición de seguridad", "protección de la cabeza", "traumatismos", "craneoencefálico", "de columna",
+                "abdominal", "torácico", "manejo de vías aéreas", "maniobra frente-mentón", "cánula orofaríngea",
+                "rcp básica", "compresiones torácicas", "ventilaciones", "deshidratación", "leve", "moderada", "severa",
+                "hidratación parenteral", "bioseguridad", "precauciones estándar", "precauciones universales", "epp", "guantes",
+                "mascarillas", "quirúrgicas", "n95", "batas", "protectores oculares", "caretas", "lavado de manos",
+                "con agua y jabón", "alcohol gel", "momentos específicos", "asepsia y antisepsia", "desinfección de superficies",
+                "esterilización de instrumentos", "manejo de punzocortantes", "descarte seguro", "contenedores rígidos",
+                "exposición a fluidos corporales", "accidente con punzocortante", "salpicaduras",
+                "infecciones asociadas a la atención de salud", "iaas", "manejo de desechos hospitalarios", "clasificación",
+                "comunes", "infecciosos", "peligrosos", "especiales", "farmacéuticos", "químicos", "separación en la fuente",
+                "bolsas de colores", "rojo", "negro", "amarillo", "almacenamiento", "temporal", "intermedio", "central",
+                "transporte y disposición final", "incineración", "autoclave", "entierro sanitario",
+                "sistema de salud de guatemala", "marco legal", "constitución política de la república", "código de salud",
+                "ley de maternidad saludable", "ley de vih/sida", "organización del mspas", "áreas de salud", "distritos de salud",
+                "puestos de salud", "centros de salud", "hospitales", "red de servicios de salud",
+                "referencia y contrarreferencia de pacientes", "programas nacionales de salud", "salud materno-infantil",
+                "inmunizaciones", "tuberculosis", "vih/sida", "enfermedades transmisibles", "enfermedades no transmisibles",
+                "registros y documentación", "expediente clínico", "historia clínica", "hojas de evolución", "órdenes médicas",
+                "notas de enfermería", "formularios", "registros de vacunación", "c-cd", "control prenatal",
+                "reporte de enfermedades", "sistemas de información", "sigsa", "sistema de información gerencial de salud",
+                "sis", "sistema de información en salud", "confidencialidad de la información", "protección de datos del paciente",
+                "ética y deontología en enfermería", "principios éticos", "beneficencia", "no maleficencia", "autonomía", "justicia",
+                "secreto profesional", "consentimiento informado", "explicación de procedimientos", "obtención de permiso",
+                "dignidad del paciente", "respeto a creencias y valores", "trabajo en equipo multidisciplinario",
+                "conceptos de esalud y telesalud", "esalud", "uso de las tics para apoyar la salud y la sanidad",
+                "telemedicina", "provisión de servicios de salud a distancia", "diagnóstico", "tratamiento", "prevención",
+                "teleconsulta", "consulta médica", "de enfermería a distancia", "telecapacitación", "formación a distancia",
+                "msalud", "mobile health", "uso de dispositivos móviles en salud", "plataformas de telesalud", "kawok",
+                "aplicaciones de mensajería", "whatsapp para comunicación profesional", "videoconferencias",
+                "aplicaciones prácticas de telesalud", "seguimiento de pacientes crónicos", "recordatorios",
+                "monitoreo a distancia", "apoyo a partos domiciliarios", "comunicación con comadronas",
+                "consultas de especialidad", "referencia a distancia", "educación al paciente a distancia",
+                "envío de materiales educativos", "registro electrónico de salud", "digitalización de datos",
+                "aspectos técnicos y de seguridad digital", "conectividad", "acceso a internet", "areas rurales",
+                "satelital", "móvil", "dispositivos", "tabletas", "teléfonos inteligentes", "computadoras",
+                "ciberseguridad", "protección de datos", "contraseñas seguras", "uso de redes seguras",
+                "privacidad de datos", "manejo de información sensible en plataformas digitales",
+                "ley de acceso a la información pública", "ley de protección de datos personales", "comunicación efectiva",
+                "verbal", "no verbal", "tono de voz", "lenguaje corporal", "contacto visual", "escucha activa",
+                "prestar atención completa al paciente", "empatía", "ponerse en el lugar del otro", "asertividad",
+                "expresar ideas de forma clara y respetuosa", "retroalimentación constructiva", "comunicación intercultural",
+                "sensibilidad cultural", "respeto a las creencias", "prácticas y cosmovisiones", "q'eqchi", "otras culturas mayas",
+                "intérpretes culturales", "importancia de trabajar con ellos", "barreras de comunicación", "lingüísticas",
+                "culturales", "educativas", "cosmovisión indígena de salud", "reconocimiento de la medicina tradicional",
+                "sanadores locales", "gestión de conflictos", "identificación de causas de conflicto",
+                "técnicas de negociación y mediación", "manejo del estrés",
+                // Términos de salud identificados en el documento "Infografía Genograma.pdf"
+                "riesgo", "biológico", "psicológico", "social", "hereditario", "eventos de la salud", "falleció", "fallecidos",
+                "muerte", "embarazo", "feto muerto", "muerte al nacer", "aborto", "aborto espontáneo", "aborto inducido",
+                "funcionalidad inadecuada", "problemas hereditarios"
+            ]);
+
+
+            /**
+             * Elimina esta función ya que la verificación de relevancia no es necesaria.
+             */
+            /*
+            function analyzeHealthSectorRelevance(documentText) {
+                const normalizedText = documentText.toLowerCase()
+                                                .replace(/[\u00AD]/g, '')
+                                                .replace(/[^a-z0-9áéíóúüñ\s\-\/]/g, ' ')
+                                                .replace(/\s+/g, ' ')
+                                                .trim();
+
+                console.log("Normalized text for relevance analysis (first 500 chars):", normalizedText.substring(0, 500) + "...");
+
+                const foundKeywords = new Set();
+                let termsToFind = Array.from(healthKeywords);
+                termsToFind.sort((a, b) => b.length - a.length);
+
+                termsToFind.forEach(keyword => {
+                    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(^|\\b)${escapedKeyword}(\\b|$)`, 'g');
+
+                    if (regex.test(normalizedText)) {
+                        foundKeywords.add(keyword);
+                    }
+                });
+                
+                const percentage = (foundKeywords.size / healthKeywords.size) * 100;
+                console.log(`Términos de salud encontrados: ${foundKeywords.size} de ${healthKeywords.size}`);
+                console.log("Términos encontrados:", Array.from(foundKeywords).join(", "));
+                console.log(`Porcentaje de relevancia para el sector salud: ${percentage.toFixed(2)}%`);
+                return percentage;
+            }
+            */
+
+
+            // Maneja el clic en el botón de analizar
+            analyzeButton.addEventListener('click', () => {
+                if (selectedFile) {
+                    startAnalysis(selectedFile);
+                } else {
+                    displayMessage("Por favor, selecciona un documento para analizar.", "error");
+                }
+            });
+
+            /**
+             * Función para extraer contenido de un archivo DOCX usando mammoth.js
+             * @param {File} docxFile - El archivo DOCX a procesar.
+             * @returns {Promise<string>} - Una promesa que resuelve con el HTML extraído.
+             */
+            async function extractDocxContent(docxFile) {
+                try {
+                    const arrayBuffer = await docxFile.arrayBuffer();
+                    const { value, messages } = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+                    console.log("Mensajes de Mammoth.js:", messages); // Mensajes de advertencia o error
+                    return value; // El contenido HTML
+                } catch (error) {
+                    console.error("Error durante la extracción de DOCX con mammoth.js:", error);
+                    return "<p>No se pudo extraer el contenido del documento.</p>";
+                }
+            }
+
+            /**
+             * Simula el proceso de análisis de un archivo por una IA.
+             * Esta función simula la llamada a un LLM para verificar el contenido y luego realiza el análisis pedagógico.
+             * @param {File} file - El archivo a "analizar".
+             */
+            async function startAnalysis(file) {
+                uploadArea.style.display = 'none';
+                analyzeButton.style.display = 'none';
+                infoButton.style.display = 'none'; // Ocultar el botón de info durante el análisis
+                loadingIndicator.style.display = 'block';
+                resultsArea.style.display = 'none';
+                llmOutput.innerHTML = '';
+                actionButtons.style.display = 'none';
+
+                // Reiniciar el contenido extraído de DOCX
+                docxExtractedContent = '';
+
+                // Si es un documento Word, intentar extraer contenido
+                if (file.name.toLowerCase().endsWith('.docx')) {
+                    loadingMessage.textContent = 'Procesando documento Word...'; // Mensaje específico
+                    try {
+                        docxExtractedContent = await extractDocxContent(file);
+                    } catch (error) {
+                        console.error("Error al procesar DOCX:", error);
+                        displayMessage("Hubo un problema al procesar el documento Word. Asegúrate de que es un archivo .docx válido.", "error");
+                        resetUIState();
+                        return; // Salir si la extracción de DOCX falla
+                    }
+                } else {
+                    displayMessage("Tipo de archivo no compatible. Por favor, sube un documento Word (.docx).", "error");
+                    resetUIState();
+                    return; // Salir si el tipo de archivo es incorrecto
+                }
+
+                // Eliminado: Bloque de análisis de relevancia del sector salud
+                /*
+                const plainTextContent = docxExtractedContent.replace(/<[^>]*>/g, '');
+                const healthRelevancePercentage = analyzeHealthSectorRelevance(plainTextContent);
+
+                if (healthRelevancePercentage <= 15) {
+                    loadingIndicator.style.display = 'none';
+                    resultsArea.style.display = 'block';
+                    actionButtons.style.display = 'flex';
+                    analysisContent.innerHTML = `
+                        <h2><i class="fas fa-exclamation-triangle"></i> Relevancia del Documento</h2>
+                        <p style="font-weight: bold; color: #FFD700;">El documento no tiene relación significativa con el sector salud (Relevancia: ${healthRelevancePercentage.toFixed(2)}%).</p>
+                        <p>Por favor, asegúrate de que el contenido esté directamente relacionado con temas de salud para un análisis pedagógico más profundo.</p>
+                    `;
+                    if (evaluationPieChartInstance) {
+                        evaluationPieChartInstance.destroy();
+                        evaluationPieChartInstance = null;
+                    }
+                    const llmFeatureButtonsContainer = document.querySelector('.llm-feature-buttons');
+                    if (llmFeatureButtonsContainer) llmFeatureButtonsContainer.style.display = 'none';
+                    llmOutput.innerHTML = '';
+                    return;
+                }
+                */
+
+                loadingMessage.textContent = 'Realizando evaluación experta del contenido pedagógico...'; // Continue with existing analysis
+                try {
+                    // Simular la llamada a la IA (LLM) con un retardo para la evaluación experta
+                    currentEvaluationResults = await new Promise(resolve => {
+                        setTimeout(() => {
+                            // Llamar a la función globalmente accesible
+                            const evaluation = window.performExpertEvaluation(docxExtractedContent, file.name);
+                            resolve(evaluation);
+                        }, 2500); // Simulated delay for expert evaluation
+                    });
+                }
+                catch (error) {
+                    console.error("Error durante la evaluación experta simulada:", error);
+                    displayMessage("Ocurrió un error al realizar la evaluación experta. Por favor, inténtalo de nuevo.", "error");
+                    resetUIState();
+                    return; // Salir si la evaluación falla
+                }
+
                 loadingIndicator.style.display = 'none';
                 
-                // Estos elementos solo se muestran DESPUÉS de que el análisis inicial haya terminado
-                uploadArea.style.display = 'flex'; 
-                analyzeButton.style.display = 'block'; 
-                analyzeButton.disabled = true; // Deshabilita hasta nueva selección
-                uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu archivo aquí, o haz click para seleccionar'; 
-                fileInput.value = ''; 
-                selectedFile = null; // Reinicia el archivo seleccionado para evitar re-análisis sin nueva selección
-
-                // Insertar las tarjetas en el analysisContent
-                analysisContent.innerHTML = `
-                    <div class="evaluation-card">
-                        ${evaluationContent}
-                    </div>
-                    <div class="observations-card">
-                        ${observationsContent}
-                    </div>
-                    <div class="llm-feature-buttons button-group">
-                        ${llmButtons}
-                    </div>
-                `;
                 resultsArea.style.display = 'block'; 
                 actionButtons.style.display = 'flex'; 
-            }, 3000); // Simula un retraso de 3 segundos para el análisis inicial
-        }
 
-        /**
-         * Simula la generación de preguntas de comprensión con un LLM (para PDF).
-         */
-        function generateComprehensionQuestions() {
-            llmLoadingIndicator.style.display = 'block';
-            llmOutput.innerHTML = ''; // Limpiar salida anterior
-
-            setTimeout(() => {
-                const questions = [
-                    "¿Cómo se relaciona el objetivo principal de este documento con la misión de TulaSalud de reducir la mortalidad materna e infantil en los departamentos meta de Alta Verapaz, Huehuetenango, Sololá y Quiché?",
-                    "Explica con tus propias palabras dos conceptos clave presentados y cómo el personal de salud en áreas rurales, multiétnicas y multilingües de Guatemala podría aplicarlos para mejorar la atención primaria.",
-                    "Identifica un ejemplo o caso práctico. ¿Cómo podría este ejemplo ser adaptado o enriquecido para reflejar la realidad específica de una comunidad rural guatemalteca, considerando las dificultades de acceso?",
-                    "Según el documento, ¿qué elementos visuales serían más efectivos para un Auxiliar de Enfermería Comunitaria capacitado por TulaSalud, considerando su contexto de tele-educación y la importancia de la nutrición en estas poblaciones?",
-                    "Si tuvieras que mejorar una sección de este documento para que se alinee más con las directrices de Tele Capacitación de TulaSalud sobre salud reproductiva y el fortalecimiento de competencias del personal, ¿qué cambio harías?",
-                    "¿Qué preguntas adicionales te surgen sobre cómo este contenido podría ser implementado para fortalecer las competencias del personal de salud en el uso de las TIC para la vigilancia epidemiológica en zonas postergadas?",
-                    "¿De qué manera la estructura del documento promueve (o podría promover mejor) la formación a distancia con un enfoque intercultural y de género, tan crucial para TulaSalud?",
-                    "Si este documento fuera parte de un diplomado de TulaSalud, ¿qué tipo de actividad práctica sugerirías para asegurar que los participantes apliquen el conocimiento directamente en los servicios de salud en sus regiones de origen?",
-                    "¿Qué tipo de recurso complementario (ej. un micro-video de un caso real de atención materna en Huehuetenango o una infografía sobre nutrición adaptada a la dieta local) crees que sería más útil para este documento, alineado con el uso de TIC de TulaSalud?",
-                    "Identifica una fortaleza clave en el diseño de la información que facilite el aprendizaje y contribuya directamente a la mejora de la cobertura en salud y las capacidades del MSPAS para la población materno-infantil y niños menores de cinco años."
-                ];
-                let output = '<h3>Preguntas de Comprensión Sugeridas por IA ✨</h3><ul>';
-                questions.forEach(q => { output += `<li>${q}</li>`; });
-                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido, con un enfoque en la relevancia para jóvenes y adultos y la alineación con las políticas educativas guatemaltecas y el perfil de Tele Educación de TulaSalud.</em></p>';
-                llmOutput.innerHTML = output;
-                llmLoadingIndicator.style.display = 'none';
-            }, 2500); // Simula un retraso de 2.5 segundos para la generación de preguntas
-        }
-
-        /**
-         * Simula la generación de una descripción detallada de imagen con un LLM.
-         */
-        function generateDetailedImageDescription() {
-            llmLoadingIndicator.style.display = 'block';
-            llmOutput.innerHTML = ''; // Limpiar salida anterior
-
-            setTimeout(() => {
-                const description = `
-                    <h3>Descripción Detallada de Imagen Sugerida por IA ✨</h3>
-                    <p>La IA interpreta esta imagen como una representación altamente conceptual de un entorno de aprendizaje dinámico, probablemente en el ámbito de la teleeducación. Se observa una paleta de colores que evoca profesionalismo y claridad, con elementos que sugieren interconexión y flujo de información.</p>
-                    <p><strong>Análisis Pedagógico Visual (Alineada con políticas educativas guatemaltecas para jóvenes y adultos, así como el perfil de Tele Educación de TulaSalud):</strong></p>
-                    <ul>
-                        <li><strong>Propósito Didáctico en Tele-Educación:</strong> La imagen sirve como metáfora visual para el proceso de aprendizaje digital, enfatizando la interacción de ideas y la conectividad, fundamental para la modalidad a distancia de TulaSalud y la mejora de cobertura en salud.</li>
-                        <li><strong>Relevancia para la Audiencia de TulaSalud:</strong> Su diseño moderno y limpio puede ser atractivo para el personal de salud (auxiliares de enfermería, técnicos en salud rural, médicos), sugiriendo un enfoque innovador en la capacitación a distancia.</li>
-                        <li><strong>Contextualización Regional (Guatemala):</strong> Aunque abstracta, esta imagen podría complementarse con elementos visuales sutiles que la conecten a la realidad de las comunidades multiétnicas, multilingües y rurales de los departamentos meta de TulaSalud (Alta Verapaz, Huehuetenango, Sololá o Quiché) para mayor identificación.</li>
-                        <li><strong>Fomento del Uso de TIC para Competencias:</strong> La imagen visualiza un flujo de información digital, lo cual refuerza el mensaje de TulaSalud sobre el uso de las TIC para mejorar las competencias del recurso humano en salud y apoyar el uso de sistemas de E-Salud.</li>
-                        <li><strong>Impacto en la Salud Materna e Infantil:</strong> Se puede interpretar como la interconexión de datos y conocimientos que, a través de la tele-capacitación, contribuye a la reducción de la mortalidad materna e infantil, y al aumento de la capacidad del MSPAS.</li>
-                        <li><strong>Accesibilidad Visual:</strong> La simplicidad de las formas y los contrastes de color facilitan la percepción visual, importante para el personal que podría acceder a los materiales en diversas condiciones y con posibles limitaciones de infraestructura.</li>
-                        <li><strong>Potencial de Discusión:</strong> La imagen puede ser un excelente punto de partida para discutir cómo las tecnologías superan las barreras geográficas y de acceso, facilitando el conocimiento y la interconexión en el aprendizaje a distancia para el personal de salud en zonas remotas.</li>
-                    </ul>
-                    <p><strong>Sugerencias para el uso óptimo en Tele Capacitación de TulaSalud:</strong></p>
-                    <ul>
-                        <li>Integrar con un texto que la referencie explícitamente, explicando su metáfora visual en el contexto de la mejora de servicios de salud a través de la tele-educación, con énfasis en la atención primaria y la población vulnerable en Guatemala.</li>
-                        <li>Considerar animación sutil si se usa en un entorno web para reforzar la idea de dinamismo y flujo de información en la vigilancia epidemiológica o la capacitación continua.</li>
-                        <li>Utilizarla como punto de partida para una discusión sobre cómo la "arquitectura" del conocimiento en línea empodera al personal de salud en las regiones de TulaSalud para servir mejor a la población.</li>
-                        <li>Si se busca ilustrar temas específicos de salud (materna, infantil, nutrición), complementar con imágenes de casos de éxito o escenarios reales que resuenen con la experiencia del personal de salud en las comunidades guatemaltecas.</li>
-                    </ul>
+                let evaluationHtml = `
+                    <h2><i class="fas fa-microscope"></i> Evaluación Experta del Material Didáctico</h2>
+                    <p><strong>Tipo de Documento:</strong> Word (.docx)</p>
+                    <p><strong>Nombre del Archivo:</strong> ${file.name}</p>
+                    <p>Como experto en educación de jóvenes y adultos (EJA), salud pública en Guatemala y proyectos de desarrollo comunitario de TulaSalud en Alta Verapaz, he evaluado el documento en Word con las características necesarias para ser un material didáctico efectivo y adecuado para jóvenes y adultos en Cobán, Alta Verapaz, con un enfoque en salud y alineado con los objetivos de TulaSalud.</p>
                 `;
-                llmOutput.innerHTML = description;
-                llmLoadingIndicator.style.display = 'none';
-            }, 2500); // Simula un retraso
-        }
 
-        /**
-         * Simula la sugerencia de puntos clave para el orador con un LLM (para PPT).
-         */
-        function suggestSpeakerPoints() {
-            llmLoadingIndicator.style.display = 'block';
-            llmOutput.innerHTML = ''; // Limpiar salida anterior
+                evaluationHtml += `<div class="evaluation-card" style="margin-top: 30px;"><h3>Resultados de la Evaluación por Criterios</h3><ul>`;
 
-            setTimeout(() => {
-                const points = [
-                    "<strong>Diapositiva 1 (Título):</strong> 'Bienvenidos a la Tele Capacitación de TulaSalud: Mejorando la Salud Materna e Infantil en Guatemala'. Conectar con la misión central y el impacto directo en las comunidades de los departamentos meta (Alta Verapaz, Huehuetenango, Sololá y Quiché).",
-                    "<strong>Diapositiva 2 (Agenda y Beneficios):</strong> 'Lo que aprenderán hoy para fortalecer sus competencias y mejorar la cobertura en salud'. Destacar cómo la capacitación contribuirá directamente a los objetivos de TulaSalud y del MSPAS para madres y niños.",
-                    "<strong>Diapositva 3 (El Desafío Guatemalteco):</strong> 'Superando barreras: la salud en poblaciones multiétnicas, multilingües, rurales y postergadas'. Contextualizar el problema que TulaSalud aborda con la tele-educación, haciendo énfasis en las dificultades de acceso.",
-                    "<strong>Diapositiva 4 (Nuestro Enfoque - Tele-Educación):</strong> 'Cómo TulaSalud utiliza las TIC para el desarrollo de competencias en salud a distancia y el impulso de la E-Salud'. Explicar la metodología y sus ventajas para el personal en ejercicio (Auxiliares de Enfermería, Técnicos, Médicos).",
-                    "<strong>Diapositiva 5 (Temas Clave de TulaSalud):</strong> 'Profundizando en salud materna, infantil, nutrición y vigilancia epidemiológica'. Desglosar los contenidos esenciales, vinculándolos con la práctica diaria del personal de salud en la atención primaria.",
-                    "<strong>Diapositiva 6 (Casos de Éxito y Lecciones Aprendidas):</strong> 'El impacto en la práctica: Ejemplos de nuestros departamentos meta'. Presentar casos reales de éxito de TulaSalud o sus colaboradores en la reducción de mortalidad o mejora de servicios en Alta Verapaz, Huehuetenango, Sololá o Quiché.",
-                    "<strong>Diapositiva 7 (Uso de Tecnología para Vigilancia Epidemiológica):</strong> 'Fortaleciendo la E-Salud comunitaria y la recopilación de datos para la toma de decisiones'. Explicar cómo el equipamiento y la capacitación en TIC apoyan la vigilancia y el acceso a servicios básicos.",
-                    "<strong>Diapositiva 8 (Enfoque Intercultural y de Género):</strong> 'Atención con pertinencia cultural y equidad para nuestra población diversa'. Abordar cómo la formación respeta y se adapta a la diversidad de las comunidades guatemaltecas, un pilar fundamental de TulaSalud.",
-                    "<strong>Diapositiva 9 (Preguntas y Aplicación Práctica):</strong> 'Aplicando lo aprendido: Preguntas y escenarios clínicos basados en la realidad local'. Fomentar la discusión y la resolución de problemas basados en la experiencia del personal y los desafíos reales.",
-                    "<strong>Diapositiva 10 (Sostenibilidad y Futuro de la Capacitación):</strong> 'El camino hacia la mejora continua: el compromiso de TulaSalud y el rol del personal'. Inspirar al personal sobre el impacto a largo plazo de su formación y su papel en el fortalecimiento del MSPAS.",
-                    "<strong>Diapositiva 11 (Agradecimientos y Compromiso):</strong> '¡Gracias por su compromiso con la salud de Guatemala y con la misión de TulaSalud!'. Reconocer el valor del personal de salud y su rol crucial en la atención a la población vulnerable.",
-                    "<strong>Diapositiva 12 (Recursos y Contacto):</strong> 'Recursos adicionales para su formación y apoyo continuo en el uso de las TIC y los servicios de salud'. Proporcionar enlaces a materiales de apoyo y formas de contacto para asistencia técnica continua, como parte de la estrategia de TulaSalud."
-                ];
-                let output = '<h3>Puntos Clave para el Orador Sugeridos por IA ✨</h3><ul>';
-                points.forEach(q => { output += `<li>${q}</li>`; });
-                output += '</ul><p><em>Estas preguntas buscan evaluar la comprensión profunda y crítica del contenido, con un enfoque en la relevancia para jóvenes y adultos en el contexto guatemalteco, alineado con las políticas educativas guatemaltecas y el perfil de Tele Educación de TulaSalud.</em></p>';
-                llmOutput.innerHTML = output;
-                llmLoadingIndicator.style.display = 'none';
-            }, 2500); // Simula un retraso
-        }
+                let cumpleCount = 0;
+                let noCumpleCount = 0;
 
-        /**
-         * Reinicia el estado de la UI a su condición inicial para permitir la carga de un nuevo archivo.
-         */
-        function resetUIState() {
-            selectedFile = null; // Resetea el archivo seleccionado
-            fileInput.value = ''; // Limpia el valor del input de archivo
-            uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu archivo aquí, o haz click para seleccionar'; // Restablece el texto del área de subida
-            analyzeButton.disabled = true; // Deshabilita el botón de analizar
-            resultsArea.style.display = 'none'; // Oculta la sección de resultados
-            llmOutput.innerHTML = ''; // Limpia el contenido generado por LLM
-            loadingIndicator.style.display = 'none'; // Oculta el indicador de carga principal
-            llmLoadingIndicator.style.display = 'none'; // Oculta el indicador de carga del LLM
-            actionButtons.style.display = 'none'; // Oculta los botones de acción post-análisis
-        }
+                currentEvaluationResults.forEach(item => {
+                    evaluationHtml += `<li><strong>${item.char}</strong>: ${item.status}`;
+                    if (item.status === "NO CUMPLE") {
+                        evaluationHtml += `<br><em>Razón:</em> ${item.reason}`;
+                        evaluationHtml += `<br><em>Sugerencia:</em> ${item.suggestion}`;
+                        noCumpleCount++;
+                    } else {
+                        cumpleCount++;
+                    }
+                    evaluationHtml += `</li>`;
+                });
+                evaluationHtml += `</ul></div>`;
+                
+                analysisContent.innerHTML = evaluationHtml;
 
-        // Event listeners para los nuevos botones de acción
-        resetButton.addEventListener('click', resetUIState); // Botón para cargar otro archivo (reinicia la UI)
+                // Eliminado: Llamada a renderizar la gráfica circular
+                // renderPieChart(cumpleCount, noCumpleCount);
 
-        closePageButton.addEventListener('click', () => {
-            // Reinicia la UI para simular un "cierre" en este entorno de sandbox
-            resetUIState();
-            displayMessage("La interfaz se ha restablecido. Puedes cargar un nuevo archivo.", "info");
-        });
+                // Después de mostrar la evaluación inicial, si hay observaciones NO CUMPLE,
+                // se muestra el botón para generar las observaciones detalladas.
+                let llmFeatureButtonsContainer = document.querySelector('.llm-feature-buttons');
+                if (!llmFeatureButtonsContainer) { // Create if it doesn't exist (e.g., if previous analysis was not health-related)
+                    llmFeatureButtonsContainer = document.createElement('div');
+                    llmFeatureButtonsContainer.className = 'llm-feature-buttons button-group';
+                    analysisContent.appendChild(llmFeatureButtonsContainer);
+                }
+                llmFeatureButtonsContainer.innerHTML = window.getLLMButtonsForFileType(file.type);
+                llmFeatureButtonsContainer.style.display = 'flex'; // Ensure visible
 
-        // Función para mostrar mensajes personalizados (en lugar de alert)
-        function displayMessage(message, type = "info") {
-            // Eliminar cualquier mensaje existente para evitar duplicados
-            const existingMessageBox = container.querySelector('.message-box');
-            if (existingMessageBox) {
-                existingMessageBox.remove();
+                // Get references to the newly created buttons and assign onclick events
+                comprehensionQuestionsButton = document.getElementById('comprehensionQuestionsButton');
+                detailedObservationsButton = document.getElementById('detailedObservationsButton');
+                
+                if (comprehensionQuestionsButton) {
+                    comprehensionQuestionsButton.onclick = window.generateComprehensionQuestions;
+                    comprehensionQuestionsButton.disabled = false; // Ensure enabled on initial display
+                }
+                if (detailedObservationsButton) {
+                    detailedObservationsButton.onclick = window.generateDetailedObservations;
+                    detailedObservationsButton.disabled = false; // Ensure enabled on initial display
+                }
+                // Reset the questions and observations generated state for a new analysis
+                areQuestionsGenerated = false;
+                areObservationsGenerated = false;
             }
 
-            // Crear un div para el mensaje
-            const messageBox = document.createElement('div');
-            messageBox.textContent = message;
-            messageBox.className = 'message-box'; // Añadir una clase para facilitar la selección
+            /**
+             * Eliminado: Función para renderizar la gráfica circular.
+             */
+            /*
+            function renderPieChart(cumple, noCumple) {
+                if (evaluationPieChartInstance) {
+                    evaluationPieChartInstance.destroy();
+                }
 
-            messageBox.style.padding = '15px';
-            messageBox.style.borderRadius = '8px';
-            messageBox.style.marginTop = '20px';
-            messageBox.style.color = '#fff';
-            messageBox.style.fontWeight = 'bold';
-            messageBox.style.textAlign = 'center';
+                const data = {
+                    labels: ['Cumple', 'No Cumple'],
+                    datasets: [{
+                        data: [cumple, noCumple],
+                        backgroundColor: [
+                            'rgb(32, 178, 170)',
+                            'rgb(255, 99, 132)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                };
 
-            if (type === "error") {
-                messageBox.style.backgroundColor = '#DC3545'; // Rojo para errores
-            } else {
-                messageBox.style.backgroundColor = '#007BFF'; // Azul para información
+                const config = {
+                    type: 'pie',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#E0E0E0',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Resumen de Criterios',
+                                color: '#00BFFF',
+                                font: {
+                                    size: 18
+                                }
+                            }
+                        }
+                    }
+                };
+
+                evaluationPieChartInstance = new Chart(evaluationPieChartCanvas, config);
+            }
+            */
+
+            /**
+             * Reinicia el estado de la UI a su condición inicial para permitir la carga de un nuevo archivo.
+             */
+            function resetUIState() {
+                selectedFile = null;
+                fileInput.value = '';
+                uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu documento Word (.docx) aquí, o haz click para seleccionar';
+                analyzeButton.disabled = true;
+                docxExtractedContent = ''; // Reiniciar el resultado del DOCX
+                currentEvaluationResults = []; // Reiniciar los resultados de la evaluación
+
+                // Eliminado: Destruir la instancia del gráfico al reiniciar la UI
+                /*
+                if (evaluationPieChartInstance) {
+                    evaluationPieChartInstance.destroy();
+                    evaluationPieChartInstance = null;
+                }
+                */
+
+                resetUIForNewFile();
+
+                // Re-enable LLM buttons when resetting the UI for a new document
+                if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
+                if (detailedObservationsButton) detailedObservationsButton.disabled = false;
+                
+                // Reset the questions and observations generated state
+                areQuestionsGenerated = false;
+                areObservationsGenerated = false;
             }
 
-            // Añadir al contenedor principal
-            container.insertBefore(messageBox, uploadArea.nextSibling); // Insertar después del área de carga
+            // Función auxiliar para resetear elementos de la UI
+            function resetUIForNewFile() {
+                resultsArea.style.display = 'none';
+                llmOutput.innerHTML = '';
+                loadingIndicator.style.display = 'none';
+                llmLoadingIndicator.style.display = 'none';
+                actionButtons.style.display = 'none';
+                uploadArea.style.display = 'flex'; // Asegura que el área de subida esté visible
+                analyzeButton.style.display = 'block'; // Asegura que el botón de análisis esté visible
+                infoButton.style.display = 'block'; // Asegura que el botón de info esté visible
+                
+                // Hide LLM buttons explicitly if they were shown in a previous run
+                const llmFeatureButtonsContainer = document.querySelector('.llm-feature-buttons');
+                if (llmFeatureButtonsContainer) {
+                    llmFeatureButtonsContainer.style.display = 'none';
+                }
+            }
 
-            // Eliminar el mensaje después de unos segundos
-            setTimeout(() => {
-                messageBox.remove();
-            }, 5000);
-        }
+            // Event listeners para los nuevos botones de acción
+            resetButton.addEventListener('click', resetUIState); // Botón para cargar otro archivo (reinicia la UI)
+
+            closePageButton.addEventListener('click', () => {
+                // Reinicia la UI para simular un "cierre" en este entorno de sandbox
+                resetUIState();
+                displayMessage("La interfaz se ha restablecido. Puedes cargar un nuevo documento.", "info");
+            });
+
+            // Función para mostrar mensajes personalizados (en lugar de alert)
+            function displayMessage(message, type = "info") {
+                const existingMessageBox = container.querySelector('.message-box');
+                if (existingMessageBox) {
+                    existingMessageBox.remove();
+                }
+
+                const messageBox = document.createElement('div');
+                messageBox.textContent = message;
+                messageBox.className = 'message-box';
+
+                messageBox.style.padding = '15px';
+                messageBox.style.borderRadius = '8px';
+                messageBox.style.marginTop = '20px';
+                messageBox.style.color = '#fff';
+                messageBox.style.fontWeight = 'bold';
+                messageBox.style.textAlign = 'center';
+
+                if (type === "error") {
+                    messageBox.style.backgroundColor = '#DC3545';
+                } else {
+                    messageBox.style.backgroundColor = '#007BFF';
+                }
+
+                container.insertBefore(messageBox, uploadArea.nextSibling);
+
+                setTimeout(() => {
+                    messageBox.remove();
+                }, 5000);
+            }
+        }); // Fin de DOMContentLoaded
     </script>
 </body>
 </html>
