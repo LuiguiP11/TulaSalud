@@ -25,6 +25,7 @@ export default async function handler(req, res) {
         // `process.env` es donde Node.js guarda las variables de entorno.
         // `GEMINI_API_KEY` es el nombre de la variable que configuraste en el panel de Vercel.
         const apiKey = process.env.GEMINI_API_KEY;
+	console.log('[Vercel Function Debug] apiKey value (first 5 chars):', apiKey ? apiKey.substring(0, 5) + '...' : 'Not set');
 
         // 4. Validar la Clave API:
         // Si la clave no está configurada, devolvemos un error 500 (Error interno del servidor).
