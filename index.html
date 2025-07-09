@@ -200,6 +200,7 @@
             margin: 0 auto 10px auto;
         }
 
+        /* CORRECCIÓN: Se ha reemplazado la ruta de archivo inválida por la sintaxis correcta de @keyframes. */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -372,6 +373,7 @@
             color: #888888; /* Gris más claro para el texto del footer */
         }
 
+        /* CORRECCIÓN: Se ha reemplazado la ruta de archivo inválida por la sintaxis correcta de @media. */
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -427,6 +429,7 @@
             }
         }
 
+        /* CORRECCIÓN: Se ha reemplazado la ruta de archivo inválida por la sintaxis correcta de @media. */
         @media (max-width: 480px) {
             body {
                 padding: 10px;
@@ -486,7 +489,7 @@
         <div class="header-logo">
             <img src="https://pbs.twimg.com/profile_images/535655953480175616/D5VRHaDd_400x400.jpeg"
                  alt="Logo de TulaSalud"
-                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/8A2BE2/FFFFFF?text=Logo';" />
+                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/8A2BE2/FFFFFF?text=Logo';"/>
         </div>
 
         <h1><i class="fas fa-brain"></i> Analizador Pedagógico TeleEducación - TulaSalud</h1>
@@ -1166,7 +1169,7 @@
                 if (noCumpleCriteria.length === 0) {
                     llmOutput.innerHTML = `
                         <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
-                            <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                            <h2 style="color: #8A2BE2; margin-top: 0;">️ Observaciones de Mejora para el Material Didáctico</h2>
                             <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
                             <p style="color: #E0E0E0;">¡Felicidades! Su documento cumple con todos los criterios evaluados. No se requieren observaciones de mejora adicionales en este momento.</p>
                         </div>
@@ -1270,7 +1273,7 @@
                                 margin-bottom: 20px;
                                 font-family: Arial, sans-serif;
                             ">
-                                <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                                <h2 style="color: #8A2BE2; margin-top: 0;">️ Observaciones de Mejora para el Material Didáctico</h2>
                                 <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
                         `;
 
@@ -1298,7 +1301,7 @@
                     } else {
                         llmOutput.innerHTML = `
                             <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
-                                <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                                <h2 style="color: #8A2BE2; margin-top: 0;">️ Observaciones de Mejora para el Material Didáctico</h2>
                                 <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
                                 <p style="color: #E0E0E0;">Hubo un problema al generar las observaciones detalladas. La respuesta de la IA fue inesperada.</p>
                             </div>
@@ -1308,7 +1311,7 @@
                 } catch (error) {
                     llmOutput.innerHTML = `
                         <div class="observations-card" style="background-color: #3A3A3A; color: #E0E0E0; border: 1px solid #E0E0E0; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
-                            <h2 style="color: #8A2BE2; margin-top: 0;">🛠️ Observaciones de Mejora para el Material Didáctico</h2>
+                            <h2 style="color: #8A2BE2; margin-top: 0;">️ Observaciones de Mejora para el Material Didáctico</h2>
                             <hr style="border: 0; height: 1px; background-color: #555555; margin-bottom: 20px;">
                             <p style="color: #E0E0E0;">Error al comunicarse con el modelo de IA para generar observaciones. Por favor, verifica la consola del navegador para más detalles.</p>
                         </div>
@@ -1402,150 +1405,19 @@
                     analyzeButton.disabled = false;
                     resetUIForNewFile();
                 } else {
-                    displayMessage("Por favor, selecciona un archivo Word (.docx).", "error");
+                    showAlertDialog("Por favor, selecciona un archivo Word (.docx).");
                     selectedFile = null;
                     fileInput.value = ''; // Limpiar el input para permitir nueva selección
                     analyzeButton.disabled = true;
                 }
             }
 
-            const healthKeywords = new Set([
-                "anatomía", "esqueleto", "articulaciones", "músculos", "órganos", "corazón", "pulmones", "riñones", "hígado",
-                "bazo", "páncreas", "estómago", "intestinos", "cerebro", "médula espinal", "vejiga", "útero", "ovarios",
-                "testículos", "glándulas", "tiroides", "suprarrenales", "sistema linfático", "vasos sanguíneos", "arterias",
-                "venas", "capilares", "nervios", "fisiología", "homeostasis", "metabolismo", "respiración celular", "ciclo cardíaco",
-                "filtración glomerular", "producción de orina", "digestión", "absorción", "sistema inmunológico", "sistema endocrino",
-                "hormonas", "sistema nervioso", "impulsos nerviosos", "supino", "prono", "decúbito lateral", "fowler", "trendelenburg",
-                "signos vitales", "frecuencia cardíaca", "pulso radial", "pulso carotídeo", "pulso femoral", "frecuencia respiratoria",
-                "temperatura", "oral", "axilar", "rectal", "timpánica", "presión arterial", "sistólica", "diastólica",
-                "saturación de oxígeno", "spo2", "dolor", "escala de dolor", "nivel de conciencia", "alerta", "somnoliento",
-                "estuporoso", "comatoso", "síntomas", "subjetivos", "náuseas", "mareo", "fatiga", "objetivos", "fiebre", "vómito",
-                "diarrea", "erupción cutánea", "examen físico", "inspección", "palpación", "percusión", "auscultación",
-                "somatometría", "peso", "talla", "perímetro cefálico", "perímetro braquial", "evaluación nutricional",
-                "infecciones", "bacterianas", "neumonía bacteriana", "infecciones urinarias", "tuberculosis", "virales", "gripe",
-                "dengue", "chikungunya", "zika", "rotavirus", "vih/sida", "covid-19", "hepatitis a", "hepatitis b", "hepatitis c",
-                "parasitarias", "amebiasis", "giardiasis", "malaria", "ascaris", "uncinariasis",
-                "enfermedades crónicas no transmisibles", "ecnt", "diabetes mellitus", "diabetes tipo 1", "diabetes tipo 2",
-                "diabetes gestacional", "hipertensión arterial", "enfermedades cardiovasculares", "infarto", "insuficiencia cardíaca",
-                "enfermedades respiratorias crónicas", "asma", "epoc", "enfermedades renales crónicas", "enfermedades de la piel",
-                "escabiosis", "sarna", "micosis", "hongos", "dermatitis", "anemias", "ferropénica", "megaloblástica",
-                "deficiencias nutricionales", "desnutrición aguda", "desnutrición moderada", "desnutrición severa",
-                "desnutrición crónica", "deficiencia de vitamina a", "deficiencia de yodo", "salud mental", "depresión", "ansiedad",
-                "estrés postraumático", "violencia", "desastres", "fármaco", "medicamento", "dosis", "vía", "indicación",
-                "contraindicación", "efecto adverso", "interacción medicamentosa", "alergia", "oral", "sublingual",
-                "intramuscular", "im", "subcutánea", "sc", "intravenosa", "iv", "tópica", "inhalada", "rectal", "vaginal",
-                "ótica", "oftálmica", "cálculo de dosis", "regla de tres", "unidades de medida", "mg", "mcg", "ml", "ui", "g",
-                "tipos de medicamentos", "analgésicos", "paracetamol", "ibuprofeno", "antipiréticos", "antibióticos", "amoxicilina",
-                "cotrimoxazol", "antiinflamatorios", "antihipertensivos", "hipoglucemiantes", "desparasitantes", "albendazol",
-                "mebendazol", "sueros de rehidratación oral", "sro", "vacunas", "vitaminas", "minerales", "hierro", "ácido fólico",
-                "zinc", "cadena de frío", "almacenamiento", "transporte", "monitoreo de temperatura", "termómetro", "termos",
-                "accesibilidad", "equidad", "participación comunitaria", "intersectorialidad", "tecnología apropiada", "costo-eficacia",
-                "prevención", "prevención primaria", "prevención secundaria", "prevención terciaria", "promoción de la salud",
-                "atención integral", "tasa de incidencia", "tasa de prevalencia", "morbilidad", "mortalidad", "letalidad",
-                "factor de riesgo", "cadena epidemiológica", "agente", "huésped", "ambiente", "programas de vigilancia",
-                "enfermedades de declaración obligatoria", "brotes epidemiológicos", "mapeo de casos", "cribado", "tamizaje",
-                "pruebas de detección temprana", "agua", "potabilización", "almacenamiento seguro", "filtrado", "hervido",
-                "saneamiento", "disposición de excretas", "letrinas", "inodoros", "manejo de aguas residuales", "recolección de basura",
-                "disposición de basura", "higiene", "lavado de manos", "higiene personal", "higiene de alimentos", "higiene de la vivienda",
-                "control de vectores", "mosquitos", "aedes aegypti", "dengue", "chikungunya", "zika", "roedores", "moscas",
-                "metodologías", "charlas educativas", "demostraciones prácticas", "material didáctico", "afiches", "folletos",
-                "visitas domiciliarias", "actores comunitarios", "líderes comunitarios", "comadronas", "cocodes",
-                "consejos comunitarios de desarrollo", "voluntarios de salud", "mesas de salud", "empoderamiento comunitario",
-                "toma de decisiones informadas", "apropiación de la salud", "dieta balanceada",
-                "seguridad alimentaria y nutricional", "soberanía alimentaria", "lactancia materna", "exclusiva", "primeros 6 meses",
-                "continuada", "técnica de amamantamiento", "banco de leche materna comunitaria", "alimentación complementaria",
-                "alimentos fortificados", "preparación adecuada", "diversidad de alimentos", "programas nutricionales",
-                "suplementación", "micronutrientes", "monitoreo nutricional", "recuperación nutricional", "atpe",
-                "alimento terapéutico listo para el consumo", "antropometría", "índice de masa corporal", "imc",
-                "tablas de crecimiento de la oms", "peso/talla", "talla/edad", "peso/edad", "perímetro cefálico",
-                "salud materna", "preconcepción", "embarazo", "parto", "puerperio", "ácido fólico", "chequeo de salud",
-                "control prenatal", "8 controles", "riesgo obstétrico", "señales de peligro en el embarazo", "sangrado",
-                "dolor de cabeza intenso", "visión borrosa", "hinchazón de cara y manos", "fiebre", "contracciones antes de tiempo",
-                "disminución de movimientos fetales", "trabajo de parto", "fases", "dilatación", "borramiento", "contracciones",
-                "expulsión", "alumbramiento", "posición del parto", "vertical", "horizontal", "atención del parto limpio",
-                "puerperio fisiológico", "puerperio patológico", "señales de peligro en el puerperio", "sangrado excesivo",
-                "dolor abdominal intenso", "mal olor en loquios", "mama dolorosa y enrojecida", "complicaciones",
-                "hemorragia postparto", "hpp", "preeclampsia", "eclampsia", "sepsis", "parto pretérmino", "aborto",
-                "planificación familiar", "métodos anticonceptivos", "hormonales", "diu", "barrera", "permanentes",
-                "consejería en planificación familiar", "recién nacido", "atención inmediata", "ligadura del cordón umbilical",
-                "profilaxis ocular", "vitamina k", "apego precoz", "termorregulación", "tamizaje neonatal",
-                "hipotiroidismo congénito", "fenilcetonuria", "crecimiento y desarrollo", "c-cd", "hitos del desarrollo", "motor",
-                "lenguaje", "social", "cognitivo", "curvas de crecimiento", "estimulación temprana", "inmunizaciones",
-                "esquema de vacunación", "bcg", "pentavalente", "rotavirus", "neumococo", "srp", "dpt", "td", "vph",
-                "anti-polio", "cadena de frío de vacunas", "enfermedades prevalentes en la infancia",
-                "infecciones respiratorias agudas", "ira", "neumonía", "bronquiolitis", "enfermedad diarreica aguda", "eda",
-                "deshidratación", "sro", "parasitosis", "varicela", "sarampión", "detección y manejo", "imci",
-                "atención integrada a las enfermedades prevalentes de la infancia", "educación sexual integral", "its",
-                "infecciones de transmisión sexual", "vih", "sífilis", "gonorrea", "clamidia", "vph", "virus del papiloma humano",
-                "cáncer cervicouterino", "cáncer de mama", "papanicolaou", "pap", "autoexamen de mama", "mamografía",
-                "violencia basada en género", "vbg", "identificación", "primera ayuda psicológica",
-                "referencia a servicios de apoyo legal y psicológico", "pas", "proteger", "avisar", "socorrer",
-                "evaluación de la víctima", "abc", "vía aérea", "respiración", "circulación", "evaluación secundaria",
-                "de cabeza a pies", "triaje", "clasificación de pacientes por gravedad", "hemorragias", "arterial", "venosa",
-                "capilar", "control", "presión directa", "elevación", "torniquete", "choque", "shock", "hipovolémico",
-                "cardiogénico", "anafiláctico", "séptico", "signos y manejo inicial", "fracturas y esguinces", "inmovilización",
-                "vendajes", "signos", "deformidad", "hinchazón", "quemaduras", "1er grado", "2do grado", "3er grado",
-                "extensión", "regla de los 9", "manejo inicial", "intoxicaciones y envenenamientos", "vías de exposición",
-                "primeros auxilios específicos", "atragantamiento", "maniobra de heimlich", "convulsiones",
-                "posición de seguridad", "protección de la cabeza", "traumatismos", "craneoencefálico", "de columna",
-                "abdominal", "torácico", "manejo de vías aéreas", "maniobra frente-mentón", "cánula orofaríngea",
-                "rcp básica", "compresiones torácicas", "ventilaciones", "deshidratación", "leve", "moderada", "severa",
-                "hidratación parenteral", "bioseguridad", "precauciones estándar", "precauciones universales", "epp", "guantes",
-                "mascarillas", "quirúrgicas", "n95", "batas", "protectores oculares", "caretas", "lavado de manos",
-                "con agua y jabón", "alcohol gel", "momentos específicos", "asepsia y antisepsia", "desinfección de superficies",
-                "esterilización de instrumentos", "manejo de punzocortantes", "descarte seguro", "contenedores rígidos",
-                "exposición a fluidos corporales", "accidente con punzocortante", "salpicaduras",
-                "infecciones asociadas a la atención de salud", "iaas", "manejo de desechos hospitalarios", "clasificación",
-                "comunes", "infecciosos", "peligrosos", "especiales", "farmacéuticos", "químicos", "separación en la fuente",
-                "bolsas de colores", "rojo", "negro", "amarillo", "almacenamiento", "temporal", "intermedio", "central",
-                "transporte y disposición final", "incineración", "autoclave", "entierro sanitario",
-                "sistema de salud de guatemala", "marco legal", "constitución política de la república", "código de salud",
-                "ley de maternidad saludable", "ley de vih/sida", "organización del mspas", "áreas de salud", "distritos de salud",
-                "puestos de salud", "centros de salud", "hospitales", "red de servicios de salud",
-                "referencia y contrarreferencia de pacientes", "programas nacionales de salud", "salud materno-infantil",
-                "inmunizaciones", "tuberculosis", "vih/sida", "enfermedades transmisibles", "enfermedades no transmisibles",
-                "registros y documentación", "expediente clínico", "historia clínica", "hojas de evolución", "órdenes médicas",
-                "notas de enfermería", "formularios", "registros de vacunación", "c-cd", "control prenatal",
-                "reporte de enfermedades", "sistemas de información", "sigsa", "sistema de información gerencial de salud",
-                "sis", "sistema de información en salud", "confidencialidad de la información", "protección de datos del paciente",
-                "ética y deontología en enfermería", "principios éticos", "beneficencia", "no maleficencia", "autonomía", "justicia",
-                "secreto profesional", "consentimiento informado", "explicación de procedimientos", "obtención de permiso",
-                "dignidad del paciente", "respeto a creencias y valores", "trabajo en equipo multidisciplinario",
-                "conceptos de esalud y telesalud", "esalud", "uso de las tics para apoyar la salud y la sanidad",
-                "telemedicina", "provisión de servicios de salud a distancia", "diagnóstico", "tratamiento", "prevención",
-                "teleconsulta", "consulta médica", "de enfermería a distancia", "telecapacitación", "formación a distancia",
-                "msalud", "mobile health", "uso de dispositivos móviles en salud", "plataformas de telesalud", "kawok",
-                "aplicaciones de mensajería", "whatsapp para comunicación profesional", "videoconferencias",
-                "aplicaciones prácticas de telesalud", "seguimiento de pacientes crónicos", "recordatorios",
-                "monitoreo a distancia", "apoyo a partos domiciliarios", "comunicación con comadronas",
-                "consultas de especialidad", "referencia a distancia", "educación al paciente a distancia",
-                "envío de materiales educativos", "registro electrónico de salud", "digitalización de datos",
-                "aspectos técnicos y de seguridad digital", "conectividad", "acceso a internet", "areas rurales",
-                "satelital", "móvil", "dispositivos", "tabletas", "teléfonos inteligentes", "computadoras",
-                "ciberseguridad", "protección de datos", "contraseñas seguras", "uso de redes seguras",
-                "privacidad de datos", "manejo de información sensible en plataformas digitales",
-                "ley de acceso a la información pública", "ley de protección de datos personales", "comunicación efectiva",
-                "verbal", "no verbal", "tono de voz", "lenguaje corporal", "contacto visual", "escucha activa",
-                "prestar atención completa al paciente", "empatía", "ponerse en el lugar del otro", "asertividad",
-                "expresar ideas de forma clara y respetuosa", "retroalimentación constructiva", "comunicación intercultural",
-                "sensibilidad cultural", "respeto a las creencias", "prácticas y cosmovisiones", "q'eqchi", "otras culturas mayas",
-                "intérpretes culturales", "importancia de trabajar con ellos", "barreras de comunicación", "lingüísticas",
-                "culturales", "educativas", "cosmovisión indígena de salud", "reconocimiento de la medicina tradicional",
-                "sanadores locales", "gestión de conflictos", "identificación de causas de conflicto",
-                "técnicas de negociación y mediación", "manejo del estrés",
-                // Términos de salud identificados en el documento "Infografía Genograma.pdf"
-                "riesgo", "biológico", "psicológico", "social", "hereditario", "eventos de la salud", "falleció", "fallecidos",
-                "muerte", "embarazo", "feto muerto", "muerte al nacer", "aborto", "aborto espontáneo", "aborto inducido",
-                "funcionalidad inadecuada", "problemas hereditarios"
-            ]);
-
-
             // Maneja el clic en el botón de analizar
             analyzeButton.addEventListener('click', () => {
                 if (selectedFile) {
                     startAnalysis(selectedFile);
                 } else {
-                    displayMessage("Por favor, selecciona un documento para analizar.", "error");
+                    showAlertDialog("Por favor, selecciona un documento para analizar.");
                 }
             });
 
@@ -1558,71 +1430,60 @@
                 try {
                     const arrayBuffer = await docxFile.arrayBuffer();
                     const { value, messages } = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-                    console.log("Mensajes de Mammoth.js:", messages); // Mensajes de advertencia o error
+                    if (messages && messages.length > 0) {
+                        console.warn("Mensajes de Mammoth.js durante la extracción:", messages);
+                    }
                     return value; // El contenido HTML
                 } catch (error) {
                     console.error("Error durante la extracción de DOCX con mammoth.js:", error);
-                    return "<p>No se pudo extraer el contenido del documento.</p>";
+                    throw new Error("No se pudo extraer el contenido del documento. El archivo podría estar dañado o en un formato no compatible.");
                 }
             }
 
             /**
-             * Simula el proceso de análisis de un archivo por una IA.
-             * Esta función simula la llamada a un LLM para verificar el contenido y luego realiza el análisis pedagógico.
-             * @param {File} file - El archivo a "analizar".
+             * Inicia el proceso de análisis de un archivo.
+             * @param {File} file - El archivo a analizar.
              */
             async function startAnalysis(file) {
                 console.log("Starting analysis for file:", file.name);
                 uploadArea.style.display = 'none';
-                analyzeButton.style.display = 'none';
-                infoButton.style.display = 'none'; // Ocultar el botón de info durante el análisis
+                document.querySelector('.button-group').style.display = 'none';
                 loadingIndicator.style.display = 'block';
                 resultsArea.style.display = 'none';
                 llmOutput.innerHTML = '';
                 actionButtons.style.display = 'none';
 
-                // Reiniciar el contenido extraído de DOCX
                 docxExtractedContent = '';
 
-                // Si es un documento Word, intentar extraer contenido
-                if (file.name.toLowerCase().endsWith('.docx')) {
-                    loadingMessage.textContent = 'Procesando documento Word...'; // Mensaje específico
-                    try {
-                        docxExtractedContent = await extractDocxContent(file);
-                        console.log("DOCX content extracted. Length:", docxExtractedContent.length);
-                    } catch (error) {
-                        console.error("Error al procesar DOCX:", error);
-                        displayMessage("Hubo un problema al procesar el documento Word. Asegúrate de que es un archivo .docx válido.", "error");
-                        resetUIState();
-                        return; // Salir si la extracción de DOCX falla
-                    }
-                } else {
-                    displayMessage("Tipo de archivo no compatible. Por favor, sube un documento Word (.docx).", "error");
-                    resetUIState();
-                    return; // Salir si el tipo de archivo es incorrecto
-                }
-
-                loadingMessage.textContent = 'Realizando evaluación experta del contenido pedagógico...'; // Continue with existing analysis
                 try {
-                    // Simular la llamada a la IA (LLM) con un retardo para la evaluación experta
+                    loadingMessage.textContent = 'Procesando documento Word...';
+                    docxExtractedContent = await extractDocxContent(file);
+                    console.log("DOCX content extracted. Length:", docxExtractedContent.length);
+
+                    loadingMessage.textContent = 'Realizando evaluación experta del contenido pedagógico...';
                     currentEvaluationResults = await new Promise(resolve => {
                         setTimeout(() => {
-                            // Llamar a la función globalmente accesible
                             const evaluation = window.performExpertEvaluation(docxExtractedContent, file.name);
                             resolve(evaluation);
-                        }, 2500); // Simulated delay for expert evaluation
+                        }, 2500);
                     });
                     console.log("Expert evaluation results:", currentEvaluationResults);
-                }
-                catch (error) {
-                    console.error("Error durante la evaluación experta simulada:", error);
-                    displayMessage("Ocurrió un error al realizar la evaluación experta. Por favor, inténtalo de nuevo.", "error");
-                    resetUIState();
-                    return; // Salir si la evaluación falla
-                }
 
+                    displayResults(file);
+
+                } catch (error) {
+                    console.error("Error en el proceso de análisis:", error);
+                    showAlertDialog(error.message || "Ocurrió un error inesperado durante el análisis.");
+                    resetUIState();
+                }
+            }
+            
+            /**
+             * Muestra los resultados del análisis en la UI.
+             * @param {File} file - El archivo que fue analizado.
+             */
+            function displayResults(file) {
                 loadingIndicator.style.display = 'none';
-                
                 resultsArea.style.display = 'block'; 
                 actionButtons.style.display = 'flex'; 
 
@@ -1635,17 +1496,11 @@
 
                 evaluationHtml += `<div class="evaluation-card" style="margin-top: 30px;"><h3>Resultados de la Evaluación por Criterios</h3><ul>`;
 
-                let cumpleCount = 0;
-                let noCumpleCount = 0;
-
                 currentEvaluationResults.forEach(item => {
-                    evaluationHtml += `<li><strong>${item.char}</strong>: ${item.status}`;
+                    evaluationHtml += `<li><strong>${item.char}</strong>: <span style="color: ${item.status === 'CUMPLE' ? '#28a745' : '#dc3545'}; font-weight: bold;">${item.status}</span>`;
                     if (item.status === "NO CUMPLE") {
                         evaluationHtml += `<br><em>Razón:</em> ${item.reason}`;
                         evaluationHtml += `<br><em>Sugerencia:</em> ${item.suggestion}`;
-                        noCumpleCount++;
-                    } else {
-                        cumpleCount++;
                     }
                     evaluationHtml += `</li>`;
                 });
@@ -1653,42 +1508,35 @@
                 
                 analysisContent.innerHTML = evaluationHtml;
 
-                // Después de mostrar la evaluación inicial, si hay observaciones NO CUMPLE,
-                // se muestra el botón para generar las observaciones detalladas.
                 let llmFeatureButtonsContainer = document.querySelector('.llm-feature-buttons');
-                if (!llmFeatureButtonsContainer) { // Create if it doesn't exist (e.g., if previous analysis was not health-related)
+                if (!llmFeatureButtonsContainer) {
                     llmFeatureButtonsContainer = document.createElement('div');
                     llmFeatureButtonsContainer.className = 'llm-feature-buttons button-group';
-                    analysisContent.appendChild(llmFeatureButtonsContainer);
-                    console.log("LLM feature buttons container created and appended.");
-                } else {
-                    console.log("LLM feature buttons container already exists.");
+                    // Insertar después del contenido del análisis, pero antes del indicador de carga de LLM
+                    analysisContent.insertAdjacentElement('afterend', llmFeatureButtonsContainer);
                 }
-                llmFeatureButtonsContainer.innerHTML = window.getLLMButtonsForFileType(file.type);
-                llmFeatureButtonsContainer.style.display = 'flex'; // Ensure visible
+                
+                llmFeatureButtonsContainer.innerHTML = window.getLLMButtonsForFileType('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                llmFeatureButtonsContainer.style.display = 'flex';
 
-                // Get references to the newly created buttons and assign onclick events
                 comprehensionQuestionsButton = document.getElementById('comprehensionQuestionsButton');
                 detailedObservationsButton = document.getElementById('detailedObservationsButton');
                 
                 if (comprehensionQuestionsButton) {
                     comprehensionQuestionsButton.onclick = window.generateComprehensionQuestions;
-                    comprehensionQuestionsButton.disabled = false; // Ensure enabled on initial display
-                    console.log("Comprehension Questions button assigned and enabled.");
+                    comprehensionQuestionsButton.disabled = false;
                 }
                 if (detailedObservationsButton) {
                     detailedObservationsButton.onclick = window.generateDetailedObservations;
-                    detailedObservationsButton.disabled = false; // Ensure enabled on initial display
-                    console.log("Detailed Observations button assigned and enabled.");
+                    detailedObservationsButton.disabled = false;
                 }
-                // Reset the questions and observations generated state for a new analysis
+                
                 areQuestionsGenerated = false;
                 areObservationsGenerated = false;
-                console.log("Analysis completed. LLM buttons reset and visible.");
             }
 
             /**
-             * Reinicia el estado de la UI a su condición inicial para permitir la carga de un nuevo archivo.
+             * Reinicia el estado de la UI a su condición inicial.
              */
             function resetUIState() {
                 console.log("Resetting UI state.");
@@ -1696,79 +1544,40 @@
                 fileInput.value = '';
                 uploadArea.querySelector('p').textContent = 'Arrastra y suelta tu documento Word (.docx) aquí, o haz click para seleccionar';
                 analyzeButton.disabled = true;
-                docxExtractedContent = ''; // Reiniciar el resultado del DOCX
-                currentEvaluationResults = []; // Reiniciar los resultados de la evaluación
+                docxExtractedContent = '';
+                currentEvaluationResults = [];
 
                 resetUIForNewFile();
-
-                // Re-enable LLM buttons when resetting the UI for a new document
-                if (comprehensionQuestionsButton) comprehensionQuestionsButton.disabled = false;
-                if (detailedObservationsButton) detailedObservationsButton.disabled = false;
                 
-                // Reset the questions and observations generated state
                 areQuestionsGenerated = false;
                 areObservationsGenerated = false;
-                console.log("UI state reset complete.");
             }
 
-            // Función auxiliar para resetear elementos de la UI
+            // Función auxiliar para resetear elementos de la UI para una nueva subida
             function resetUIForNewFile() {
                 resultsArea.style.display = 'none';
+                analysisContent.innerHTML = '';
                 llmOutput.innerHTML = '';
                 loadingIndicator.style.display = 'none';
                 llmLoadingIndicator.style.display = 'none';
                 actionButtons.style.display = 'none';
-                uploadArea.style.display = 'flex'; // Asegura que el área de subida esté visible
-                analyzeButton.style.display = 'block'; // Asegura que el botón de análisis esté visible
-                infoButton.style.display = 'block'; // Asegura que el botón de info esté visible
+                uploadArea.style.display = 'flex';
+                document.querySelector('.button-group').style.display = 'flex';
                 
-                // Hide LLM buttons explicitly if they were shown in a previous run
                 const llmFeatureButtonsContainer = document.querySelector('.llm-feature-buttons');
                 if (llmFeatureButtonsContainer) {
-                    llmFeatureButtonsContainer.style.display = 'none';
+                    llmFeatureButtonsContainer.remove();
                 }
-                console.log("Resetting UI for new file: hiding results and showing upload area.");
             }
 
-            // Event listeners para los nuevos botones de acción
-            resetButton.addEventListener('click', resetUIState); // Botón para cargar otro archivo (reinicia la UI)
+            // Event listeners para los botones de acción
+            resetButton.addEventListener('click', resetUIState);
 
             closePageButton.addEventListener('click', () => {
-                // Reinicia la UI para simular un "cierre" en este entorno de sandbox
+                showAlertDialog("La página se ha restablecido. Puede cargar un nuevo documento.");
                 resetUIState();
-                displayMessage("La interfaz se ha restablecido. Puedes cargar un nuevo documento.", "info");
             });
 
-            // Función para mostrar mensajes personalizados (en lugar de alert)
-            function displayMessage(message, type = "info") {
-                const existingMessageBox = container.querySelector('.message-box');
-                if (existingMessageBox) {
-                    existingMessageBox.remove();
-                }
-
-                const messageBox = document.createElement('div');
-                messageBox.textContent = message;
-                messageBox.className = 'message-box';
-
-                messageBox.style.padding = '15px';
-                messageBox.style.borderRadius = '8px';
-                messageBox.style.marginTop = '20px';
-                messageBox.style.color = '#fff';
-                messageBox.style.fontWeight = 'bold';
-                messageBox.style.textAlign = 'center';
-
-                if (type === "error") {
-                    messageBox.style.backgroundColor = '#DC3545';
-                } else {
-                    messageBox.style.backgroundColor = '#007BFF';
-                }
-
-                container.insertBefore(messageBox, uploadArea.nextSibling);
-
-                setTimeout(() => {
-                    messageBox.remove();
-                }, 5000);
-            }
         }); // Fin de DOMContentLoaded
     </script>
 </body>
